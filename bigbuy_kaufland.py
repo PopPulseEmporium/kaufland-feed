@@ -132,7 +132,7 @@ def create_html_page(unique_data, margin, files_created, country, config):
     <div class="header">
         <h1>🛍️ Feed Prodotti Kaufland</h1>
         <p><strong>Pop Pulse Emporium</strong> - Ultimo Aggiornamento: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}</p>
-    </div>
+    </div>"""
     
     <div class="country-info">
         <h2><span class="flag">🇪🇺</span> Paese: {config['name']} ({country})</h2>
