@@ -76,15 +76,15 @@ def safe_str(value, default=""):
     except:
         return default
 
-def create_html_page(unique_data, margin, files_created):
-    """Create HTML page with product data"""
+def create_html_page(unique_data, margin, files_created, country, config):
+    """Create HTML page with product data in Italian"""
     
     print(f"🔄 Creating HTML for {len(unique_data)} products...")
     
     # Safety check
     if not unique_data:
         print("❌ No data to create HTML page")
-        return "<html><body><h1>No products available</h1></body></html>"
+        return "<html><body><h1>Nessun prodotto disponibile</h1></body></html>"
     
     # Calculate price range safely
     try:
@@ -98,33 +98,153 @@ def create_html_page(unique_data, margin, files_created):
         max_price = 0
     
     html_content = f"""<!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
-    <title>Kaufland Feed - Pop Pulse Emporium</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed Prodotti Kaufland - Pop Pulse Emporium</title>
     <style>
-        body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .header {{ background: #f0f0f0; padding: 20px; border-radius: 5px; margin-bottom: 20px; }}
-        .stats {{ display: flex; gap: 20px; margin-bottom: 20px; }}
-        .stat-box {{ background: #e8f4f8; padding: 15px; border-radius: 5px; text-align: center; }}
-        .stat-number {{ font-size: 24px; font-weight: bold; color: #2c5aa0; }}
-        .stat-label {{ font-size: 14px; color: #666; }}
-        table {{ border-collapse: collapse; width: 100%; margin-top: 20px; }}
-        th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
-        th {{ background-color: #f2f2f2; font-weight: bold; }}
-        tr:nth-child(even) {{ background-color: #f9f9f9; }}
-        .price {{ color: #2c5aa0; font-weight: bold; }}
-        .ean {{ font-family: monospace; font-size: 12px; }}
-        .image {{ max-width: 50px; max-height: 50px; }}
-        .feed-url {{ background: #e8f4f8; padding: 15px; border-radius: 5px; margin: 20px 0; }}
-        .feed-url code {{ background: #fff; padding: 5px; border-radius: 3px; font-size: 14px; word-break: break-all; }}
+        body {{ font-family: Arial, sans-serif; margin: 20px; background-color: #f8f9fa; }}
+        .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px; text-align: center; }}
+        .header h1 {{ margin: 0; font-size: 2.5em; }}
+        .header p {{ margin: 10px 0 0 0; opacity: 0.9; }}
+        .stats {{ display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap; }}
+        .stat-box {{ background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex: 1; min-width: 150px; }}
+        .stat-number {{ font-size: 28px; font-weight: bold; color: #667eea; margin-bottom: 5px; }}
+        .stat-label {{ font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 1px; }}
+        .country-info {{ background: white; padding: 20px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
+        .feed-url {{ background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 30px 0; border-left: 5px solid #2196f3; }}
+        .feed-url code {{ background: #fff; padding: 10px; border-radius: 5px; font-size: 14px; word-break: break-all; display: block; margin: 10px 0; border: 1px solid #ddd; }}
+        table {{ border-collapse: collapse; width: 100%; margin-top: 30px; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
+        th, td {{ border: none; padding: 12px; text-align: left; }}
+        th {{ background-color: #667eea; color: white; font-weight: bold; }}
+        tr:nth-child(even) {{ background-color: #f8f9fa; }}
+        .price {{ color: #4caf50; font-weight: bold; font-size: 16px; }}
+        .ean {{ font-family: 'Courier New', monospace; font-size: 12px; background: #f5f5f5; padding: 4px; border-radius: 3px; }}
+        .image {{ max-width: 60px; max-height: 60px; border-radius: 5px; }}
         .description {{ max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
-        .success {{ background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin: 20px 0; }}
+        .success {{ background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 10px; margin: 30px 0; }}
+        .info-section {{ background: white; padding: 20px; border-radius: 10px; margin-top: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
+        .flag {{ font-size: 24px; margin-right: 10px; }}
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🛍️ Kaufland Product Feed</h1>
-        <p><strong>Pop Pulse Emporium</strong> - Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+        <h1>🛍️ Feed Prodotti Kaufland</h1>
+        <p><strong>Pop Pulse Emporium</strong> - Ultimo Aggiornamento: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}</p>
+    </div>
+    
+    <div class="country-info">
+        <h2><span class="flag">🇪🇺</span> Paese: {config['name']} ({country})</h2>
+        <p><strong>Lingua:</strong> {config['language'].upper()} | <strong>Formato Locale:</strong> {config['locale']}</p>
+    </div>
+    
+    <div class="stats">
+        <div class="stat-box">
+            <div class="stat-number">{len(unique_data):,}</div>
+            <div class="stat-label">Prodotti</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">{margin*100:.0f}%</div>
+            <div class="stat-label">Margine</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">€{min_price:.2f}</div>
+            <div class="stat-label">Prezzo Min</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">€{max_price:.2f}</div>
+            <div class="stat-label">Prezzo Max</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">€300</div>
+            <div class="stat-label">Limite Prezzo</div>
+        </div>
+    </div>
+    
+    <div class="success">
+        <h3>✅ Pronto per Kaufland {config['name']}!</h3>
+        <p>Il tuo feed è ottimizzato per il mercato {config['name']} con {len(unique_data):,} prodotti selezionati casualmente.</p>
+        <p>Tutti i prodotti hanno un prezzo massimo di €300 e descrizioni nella lingua locale.</p>
+    </div>
+    
+    <div class="feed-url">
+        <h3>📡 URL del Feed per Kaufland {config['name']}:</h3>
+        <code>https://poppulseemporium.github.io/kaufland-feed/{files_created[0]}</code>
+        <p><small>📋 Copia questo URL e incollalo nel campo "Percorso del file" di Kaufland</small></p>
+    </div>
+    
+    <h2>📊 Anteprima Prodotti (Primi 50)</h2>
+    <table>
+        <tr>
+            <th>Immagine</th>
+            <th>Titolo</th>
+            <th>EAN</th>
+            <th>Prezzo</th>
+            <th>Categoria</th>
+            <th>Descrizione</th>
+        </tr>
+"""
+    
+    # Add first 50 products to HTML table
+    for i, row in enumerate(unique_data[:50]):
+        img_tag = f'<img src="{row["picture_1"]}" class="image" onerror="this.style.display=\'none\'" alt="Prodotto">' if row["picture_1"] else "Nessuna immagine"
+        title = safe_str(row["title"])[:50] + "..." if len(safe_str(row["title"])) > 50 else safe_str(row["title"])
+        description = safe_str(row["description"])[:100] + "..." if len(safe_str(row["description"])) > 100 else safe_str(row["description"])
+        
+        html_content += f"""
+        <tr>
+            <td>{img_tag}</td>
+            <td><strong>{title}</strong></td>
+            <td class="ean">{row["ean"]}</td>
+            <td class="price">€{row["price_cs"]:.2f}</td>
+            <td>{row["category"]}</td>
+            <td class="description">{description}</td>
+        </tr>
+"""
+    
+    html_content += f"""
+    </table>
+    
+    <div class="info-section">
+        <h3>📋 File Disponibili</h3>
+        <ul>
+            <li><strong>{files_created[0]}</strong> - File feed principale per Kaufland {config['name']}</li>
+            <li><strong>feed_info_{country.lower()}.json</strong> - Informazioni tecniche sul feed</li>
+            <li><strong>index.html</strong> - Questa pagina di anteprima</li>
+        </ul>
+        
+        <h3>🔄 Programma di Aggiornamento</h3>
+        <p>Questo feed si aggiorna automaticamente ogni 6 ore con nuovi dati BigBuy freschi.</p>
+        
+        <h3>⚙️ Configurazione Kaufland</h3>
+        <ol>
+            <li>Copia l'URL del feed qui sopra</li>
+            <li>Vai al pannello di controllo Kaufland per {config['name']}</li>
+            <li>Incolla l'URL nel campo "Percorso del file"</li>
+            <li>Seleziona la frequenza di aggiornamento preferita (giornaliera consigliata)</li>
+            <li>Clicca "Salva le modifiche"</li>
+        </ol>
+        
+        <h3>🌍 Altri Paesi</h3>
+        <p>Questo feed è specifico per <strong>{config['name']}</strong>. 
+        Per altri paesi (Austria, Germania, Polonia, Slovacchia, Repubblica Ceca), 
+        sono disponibili feed separati con localizzazioni appropriate.</p>
+        
+        <h3>📊 Statistiche Prodotti</h3>
+        <ul>
+            <li><strong>Selezione:</strong> Casuale da un catalogo di ~168.000 prodotti</li>
+            <li><strong>Filtro prezzo:</strong> Massimo €300 per prodotto</li>
+            <li><strong>Condizione:</strong> Solo prodotti NUOVI</li>
+            <li><strong>Lingua:</strong> Descrizioni in {config['language'].upper()}</li>
+            <li><strong>Margine applicato:</strong> {margin*100:.0f}% + IVA 22%</li>
+        </ul>
+    </div>
+</body>
+</html>
+"""
+    
+    return html_contentstrftime('%Y-%m-%d %H:%M:%S')}</p>
     </div>
     
     <div class="stats">
@@ -235,20 +355,40 @@ def main():
         print("❌ No API key found")
         return
     
+    # Get country from environment (for multi-country support)
+    country = os.getenv('COUNTRY_CODE', 'DE').upper()  # Default to Germany
+    
+    # Country configuration
+    country_config = {
+        'AT': {'locale': 'de-AT', 'language': 'de', 'name': 'Austria'},
+        'DE': {'locale': 'de-DE', 'language': 'de', 'name': 'Germany'}, 
+        'PL': {'locale': 'pl-PL', 'language': 'pl', 'name': 'Poland'},
+        'SK': {'locale': 'sk-SK', 'language': 'sk', 'name': 'Slovakia'},
+        'CZ': {'locale': 'cs-CZ', 'language': 'cs', 'name': 'Czech Republic'}  # CZ instead of CK
+    }
+    
+    if country not in country_config:
+        print(f"❌ Unsupported country: {country}")
+        return
+    
+    config = country_config[country]
+    print(f"🌍 Processing for {config['name']} ({country})")
+    
     api = BigBuyAPI(api_key)
     
     # Configuration
     margin = 0.20
     vat = 0.22
     base_price = 0.75
+    max_price_limit = 300.0  # Maximum price filter
     
-    # Get data
+    # Get data in appropriate language
     taxonomies = api.get_taxonomies()
     if not taxonomies:
         print("❌ No taxonomies found")
         return
     
-    print(f"📊 Processing {len(taxonomies)} categories...")
+    print(f"📊 Processing {len(taxonomies)} categories for {config['name']}...")
     
     # Collect all data
     all_products = []
@@ -269,8 +409,8 @@ def main():
         else:
             print(f"   ⚠️  No products found")
             
-        # Get descriptions
-        info = api.get_product_info(tax_id)
+        # Get descriptions in local language
+        info = api.get_product_info(tax_id, config['language'])
         if info:
             all_info.extend(info)
             print(f"   ✅ Added {len(info)} descriptions")
@@ -290,7 +430,7 @@ def main():
         # Debug: Show running totals
         print(f"   📊 Running totals: {len(all_products)} products, {len(all_info)} info, {len(all_images)} images")
     
-    print(f"✅ Collected {len(all_products)} products")
+    print(f"✅ Collected {len(all_products)} products for {config['name']}")
     
     # Create lookup dictionaries
     info_dict = {item['sku']: item for item in all_info}
@@ -308,7 +448,7 @@ def main():
                 'image4': images[3].get('url', '') if len(images) > 3 else ''
             }
     
-    # Create CSV
+    # Create CSV with price filtering
     csv_data = []
     
     for product in all_products:
@@ -327,21 +467,25 @@ def main():
         wholesale = safe_float(product.get('wholesalePrice', 0))
         price = round((wholesale * (1 + vat) * (1 + margin)) + base_price, 2)
         
-        # Create row with optimized data (matching working format)
+        # Filter by maximum price
+        if price > max_price_limit:
+            continue
+        
+        # Create row with country-specific locale
         row = {
-            'id_offer': str(product_id),  # Convert to string like manual file
+            'id_offer': str(product_id),
             'ean': safe_str(product.get('ean13')),
-            'locale': 'it-IT',  # Keep Italian for Italy
+            'locale': config['locale'],  # Country-specific locale
             'category': 'Gardening & DIY',
-            'title': safe_str(info.get('name', 'Product'))[:100],  # Limit title length
-            'short_description': safe_str(info.get('description', ''))[:150],  # Shorter description
-            'description': safe_str(info.get('description', ''))[:500],  # Limit description length
+            'title': safe_str(info.get('name', 'Product'))[:100],
+            'short_description': safe_str(info.get('description', ''))[:150],
+            'description': safe_str(info.get('description', ''))[:500],
             'manufacturer': 'Pop Pulse Emporium',
             'picture_1': images.get('image1', ''),
             'picture_2': images.get('image2', ''),
             'picture_3': images.get('image3', ''),
             'picture_4': images.get('image4', ''),
-            'price_cs': round(price, 2),  # Ensure proper rounding
+            'price_cs': price,
             'quantity': 100,
             'condition': 'NEW',
             'length': round(safe_float(product.get('depth')), 2),
@@ -357,7 +501,9 @@ def main():
         
         csv_data.append(row)
     
-    # Remove duplicates and randomly select products for testing
+    print(f"✅ Created {len(csv_data)} products under €{max_price_limit} for {config['name']}")
+    
+    # Remove duplicates and randomly select products
     seen_eans = set()
     unique_data = []
     
@@ -368,27 +514,28 @@ def main():
             seen_eans.add(ean)
             unique_data.append(row)
     
-    print(f"✅ Found {len(unique_data)} unique products")
+    print(f"✅ Found {len(unique_data)} unique products for {config['name']}")
     
-    # For testing: randomly select a small sample
-    test_sample_size = 25000  # Small sample for testing
+    # For testing: randomly select sample
+    test_sample_size = 25000  # 25k products
     
     if len(unique_data) > test_sample_size:
         # Randomly shuffle and take first N products
         random.shuffle(unique_data)
         unique_data = unique_data[:test_sample_size]
-        print(f"📊 Randomly selected {test_sample_size} products for testing")
+        print(f"📊 Randomly selected {test_sample_size} products for {config['name']}")
     else:
-        print(f"📊 Using all {len(unique_data)} products (less than {test_sample_size})")
+        print(f"📊 Using all {len(unique_data)} products for {config['name']}")
     
-    # Create single test file for Kaufland
-    with open('kaufland_feed.csv', 'w', newline='', encoding='utf-8') as f:
+    # Create country-specific file
+    filename = f'kaufland_feed_{country.lower()}.csv'
+    with open(filename, 'w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=unique_data[0].keys())
         writer.writeheader()
         writer.writerows(unique_data)
     
-    files_created = ['kaufland_feed.csv']
-    print(f"✅ Created test kaufland_feed.csv with {len(unique_data)} products")
+    files_created = [filename]
+    print(f"✅ Created {filename} with {len(unique_data)} products for {config['name']}")
     
     # Write files
     if unique_data:
