@@ -384,7 +384,7 @@ def main():
         
         # Create row with country-specific locale and currency
         row = {
-            'id_offer': str(product_id),
+            'id_offer': str(sku),
             'ean': safe_str(product.get('ean13')),
             'locale': config['locale'],
             'category': 'Gardening & DIY',
