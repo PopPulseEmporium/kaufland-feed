@@ -44,7 +44,7 @@ jobs:
           git config --local user.name "GitHub Action"
           
           # Add all generated files
-          git add kaufland_feed.csv index.html feed_info.json
+          git add kaufland_feed_it.csv index_cz.html feed_info_it.json
           
           # Check if there are changes to commit
           if git diff --cached --quiet; then
