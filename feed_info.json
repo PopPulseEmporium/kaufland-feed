@@ -1,9 +1,9 @@
 {
-  "last_updated": "2025-07-17T12:42:44.185755",
-  "product_count": 50,
-  "total_products_available": 170297,
+  "last_updated": "2025-07-17T13:13:03.061031",
+  "product_count": 25000,
+  "total_products_available": 170292,
   "selection_method": "Random sample for testing",
-  "sample_size": 50,
+  "sample_size": 25000,
   "margin_applied": "20.0%",
   "categories_processed": 10,
   "feed_url": "https://your-username.github.io/kaufland-feed/kaufland_feed.csv",
