@@ -2,6 +2,7 @@ import requests
 import json
 import csv
 import os
+import random
 from datetime import datetime
 import time
 
@@ -75,7 +76,7 @@ def safe_str(value, default=""):
     except:
         return default
 
-def create_html_page(unique_data, margin):
+def create_html_page(unique_data, margin, files_created):
     """Create HTML page with product data"""
     
     print(f"🔄 Creating HTML for {len(unique_data)} products...")
@@ -115,8 +116,9 @@ def create_html_page(unique_data, margin):
         .ean {{ font-family: monospace; font-size: 12px; }}
         .image {{ max-width: 50px; max-height: 50px; }}
         .feed-url {{ background: #e8f4f8; padding: 15px; border-radius: 5px; margin: 20px 0; }}
-        .feed-url code {{ background: #fff; padding: 5px; border-radius: 3px; font-size: 14px; }}
+        .feed-url code {{ background: #fff; padding: 5px; border-radius: 3px; font-size: 14px; word-break: break-all; }}
         .description {{ max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
+        .success {{ background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin: 20px 0; }}
     </style>
 </head>
 <body>
@@ -144,10 +146,17 @@ def create_html_page(unique_data, margin):
         </div>
     </div>
     
+    <div class="success">
+        <h3>🧪 Test Version - Random Sample</h3>
+        <p>This is a test version with {len(unique_data)} randomly selected products.</p>
+        <p>Perfect for testing Kaufland integration before scaling up!</p>
+        <p><strong>Available:</strong> {len(unique_data)} products selected from a total catalog of ~168,000 products</p>
+    </div>
+    
     <div class="feed-url">
         <h3>📡 Feed URL for Kaufland:</h3>
         <code>https://your-username.github.io/kaufland-feed/kaufland_feed.csv</code>
-        <p><small>Use this URL in Kaufland's automatic feed import</small></p>
+        <p><small>Copy this URL and paste it into Kaufland's "Percorso del file" field</small></p>
     </div>
     
     <h2>📊 Product Preview (First 50 products)</h2>
@@ -192,6 +201,23 @@ def create_html_page(unique_data, margin):
         
         <h3>🔄 Update Schedule:</h3>
         <p>This feed updates automatically every 6 hours with fresh BigBuy data.</p>
+        
+        <h3>⚙️ Kaufland Setup:</h3>
+        <ol>
+            <li>Copy the URL above</li>
+            <li>Paste it in Kaufland's "Percorso del file" field</li>
+            <li>Select your preferred update schedule (daily recommended)</li>
+            <li>Click "Salva le modifiche"</li>
+            <li><strong>Test with this small sample first!</strong></li>
+        </ol>
+        
+        <h3>📈 Next Steps:</h3>
+        <p>Once you're happy with the test integration:</p>
+        <ol>
+            <li>Change <code>test_sample_size = 50</code> to <code>test_sample_size = 80000</code> in the script</li>
+            <li>Or remove the limit entirely for the full catalog</li>
+            <li>Your feed will automatically update with more products</li>
+        </ol>
     </div>
 </body>
 </html>
@@ -301,15 +327,15 @@ def main():
         wholesale = safe_float(product.get('wholesalePrice', 0))
         price = round((wholesale * (1 + vat) * (1 + margin)) + base_price, 2)
         
-        # Create row
+        # Create row with optimized data
         row = {
             'id_offer': product_id,
             'ean': safe_str(product.get('ean13')),
             'locale': 'it-IT',
             'category': 'Gardening & DIY',
-            'title': safe_str(info.get('name', 'Product')),
-            'short_description': safe_str(info.get('description', ''))[:200] + '...',
-            'description': safe_str(info.get('description', '')),
+            'title': safe_str(info.get('name', 'Product'))[:100],  # Limit title length
+            'short_description': safe_str(info.get('description', ''))[:150],  # Shorter description
+            'description': safe_str(info.get('description', ''))[:500],  # Limit description length
             'manufacturer': 'Pop Pulse Emporium',
             'picture_1': images.get('image1', ''),
             'picture_2': images.get('image2', ''),
@@ -318,11 +344,11 @@ def main():
             'price_cs': price,
             'quantity': 100,
             'condition': 'NEW',
-            'length': safe_float(product.get('depth')),
-            'width': safe_float(product.get('width')),
-            'height': safe_float(product.get('height')),
-            'weight': safe_float(product.get('weight')),
-            'content_volume': safe_float(product.get('width')) * safe_float(product.get('height')) * safe_float(product.get('depth')),
+            'length': round(safe_float(product.get('depth')), 2),
+            'width': round(safe_float(product.get('width')), 2),
+            'height': round(safe_float(product.get('height')), 2),
+            'weight': round(safe_float(product.get('weight')), 2),
+            'content_volume': round(safe_float(product.get('width')) * safe_float(product.get('height')) * safe_float(product.get('depth')), 2),
             'currency': 'EUR',
             'handling_time': 2,
             'delivery_time_max': 5,
@@ -331,34 +357,56 @@ def main():
         
         csv_data.append(row)
     
-    # Remove duplicates by EAN
+    # Remove duplicates and randomly select products for testing
     seen_eans = set()
     unique_data = []
+    
+    # First, collect all unique products
     for row in csv_data:
         ean = row['ean']
         if ean and ean not in seen_eans:
             seen_eans.add(ean)
             unique_data.append(row)
     
-    print(f"✅ Created {len(unique_data)} unique products")
+    print(f"✅ Found {len(unique_data)} unique products")
+    
+    # For testing: randomly select a small sample
+    test_sample_size = 50  # Small sample for testing
+    
+    if len(unique_data) > test_sample_size:
+        # Randomly shuffle and take first N products
+        random.shuffle(unique_data)
+        unique_data = unique_data[:test_sample_size]
+        print(f"📊 Randomly selected {test_sample_size} products for testing")
+    else:
+        print(f"📊 Using all {len(unique_data)} products (less than {test_sample_size})")
+    
+    # Create single test file for Kaufland
+    with open('kaufland_feed.csv', 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=unique_data[0].keys())
+        writer.writeheader()
+        writer.writerows(unique_data)
+    
+    files_created = ['kaufland_feed.csv']
+    print(f"✅ Created test kaufland_feed.csv with {len(unique_data)} products")
     
     # Write files
     if unique_data:
         print(f"✅ Ready to create files with {len(unique_data)} products")
         
-        # Write CSV
-        with open('kaufland_feed.csv', 'w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=unique_data[0].keys())
-            writer.writeheader()
-            writer.writerows(unique_data)
-        print("✅ CSV file created")
+        # CSV files are already created above in the splitting logic
         
         # Create info file
         info_data = {
             "last_updated": datetime.now().isoformat(),
             "product_count": len(unique_data),
+            "total_products_available": len(csv_data),
+            "selection_method": "Random sample for testing",
+            "sample_size": len(unique_data),
             "margin_applied": f"{margin*100}%",
-            "categories_processed": len(taxonomies)
+            "categories_processed": len(taxonomies),
+            "feed_url": "https://your-username.github.io/kaufland-feed/kaufland_feed.csv",
+            "note": "This is a test version with a small random sample"
         }
         
         with open('feed_info.json', 'w') as f:
@@ -368,7 +416,7 @@ def main():
         # Create HTML page - this is where the error might occur
         print("🔄 Creating HTML page...")
         try:
-            html_content = create_html_page(unique_data, margin)
+            html_content = create_html_page(unique_data, margin, ['kaufland_feed.csv'])
             with open('index.html', 'w', encoding='utf-8') as f:
                 f.write(html_content)
             print("✅ HTML page created")
@@ -380,7 +428,7 @@ def main():
 <body>
 <h1>Kaufland Feed - {len(unique_data)} Products</h1>
 <p>Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
-<p>Feed URL: https://your-username.github.io/kaufland-feed/kaufland_feed.csv</p>
+<p>Feed URL: <a href="kaufland_feed.csv">https://your-username.github.io/kaufland-feed/kaufland_feed.csv</a></p>
 </body></html>"""
             with open('index.html', 'w', encoding='utf-8') as f:
                 f.write(simple_html)
@@ -404,9 +452,11 @@ def main():
                 file_size = os.path.getsize(filename)
                 files_created.append(f"{filename} ({file_size:,} bytes)")
         
-        print(f"✅ Files created: {', '.join(files_created)}")
+        print(f"✅ Files created: kaufland_feed.csv, feed_info.json, index.html")
         print(f"🌐 Preview will be available at: https://your-username.github.io/kaufland-feed/")
-        print(f"📡 Feed URL: https://your-username.github.io/kaufland-feed/kaufland_feed.csv")
+        print(f"📡 Test feed URL for Kaufland: https://your-username.github.io/kaufland-feed/kaufland_feed.csv")
+        print(f"🧪 Test sample: {len(unique_data)} randomly selected products from {len(csv_data)} total")
+        print(f"💡 Perfect for testing Kaufland integration!")
         
     else:
         print("❌ No products to export")
