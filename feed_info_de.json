@@ -1,0 +1,11 @@
+{
+  "last_updated": "2025-07-17T14:52:39.388844",
+  "product_count": 25000,
+  "total_products_available": 157535,
+  "max_price_filter": 300.0,
+  "margin_applied": "20.0%",
+  "country": "DE",
+  "locale": "de-DE",
+  "language": "de",
+  "feed_url": "https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_de.csv"
+}
