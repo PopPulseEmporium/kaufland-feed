@@ -436,6 +436,7 @@ def main():
         except Exception as e:
             print(f"❌ Error creating HTML: {e}")
             # Create simple fallback
+html_filename = f'index_{country.lower()}.html' if country != 'IT' else 'index.html'
             simple_html = f"""<!DOCTYPE html>
 <html><head><title>Feed Kaufland {config['name']}</title></head>
 <body>
@@ -443,9 +444,9 @@ def main():
 <p>Paese: {config['name']} ({country})</p>
 <p>URL Feed: <a href="{filename}">{filename}</a></p>
 </body></html>"""
-            with open('index.html', 'w', encoding='utf-8') as f:
+            with open(html_filename, 'w', encoding='utf-8') as f:
                 f.write(simple_html)
-            print("✅ Simple HTML created")
+            print(f"✅ Simple HTML created: {html_filename}")
         
         # Stats
         prices = [row['price_cs'] for row in unique_data]
