@@ -63,7 +63,7 @@ Rep. Ceca:    https://poppulseemporium.github.io/kaufland-feed/index_cz.html
 - **Quantità per paese**: 25.000 prodotti selezionati casualmente
 - **Prezzo massimo**: €300 per prodotto
 - **Condizione**: Solo prodotti NUOVI
-- **Stock minimo**: ≥ 5 unità disponibili in BigBuy
+- **Stock minimo**: ≥ 2 unità disponibili in BigBuy
 - **Quantità reali**: Stock effettivo da BigBuy (massimo 100)
 - **Margine applicato**: 20%
 - **IVA**: 22%
@@ -98,7 +98,7 @@ currency,handling_time,delivery_time_max,delivery_time_min
 
 ### Processo di Aggiornamento
 1. **Estrazione dati** da BigBuy API
-2. **Filtraggio** prodotti (max €300, solo NUOVI, stock ≥ 5)
+2. **Filtraggio** prodotti (max €300, solo NUOVI, stock ≥ 2)
 3. **Selezione casuale** di 25k prodotti per paese
 4. **Traduzione** descrizioni nella lingua locale
 5. **Quantità reali** dal magazzino BigBuy (max 100)
