@@ -225,7 +225,7 @@ def main():
         return
     
     # Get country from environment (for multi-country support)
-    country = os.getenv('COUNTRY_CODE', 'DE').upper()
+    country = os.getenv('COUNTRY_CODE', 'IT').upper()
     
     # Country configuration
     country_config = {
@@ -233,7 +233,8 @@ def main():
         'DE': {'locale': 'de-DE', 'language': 'de', 'name': 'Germany'}, 
         'PL': {'locale': 'pl-PL', 'language': 'pl', 'name': 'Poland'},
         'SK': {'locale': 'sk-SK', 'language': 'sk', 'name': 'Slovakia'},
-        'CZ': {'locale': 'cs-CZ', 'language': 'cs', 'name': 'Czech Republic'}
+        'CZ': {'locale': 'cs-CZ', 'language': 'cs', 'name': 'Czech Republic'},
+        'IT': {'locale': 'it-IT', 'language': 'it', 'name': 'Italy'}
     }
     
     if country not in country_config:
@@ -323,6 +324,11 @@ def main():
         if product.get('condition', '').upper() != 'NEW':
             continue
             
+        # Filter out products with 0 or low stock
+        stock_quantity = safe_float(product.get('inStock', 0))
+        if stock_quantity < 2:  # Skip products with less than 5 in stock
+            continue
+            
         sku = product['sku']
         product_id = product['id']
         
@@ -353,7 +359,7 @@ def main():
             'picture_3': images.get('image3', ''),
             'picture_4': images.get('image4', ''),
             'price_cs': price,
-            'quantity': 100,
+            'quantity': min(100, int(stock_quantity)),  # Use actual stock, max 100
             'condition': 'NEW',
             'length': round(safe_float(product.get('depth')), 2),
             'width': round(safe_float(product.get('width')), 2),
@@ -393,7 +399,11 @@ def main():
     # Write files
     if unique_data:
         # Create country-specific CSV file
-        filename = f'kaufland_feed_{country.lower()}.csv'
+        if country == 'IT':
+            filename = 'kaufland_feed.csv'  # Keep Italy as main file
+        else:
+            filename = f'kaufland_feed_{country.lower()}.csv'
+            
         with open(filename, 'w', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=unique_data[0].keys())
             writer.writeheader()
@@ -403,6 +413,11 @@ def main():
         print(f"✅ Created {filename} with {len(unique_data)} products")
         
         # Create info file
+        if country == 'IT':
+            info_filename = 'feed_info.json'
+        else:
+            info_filename = f'feed_info_{country.lower()}.json'
+            
         info_data = {
             "last_updated": datetime.now().isoformat(),
             "product_count": len(unique_data),
@@ -415,7 +430,7 @@ def main():
             "feed_url": f"https://poppulseemporium.github.io/kaufland-feed/{filename}"
         }
         
-        with open(f'feed_info_{country.lower()}.json', 'w') as f:
+        with open(info_filename, 'w') as f:
             json.dump(info_data, f, indent=2)
         print("✅ JSON info file created")
         
@@ -436,7 +451,7 @@ def main():
         except Exception as e:
             print(f"❌ Error creating HTML: {e}")
             # Create simple fallback
-html_filename = f'index_{country.lower()}.html' if country != 'IT' else 'index.html'
+            html_filename = f'index_{country.lower()}.html' if country != 'IT' else 'index.html'
             simple_html = f"""<!DOCTYPE html>
 <html><head><title>Feed Kaufland {config['name']}</title></head>
 <body>
