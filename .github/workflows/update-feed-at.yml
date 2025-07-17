@@ -1,0 +1,41 @@
+name: Aggiorna Feed Kaufland Austria
+on:
+  schedule:
+    - cron: '15 */6 * * *'  # Ogni 6 ore (offset di 15 min dalla Germania)
+  workflow_dispatch:
+
+jobs:
+  update-feed-at:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scarica codice
+        uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Installa dipendenze
+        run: pip install -r requirements.txt
+      
+      - name: Esegui sincronizzazione BigBuy Austria
+        env:
+          BIGBUY_API_KEY: ${{ secrets.BIGBUY_API_KEY }}
+          COUNTRY_CODE: AT
+        run: python bigbuy_kaufland.py
+      
+      - name: Commit feed Austria
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          git add kaufland_feed_at.csv index.html feed_info_at.json
+          
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica per l'Austria"
+          else
+            git commit -m "Aggiorna feed Austria $(date '+%Y-%m-%d %H:%M:%S')"
+            git push
+            echo "Feed Austria aggiornato con successo!"
+          fi
