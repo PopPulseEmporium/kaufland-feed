@@ -1,11 +1,11 @@
-name: Aggiorna Feed Kaufland Repubblica Ceca
+name: Aggiorna Feed Kaufland Italia
 on:
   schedule:
-    - cron: '0 1,7,13,19 * * *'  # 4 volte al giorno (offset diverso)
-  workflow_dispatch:
+    - cron: '0 */6 * * *'  # Ogni 6 ore
+  workflow_dispatch:  # Pulsante manuale
 
 jobs:
-  update-feed-cz:
+  update-feed:
     runs-on: ubuntu-latest
     steps:
       - name: Scarica codice
@@ -26,62 +26,59 @@ jobs:
       - name: Installa dipendenze
         run: pip install -r requirements.txt
       
-      - name: Esegui sincronizzazione BigBuy Repubblica Ceca
+      - name: Esegui sincronizzazione BigBuy Italia
         env:
           BIGBUY_API_KEY: ${{ secrets.BIGBUY_API_KEY }}
-          COUNTRY_CODE: CZ
+          COUNTRY_CODE: IT
         run: python bigbuy_kaufland.py
       
       - name: Check generated files
         run: |
           echo "Files generated:"
           ls -la *.csv *.html *.json 2>/dev/null || echo "No files found"
-          echo "Looking for Czech Republic-specific files:"
-          find . -name "*_cz.*" -o -name "index_cz.html" -o -name "kaufland_feed_cz.csv" 2>/dev/null || echo "No CZ files found"
+          echo "Looking for Italy main files:"
+          find . -name "kaufland_feed.csv" -o -name "index.html" -o -name "feed_info.json" 2>/dev/null || echo "No main IT files found"
       
-      - name: Commit feed Repubblica Ceca
+      - name: Commit feed Italia aggiornato
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          # Pull latest changes first
-          git pull origin main --rebase
-          
-          # Add Czech Republic-specific files only if they exist
+          # Add Italy main files only if they exist
           files_to_add=""
           
-          if [ -f "kaufland_feed_cz.csv" ]; then
-            files_to_add="$files_to_add kaufland_feed_cz.csv"
-            echo "✅ Found kaufland_feed_cz.csv"
+          if [ -f "kaufland_feed.csv" ]; then
+            files_to_add="$files_to_add kaufland_feed.csv"
+            echo "✅ Found kaufland_feed.csv"
           else
-            echo "❌ Missing kaufland_feed_cz.csv"
+            echo "❌ Missing kaufland_feed.csv"
           fi
           
-          if [ -f "index_cz.html" ]; then
-            files_to_add="$files_to_add index_cz.html"
-            echo "✅ Found index_cz.html"
+          if [ -f "index.html" ]; then
+            files_to_add="$files_to_add index.html"
+            echo "✅ Found index.html"
           else
-            echo "❌ Missing index_cz.html"
+            echo "❌ Missing index.html"
           fi
           
-          if [ -f "feed_info_cz.json" ]; then
-            files_to_add="$files_to_add feed_info_cz.json"
-            echo "✅ Found feed_info_cz.json"
+          if [ -f "feed_info.json" ]; then
+            files_to_add="$files_to_add feed_info.json"
+            echo "✅ Found feed_info.json"
           else
-            echo "❌ Missing feed_info_cz.json"
+            echo "❌ Missing feed_info.json"
           fi
           
           if [ -n "$files_to_add" ]; then
             git add $files_to_add
             
             if git diff --cached --quiet; then
-              echo "Nessuna modifica per la Repubblica Ceca"
+              echo "No changes to commit"
             else
-              git commit -m "Aggiorna feed Repubblica Ceca $(date '+%Y-%m-%d %H:%M:%S')"
+              git commit -m "Update feed Italia $(date '+%Y-%m-%d %H:%M:%S')"
               git push
-              echo "Feed Repubblica Ceca aggiornato con successo!"
+              echo "Feed Italia updated successfully!"
             fi
           else
-            echo "❌ Nessun file Repubblica Ceca generato - controllare il log Python"
+            echo "❌ Nessun file Italia generato - controllare il log Python"
             exit 1
           fi
