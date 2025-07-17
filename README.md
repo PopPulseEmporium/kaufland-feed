@@ -6,6 +6,7 @@ Sistema automatico per sincronizzare prodotti BigBuy con Kaufland in 5 paesi eur
 
 | Paese | Codice | Feed URL | Lingua | Aggiornamento |
 |-------|--------|----------|--------|---------------|
+| 🇮🇹 Italia | IT | `kaufland_feed.csv` | Italiano | Ogni 6 ore |
 | 🇩🇪 Germania | DE | `kaufland_feed_de.csv` | Tedesco | Ogni 6 ore |
 | 🇦🇹 Austria | AT | `kaufland_feed_at.csv` | Tedesco | Ogni 6 ore (+15min) |
 | 🇵🇱 Polonia | PL | `kaufland_feed_pl.csv` | Polacco | Ogni 6 ore (+30min) |
@@ -16,6 +17,7 @@ Sistema automatico per sincronizzare prodotti BigBuy con Kaufland in 5 paesi eur
 
 ### URL Diretti CSV (da inserire in Kaufland)
 ```
+Italia:       https://poppulseemporium.github.io/kaufland-feed/kaufland_feed.csv
 Germania:     https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_de.csv
 Austria:      https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_at.csv  
 Polonia:      https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_pl.csv
@@ -23,9 +25,14 @@ Slovacchia:   https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_sk.
 Rep. Ceca:    https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_cz.csv
 ```
 
-### Anteprima HTML
+### Anteprima HTML per Paese
 ```
-https://poppulseemporium.github.io/kaufland-feed/
+Italia:       https://poppulseemporium.github.io/kaufland-feed/index.html
+Germania:     https://poppulseemporium.github.io/kaufland-feed/index_de.html
+Austria:      https://poppulseemporium.github.io/kaufland-feed/index_at.html
+Polonia:      https://poppulseemporium.github.io/kaufland-feed/index_pl.html
+Slovacchia:   https://poppulseemporium.github.io/kaufland-feed/index_sk.html
+Rep. Ceca:    https://poppulseemporium.github.io/kaufland-feed/index_cz.html
 ```
 
 ## ⚙️ Configurazione Kaufland
@@ -56,6 +63,8 @@ https://poppulseemporium.github.io/kaufland-feed/
 - **Quantità per paese**: 25.000 prodotti selezionati casualmente
 - **Prezzo massimo**: €300 per prodotto
 - **Condizione**: Solo prodotti NUOVI
+- **Stock minimo**: ≥ 5 unità disponibili in BigBuy
+- **Quantità reali**: Stock effettivo da BigBuy (massimo 100)
 - **Margine applicato**: 20%
 - **IVA**: 22%
 - **Categoria principale**: Gardening & DIY
@@ -71,6 +80,7 @@ currency,handling_time,delivery_time_max,delivery_time_min
 ```
 
 ### Localizzazione per Paese
+- **Italia**: Descrizioni in italiano (`it-IT`)
 - **Germania/Austria**: Descrizioni in tedesco (`de-DE`, `de-AT`)
 - **Polonia**: Descrizioni in polacco (`pl-PL`)
 - **Slovacchia**: Descrizioni in slovacco (`sk-SK`)
@@ -79,6 +89,7 @@ currency,handling_time,delivery_time_max,delivery_time_min
 ## 🔄 Aggiornamenti Automatici
 
 ### Schedule GitHub Actions
+- **Italia**: Ogni 6 ore (00:00, 06:00, 12:00, 18:00)
 - **Germania**: Ogni 6 ore (00:00, 06:00, 12:00, 18:00)
 - **Austria**: Ogni 6 ore (+15 min offset)
 - **Polonia**: Ogni 6 ore (+30 min offset)  
@@ -87,24 +98,31 @@ currency,handling_time,delivery_time_max,delivery_time_min
 
 ### Processo di Aggiornamento
 1. **Estrazione dati** da BigBuy API
-2. **Filtraggio** prodotti (max €300, solo NUOVI)
+2. **Filtraggio** prodotti (max €300, solo NUOVI, stock ≥ 5)
 3. **Selezione casuale** di 25k prodotti per paese
 4. **Traduzione** descrizioni nella lingua locale
-5. **Generazione** file CSV e HTML
-6. **Pubblicazione** automatica su GitHub Pages
+5. **Quantità reali** dal magazzino BigBuy (max 100)
+6. **Generazione** file CSV e HTML separati per paese
+7. **Pubblicazione** automatica su GitHub Pages
 
 ## 🛠️ Configurazione Tecnica
 
 ### Variabili d'Ambiente
 ```bash
 BIGBUY_API_KEY=your_bigbuy_api_key_here
-COUNTRY_CODE=DE  # DE, AT, PL, SK, CZ
+COUNTRY_CODE=DE  # IT, DE, AT, PL, SK, CZ
 ```
 
 ### File Generati per Paese
+**Italia (paese principale):**
+- `kaufland_feed.csv` - Feed principale
+- `feed_info.json` - Metadati del feed
+- `index.html` - Anteprima prodotti
+
+**Altri paesi:**
 - `kaufland_feed_{paese}.csv` - Feed principale
 - `feed_info_{paese}.json` - Metadati del feed
-- `index.html` - Anteprima prodotti
+- `index_{paese}.html` - Anteprima prodotti
 
 ### Dipendenze Python
 ```
@@ -152,8 +170,10 @@ git clone https://github.com/poppulseemporium/kaufland-feed.git
 
 ### 4. Verifica Feed
 ```bash
-# Controlla i file generati
-curl https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_de.csv
+# Controlla i file generati per ogni paese
+curl https://poppulseemporium.github.io/kaufland-feed/kaufland_feed.csv      # Italia
+curl https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_de.csv   # Germania
+curl https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_at.csv   # Austria
 ```
 
 ## 🔧 Personalizzazione
@@ -166,6 +186,9 @@ margin = 0.20              # Margine 20%
 vat = 0.22                # IVA 22%
 max_price_limit = 300.0   # Prezzo massimo €300
 sample_size = 25000       # Prodotti per paese
+
+# Filtro stock
+stock_minimum = 5         # Stock minimo richiesto
 
 # Tempi di consegna
 handling_time = 2         # Giorni preparazione
@@ -207,4 +230,12 @@ Questo progetto è disponibile sotto licenza MIT. Vedi il file `LICENSE` per i d
 
 ---
 
-🎯 **Obiettivo**: Vendere su Kaufland in 5 paesi europei con aggiornamenti automatici ogni 6 ore!
+🎯 **Obiettivo**: Vendere su Kaufland in 6 paesi europei con aggiornamenti automatici ogni 6 ore!
+
+## ✨ **Novità Versione 2.0**
+
+- ✅ **Stock reali**: Quantità effettive dal magazzino BigBuy
+- ✅ **Filtro stock**: Solo prodotti con ≥ 5 unità disponibili
+- ✅ **HTML separati**: Anteprima dedicata per ogni paese
+- ✅ **Italia supportata**: Paese aggiunto con traduzioni italiane
+- ✅ **Migliore qualità**: Prodotti sempre disponibili per la vendita
