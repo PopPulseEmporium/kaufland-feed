@@ -32,17 +32,56 @@ jobs:
           COUNTRY_CODE: CZ
         run: python bigbuy_kaufland.py
       
+      - name: Check generated files
+        run: |
+          echo "Files generated:"
+          ls -la *.csv *.html *.json 2>/dev/null || echo "No files found"
+          echo "Looking for Czech Republic-specific files:"
+          find . -name "*_cz.*" -o -name "index_cz.html" -o -name "kaufland_feed_cz.csv" 2>/dev/null || echo "No CZ files found"
+      
       - name: Commit feed Repubblica Ceca
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          git add kaufland_feed_cz.csv index_cz.html feed_info_cz.json
+          # Pull latest changes first
+          git pull origin main --rebase
           
-          if git diff --cached --quiet; then
-            echo "Nessuna modifica per la Repubblica Ceca"
+          # Add Czech Republic-specific files only if they exist
+          files_to_add=""
+          
+          if [ -f "kaufland_feed_cz.csv" ]; then
+            files_to_add="$files_to_add kaufland_feed_cz.csv"
+            echo "✅ Found kaufland_feed_cz.csv"
           else
-            git commit -m "Aggiorna feed Repubblica Ceca $(date '+%Y-%m-%d %H:%M:%S')"
-            git push
-            echo "Feed Repubblica Ceca aggiornato con successo!"
+            echo "❌ Missing kaufland_feed_cz.csv"
+          fi
+          
+          if [ -f "index_cz.html" ]; then
+            files_to_add="$files_to_add index_cz.html"
+            echo "✅ Found index_cz.html"
+          else
+            echo "❌ Missing index_cz.html"
+          fi
+          
+          if [ -f "feed_info_cz.json" ]; then
+            files_to_add="$files_to_add feed_info_cz.json"
+            echo "✅ Found feed_info_cz.json"
+          else
+            echo "❌ Missing feed_info_cz.json"
+          fi
+          
+          if [ -n "$files_to_add" ]; then
+            git add $files_to_add
+            
+            if git diff --cached --quiet; then
+              echo "Nessuna modifica per la Repubblica Ceca"
+            else
+              git commit -m "Aggiorna feed Repubblica Ceca $(date '+%Y-%m-%d %H:%M:%S')"
+              git push
+              echo "Feed Repubblica Ceca aggiornato con successo!"
+            fi
+          else
+            echo "❌ Nessun file Repubblica Ceca generato - controllare il log Python"
+            exit 1
           fi
