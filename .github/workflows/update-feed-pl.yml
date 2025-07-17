@@ -1,7 +1,5 @@
-name: Aggiorna Feed Kaufland Polonia
+name: Aggiorna Feed Kaufland Polonia (Diagnostic)
 on:
-  schedule:
-    - cron: '30 */6 * * *'  # Ogni 6 ore (offset di 30 min)
   workflow_dispatch:
 
 jobs:
@@ -11,13 +9,6 @@ jobs:
       - name: Scarica codice
         uses: actions/checkout@v3
 
-      - name: Wait for other workflows to complete
-        uses: softprops/turnstyle@v1
-        with:
-          poll-interval-seconds: 10
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -26,28 +17,78 @@ jobs:
       - name: Installa dipendenze
         run: pip install -r requirements.txt
       
-      - name: Esegui sincronizzazione BigBuy Polonia
+      - name: Debug - Check Python script
+        run: |
+          echo "Checking if bigbuy_kaufland.py exists:"
+          ls -la bigbuy_kaufland.py
+          echo "First 20 lines of script:"
+          head -20 bigbuy_kaufland.py
+      
+      - name: Debug - Test API connection
+        env:
+          BIGBUY_API_KEY: ${{ secrets.BIGBUY_API_KEY }}
+        run: |
+          python3 -c "
+          import os
+          import requests
+          api_key = os.getenv('BIGBUY_API_KEY')
+          print(f'API Key exists: {bool(api_key)}')
+          print(f'API Key length: {len(api_key) if api_key else 0}')
+          
+          if api_key:
+              headers = {'Authorization': f'Bearer {api_key}'}
+              try:
+                  response = requests.get('https://api.bigbuy.eu/rest/catalog/taxonomies.json?firstLevel', headers=headers)
+                  print(f'API Status: {response.status_code}')
+                  if response.status_code == 200:
+                      data = response.json()
+                      print(f'Taxonomies found: {len(data)}')
+                  else:
+                      print(f'API Error: {response.text}')
+              except Exception as e:
+                  print(f'Connection error: {e}')
+          "
+      
+      - name: Esegui sincronizzazione BigBuy Polonia (con debug massimo)
         env:
           BIGBUY_API_KEY: ${{ secrets.BIGBUY_API_KEY }}
           COUNTRY_CODE: PL
-        run: python bigbuy_kaufland.py
-      
-      - name: Check generated files
         run: |
-          echo "Files generated:"
-          ls -la *.csv *.html *.json 2>/dev/null || echo "No files found"
-          echo "Looking for Poland-specific files:"
-          find . -name "*_pl.*" -o -name "index_pl.html" -o -name "kaufland_feed_pl.csv" 2>/dev/null || echo "No PL files found"
+          echo "=== STARTING POLAND SYNC ==="
+          echo "Country Code: $COUNTRY_CODE"
+          echo "Python version:"
+          python3 --version
+          echo "=== RUNNING SCRIPT ==="
+          python3 bigbuy_kaufland.py 2>&1 | tee poland_debug.log
+          echo "=== SCRIPT COMPLETED ==="
+          echo "Exit code: $?"
       
-      - name: Commit feed Polonia
+      - name: Show all output and files
+        run: |
+          echo "=== PYTHON LOG OUTPUT ==="
+          if [ -f poland_debug.log ]; then
+            cat poland_debug.log
+          else
+            echo "No debug log found"
+          fi
+          
+          echo "=== ALL FILES IN DIRECTORY ==="
+          ls -la
+          
+          echo "=== LOOKING FOR POLAND FILES ==="
+          find . -name "*pl*" -o -name "*PL*" 2>/dev/null || echo "No Poland files found"
+          
+          echo "=== LOOKING FOR ANY CSV FILES ==="
+          find . -name "*.csv" 2>/dev/null || echo "No CSV files found"
+          
+          echo "=== LOOKING FOR ANY HTML FILES ==="
+          find . -name "*.html" 2>/dev/null || echo "No HTML files found"
+      
+      - name: Check if any files were created (safe commit)
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          # Pull latest changes first
-          git pull origin main --rebase
-          
-          # Add Poland-specific files only if they exist
           files_to_add=""
           
           if [ -f "kaufland_feed_pl.csv" ]; then
@@ -72,6 +113,7 @@ jobs:
           fi
           
           if [ -n "$files_to_add" ]; then
+            echo "Files to commit: $files_to_add"
             git add $files_to_add
             
             if git diff --cached --quiet; then
@@ -82,6 +124,11 @@ jobs:
               echo "Feed Polonia aggiornato con successo!"
             fi
           else
-            echo "❌ Nessun file Polonia generato - controllare il log Python"
+            echo "❌ Nessun file Polonia generato"
+            echo "Checking if script actually ran:"
+            if [ -f poland_debug.log ]; then
+              echo "Last 50 lines of debug log:"
+              tail -50 poland_debug.log
+            fi
             exit 1
           fi
