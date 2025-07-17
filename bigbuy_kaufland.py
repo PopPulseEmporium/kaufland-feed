@@ -1,287 +1,360 @@
 import requests
 import json
-import pandas as pd
-from typing import Dict, List, Optional
-import time
-import os
+import csv
 from datetime import datetime
+import os
+import time
 
 class BigBuyAPI:
-    def __init__(self, api_key: str, base_url: str = "https://api.bigbuy.eu"):
-        """Initialize BigBuy API client"""
+    def __init__(self, api_key: str):
         self.api_key = api_key
-        self.base_url = base_url
+        self.base_url = "https://api.bigbuy.eu"
         self.headers = {
             'Authorization': f'Bearer {api_key}',
             'Content-Type': 'application/json'
         }
 
-    def _make_request(self, endpoint: str, method: str = 'GET', data: Dict = None) -> Dict:
-        """Make API request with error handling"""
+    def _make_request(self, endpoint: str):
+        """Make API request"""
         url = f"{self.base_url}{endpoint}"
         
         try:
-            if method == 'GET':
-                response = requests.get(url, headers=self.headers)
-            elif method == 'POST':
-                response = requests.post(url, headers=self.headers, json=data)
-            
+            response = requests.get(url, headers=self.headers)
             print(f"Request: {endpoint} - Status: {response.status_code}")
             
             if response.status_code == 401:
-                print("❌ Authentication Error: Please check your API key")
+                print("❌ Authentication Error")
                 return None
             
             response.raise_for_status()
             return response.json()
             
-        except requests.exceptions.RequestException as e:
-            print(f"❌ API Error: {e}")
+        except Exception as e:
+            print(f"❌ Error: {e}")
             return None
 
-    def _filter_erotic_categories(self, taxonomies: List[Dict]) -> List[Dict]:
-        """Filter out erotic/adult content categories"""
-        erotic_keywords = [
-            'erotic', 'erotico', 'adult', 'adulto', 'sex', 'sesso', 'sexy', 
-            'intimate', 'intimo', 'lingerie', 'pleasure', 'piacere',
-            'sensual', 'sensuale', 'mature', 'maturo', 'xxx'
-        ]
-        
-        filtered_taxonomies = []
-        for taxonomy in taxonomies:
-            taxonomy_name = taxonomy.get('name', '').lower()
-            taxonomy_url = taxonomy.get('url', '').lower()
-            
-            is_erotic = any(keyword in taxonomy_name or keyword in taxonomy_url 
-                          for keyword in erotic_keywords)
-            
-            if not is_erotic:
-                filtered_taxonomies.append(taxonomy)
-            else:
-                print(f"🚫 Filtered out: {taxonomy['name']}")
-        
-        return filtered_taxonomies
-
-    def get_taxonomies(self, first_level_only: bool = True) -> List[Dict]:
-        """Get product taxonomies (categories)"""
-        endpoint = "/rest/catalog/taxonomies.json"
-        if first_level_only:
-            endpoint += "?firstLevel"
-        
-        result = self._make_request(endpoint)
+    def get_taxonomies(self):
+        """Get product categories"""
+        result = self._make_request("/rest/catalog/taxonomies.json?firstLevel")
         if result:
-            result = self._filter_erotic_categories(result)
-        return result
+            # Filter out erotic categories
+            filtered = []
+            erotic_keywords = ['erotic', 'erotico', 'adult', 'sex', 'sexy', 'intimate', 'lingerie']
+            for taxonomy in result:
+                name = taxonomy.get('name', '').lower()
+                if not any(keyword in name for keyword in erotic_keywords):
+                    filtered.append(taxonomy)
+                else:
+                    print(f"🚫 Filtered: {taxonomy['name']}")
+            return filtered[:10]  # Limit to 10 categories
+        return []
 
-    def get_products_by_taxonomy(self, taxonomy_id: int) -> List[Dict]:
-        """Get products for a specific taxonomy"""
-        endpoint = f"/rest/catalog/products.json?parentTaxonomy={taxonomy_id}"
-        return self._make_request(endpoint)
+    def get_products(self, taxonomy_id):
+        """Get products for category"""
+        return self._make_request(f"/rest/catalog/products.json?parentTaxonomy={taxonomy_id}")
 
-    def get_product_information(self, taxonomy_id: int, iso_code: str = "it") -> List[Dict]:
-        """Get product information (names, descriptions) for a taxonomy"""
-        endpoint = f"/rest/catalog/productsinformation.json?isoCode={iso_code}&parentTaxonomy={taxonomy_id}"
-        return self._make_request(endpoint)
+    def get_product_info(self, taxonomy_id):
+        """Get product descriptions"""
+        return self._make_request(f"/rest/catalog/productsinformation.json?isoCode=it&parentTaxonomy={taxonomy_id}")
 
-    def get_product_images(self, taxonomy_id: int) -> List[Dict]:
-        """Get product images for a taxonomy"""
-        endpoint = f"/rest/catalog/productsimages.json?parentTaxonomy={taxonomy_id}"
-        return self._make_request(endpoint)
+    def get_product_images(self, taxonomy_id):
+        """Get product images"""
+        return self._make_request(f"/rest/catalog/productsimages.json?parentTaxonomy={taxonomy_id}")
 
-    def retrieve_catalog_data(self, language: str = "it", max_categories: int = 10) -> Dict:
-        """Retrieve BigBuy catalog data (optimized for GitHub Actions)"""
-        print("🔄 Starting catalog retrieval...")
-        
-        catalog = {
-            'products': [],
-            'product_information': [],
-            'images': []
-        }
-        
-        # Get taxonomies
-        taxonomies = self.get_taxonomies(first_level_only=True)
-        if not taxonomies:
-            print("❌ Failed to retrieve taxonomies")
-            return catalog
-        
-        # Limit categories for GitHub Actions (to avoid timeout)
-        taxonomies = taxonomies[:max_categories]
-        print(f"📊 Processing {len(taxonomies)} categories...")
-        
-        for i, taxonomy in enumerate(taxonomies):
-            taxonomy_id = taxonomy['id']
-            taxonomy_name = taxonomy['name']
-            
-            print(f"📦 Processing {i+1}/{len(taxonomies)}: {taxonomy_name}")
-            
-            # Get products
-            products = self.get_products_by_taxonomy(taxonomy_id)
-            if products:
-                catalog['products'].extend(products)
-                print(f"   ✅ {len(products)} products")
-            
-            # Get product information
-            product_info = self.get_product_information(taxonomy_id, language)
-            if product_info:
-                catalog['product_information'].extend(product_info)
-                print(f"   ✅ {len(product_info)} descriptions")
-            
-            # Get images
-            images = self.get_product_images(taxonomy_id)
-            if images:
-                catalog['images'].extend(images)
-                print(f"   ✅ {len(images)} image sets")
-            
-            # Small delay to avoid rate limiting
-            time.sleep(0.5)
-        
-        print(f"✅ Catalog retrieval complete!")
-        print(f"📊 Total: {len(catalog['products'])} products, {len(catalog['product_information'])} descriptions")
-        
-        return catalog
+def safe_float(value, default=0.0):
+    """Safely convert to float"""
+    try:
+        return float(value) if value else default
+    except:
+        return default
 
-    def process_for_kaufland(self, catalog: Dict, margin: float = 0.20) -> pd.DataFrame:
-        """Process catalog data for Kaufland marketplace"""
-        print("🔄 Processing data for Kaufland...")
-        
-        try:
-            # Convert to DataFrames
-            products_df = pd.DataFrame(catalog['products'])
-            product_info_df = pd.DataFrame(catalog['product_information'])
-            images_df = pd.DataFrame(catalog['images'])
-            
-            if products_df.empty:
-                print("❌ No products to process")
-                return pd.DataFrame()
-            
-            # Filter NEW condition only
-            products_new = products_df[products_df['condition'].str.upper() == 'NEW']
-            print(f"📦 {len(products_new)} NEW products found")
-            
-            # Merge with product information
-            merged_df = products_new.merge(product_info_df, on='sku', how='left')
-            
-            # Process images
-            if not images_df.empty:
-                # Flatten images
-                images_flat = []
-                for _, row in images_df.iterrows():
-                    product_id = row['id']
-                    if isinstance(row.get('images'), list):
-                        for i, img in enumerate(row['images'][:4]):  # Max 4 images
-                            images_flat.append({
-                                'product_id': product_id,
-                                f'IMAGE{i+1}': img.get('url', '') if isinstance(img, dict) else ''
-                            })
-                
-                if images_flat:
-                    images_pivot = pd.DataFrame(images_flat).groupby('product_id').first().reset_index()
-                    merged_df = merged_df.merge(images_pivot, left_on='id', right_on='product_id', how='left')
-            
-            # Create Kaufland format
-            output_df = pd.DataFrame()
-            output_df['id_offer'] = merged_df['id']
-            output_df['ean'] = merged_df['ean13']
-            output_df['locale'] = 'it-IT'
-            output_df['category'] = "Gardening & DIY"
-            output_df['title'] = merged_df['name']
-            output_df['short_description'] = merged_df['description'].astype(str).str[:200] + "..."
-            output_df['description'] = merged_df['description']
-            output_df['manufacturer'] = "Pop Pulse Emporium"
-            
-            # Images
-            output_df['picture_1'] = merged_df.get('IMAGE1', '')
-            output_df['picture_2'] = merged_df.get('IMAGE2', '')
-            output_df['picture_3'] = merged_df.get('IMAGE3', '')
-            output_df['picture_4'] = merged_df.get('IMAGE4', '')
-            
-            # Pricing (wholesale * (1 + VAT) * (1 + margin) + base_price)
-            VAT = 0.22
-            base_price = 0.75
-            output_df['price_cs'] = (merged_df['wholesalePrice'].astype(float) * 
-                                   (1 + VAT) * (1 + margin) + base_price).round(2)
-            
-            # Product details
-            output_df['quantity'] = 100  # Default stock
-            output_df['condition'] = 'NEW'
-            output_df['length'] = merged_df['depth'].fillna(0)
-            output_df['width'] = merged_df['width'].fillna(0)
-            output_df['height'] = merged_df['height'].fillna(0)
-            output_df['weight'] = merged_df['weight'].fillna(0)
-            output_df['content_volume'] = (output_df['length'] * output_df['width'] * output_df['height']).fillna(0)
-            output_df['currency'] = 'EUR'
-            output_df['handling_time'] = 2
-            output_df['delivery_time_max'] = 5
-            output_df['delivery_time_min'] = 3
-            
-            # Clean up
-            output_df = output_df.fillna('')
-            output_df = output_df.drop_duplicates(subset=['ean'], keep='first')
-            
-            print(f"✅ Processed {len(output_df)} products for Kaufland")
-            print(f"💰 Price range: €{output_df['price_cs'].min():.2f} - €{output_df['price_cs'].max():.2f}")
-            
-            return output_df
-            
-        except Exception as e:
-            print(f"❌ Error processing for Kaufland: {e}")
-            return pd.DataFrame()
+def safe_str(value, default=""):
+    """Safely convert to string"""
+    try:
+        return str(value) if value else default
+    except:
+        return default
 
 def main():
-    """Main function for GitHub Actions"""
+    """Main function"""
     print("🚀 Starting BigBuy to Kaufland sync...")
-    print(f"⏰ Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
-    # Get API key from environment
+    # Get API key
     api_key = os.getenv('BIGBUY_API_KEY')
     if not api_key:
-        print("❌ BIGBUY_API_KEY environment variable not set")
+        print("❌ No API key found")
         return
     
-    # Initialize API
     api = BigBuyAPI(api_key)
     
     # Configuration
-    margin = 0.20  # 20% margin
-    max_categories = 15  # Limit for GitHub Actions
+    margin = 0.20
+    vat = 0.22
+    base_price = 1
     
-    try:
-        # Step 1: Retrieve catalog
-        catalog = api.retrieve_catalog_data(language="it", max_categories=max_categories)
+    # Get data
+    taxonomies = api.get_taxonomies()
+    if not taxonomies:
+        print("❌ No taxonomies found")
+        return
+    
+    print(f"📊 Processing {len(taxonomies)} categories...")
+    
+    # Collect all data
+    all_products = []
+    all_info = []
+    all_images = []
+    
+    for i, taxonomy in enumerate(taxonomies):
+        tax_id = taxonomy['id']
+        tax_name = taxonomy['name']
         
-        # Step 2: Process for Kaufland
-        kaufland_df = api.process_for_kaufland(catalog, margin=margin)
+        print(f"📦 {i+1}/{len(taxonomies)}: {tax_name}")
         
-        if not kaufland_df.empty:
-            # Step 3: Save to CSV
-            kaufland_df.to_csv('kaufland_feed.csv', index=False, encoding='utf-8')
+        # Get products
+        products = api.get_products(tax_id)
+        if products:
+            all_products.extend(products)
             
-            # Step 4: Create info file
-            info = {
-                "last_updated": datetime.now().isoformat(),
-                "product_count": len(kaufland_df),
-                "margin_applied": f"{margin*100}%",
-                "categories_processed": max_categories,
-                "price_range": {
-                    "min": f"€{kaufland_df['price_cs'].min():.2f}",
-                    "max": f"€{kaufland_df['price_cs'].max():.2f}"
-                }
+        # Get descriptions
+        info = api.get_product_info(tax_id)
+        if info:
+            all_info.extend(info)
+            
+        # Get images
+        images = api.get_product_images(tax_id)
+        if images:
+            all_images.extend(images)
+        
+        time.sleep(0.5)  # Rate limiting
+    
+    print(f"✅ Collected {len(all_products)} products")
+    
+    # Create lookup dictionaries
+    info_dict = {item['sku']: item for item in all_info}
+    image_dict = {}
+    
+    # Process images
+    for img_set in all_images:
+        product_id = img_set['id']
+        images = img_set.get('images', [])
+        if images:
+            image_dict[product_id] = {
+                'image1': images[0].get('url', '') if len(images) > 0 else '',
+                'image2': images[1].get('url', '') if len(images) > 1 else '',
+                'image3': images[2].get('url', '') if len(images) > 2 else '',
+                'image4': images[3].get('url', '') if len(images) > 3 else ''
             }
+    
+    # Create CSV
+    csv_data = []
+    
+    for product in all_products:
+        # Only NEW products
+        if product.get('condition', '').upper() != 'NEW':
+            continue
             
-            with open('feed_info.json', 'w') as f:
-                json.dump(info, f, indent=2)
+        sku = product['sku']
+        product_id = product['id']
+        
+        # Get additional info
+        info = info_dict.get(sku, {})
+        images = image_dict.get(product_id, {})
+        
+        # Calculate price
+        wholesale = safe_float(product.get('wholesalePrice', 0))
+        price = round((wholesale * (1 + vat) * (1 + margin)) + base_price, 2)
+        
+        # Create row
+        row = {
+            'id_offer': product_id,
+            'ean': safe_str(product.get('ean13')),
+            'locale': 'it-IT',
+            'category': 'Gardening & DIY',
+            'title': safe_str(info.get('name', 'Product')),
+            'short_description': safe_str(info.get('description', ''))[:200] + '...',
+            'description': safe_str(info.get('description', '')),
+            'manufacturer': 'Pop Pulse Emporium',
+            'picture_1': images.get('image1', ''),
+            'picture_2': images.get('image2', ''),
+            'picture_3': images.get('image3', ''),
+            'picture_4': images.get('image4', ''),
+            'price_cs': price,
+            'quantity': 100,
+            'condition': 'NEW',
+            'length': safe_float(product.get('depth')),
+            'width': safe_float(product.get('width')),
+            'height': safe_float(product.get('height')),
+            'weight': safe_float(product.get('weight')),
+            'content_volume': safe_float(product.get('width')) * safe_float(product.get('height')) * safe_float(product.get('depth')),
+            'currency': 'EUR',
+            'handling_time': 2,
+            'delivery_time_max': 5,
+            'delivery_time_min': 3
+        }
+        
+        csv_data.append(row)
+    
+    # Remove duplicates by EAN
+    seen_eans = set()
+    unique_data = []
+    for row in csv_data:
+        ean = row['ean']
+        if ean and ean not in seen_eans:
+            seen_eans.add(ean)
+            unique_data.append(row)
+    
+    print(f"✅ Created {len(unique_data)} unique products")
+    
+    # Write CSV
+    if unique_data:
+        with open('kaufland_feed.csv', 'w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=unique_data[0].keys())
+            writer.writeheader()
+            writer.writerows(unique_data)
+        
+        # Create HTML visualization for sanity check
+        html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kaufland Feed - Pop Pulse Emporium</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 20px; }}
+        .header {{ background: #f0f0f0; padding: 20px; border-radius: 5px; margin-bottom: 20px; }}
+        .stats {{ display: flex; gap: 20px; margin-bottom: 20px; }}
+        .stat-box {{ background: #e8f4f8; padding: 15px; border-radius: 5px; text-align: center; }}
+        .stat-number {{ font-size: 24px; font-weight: bold; color: #2c5aa0; }}
+        .stat-label {{ font-size: 14px; color: #666; }}
+        table {{ border-collapse: collapse; width: 100%; margin-top: 20px; }}
+        th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+        th {{ background-color: #f2f2f2; font-weight: bold; }}
+        tr:nth-child(even) {{ background-color: #f9f9f9; }}
+        .price {{ color: #2c5aa0; font-weight: bold; }}
+        .ean {{ font-family: monospace; font-size: 12px; }}
+        .image {{ max-width: 50px; max-height: 50px; }}
+        .feed-url {{ background: #e8f4f8; padding: 15px; border-radius: 5px; margin: 20px 0; }}
+        .feed-url code {{ background: #fff; padding: 5px; border-radius: 3px; font-size: 14px; }}
+        .description {{ max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛍️ Kaufland Product Feed</h1>
+        <p><strong>Pop Pulse Emporium</strong> - Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+    </div>
+    
+    <div class="stats">
+        <div class="stat-box">
+            <div class="stat-number">{len(unique_data)}</div>
+            <div class="stat-label">Products</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">{margin*100}%</div>
+            <div class="stat-label">Margin</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">€{min(prices):.2f}</div>
+            <div class="stat-label">Min Price</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">€{max(prices):.2f}</div>
+            <div class="stat-label">Max Price</div>
+        </div>
+    </div>
+    
+    <div class="feed-url">
+        <h3>📡 Feed URL for Kaufland:</h3>
+        <code>https://your-username.github.io/kaufland-feed/kaufland_feed.csv</code>
+        <p><small>Use this URL in Kaufland's automatic feed import</small></p>
+    </div>
+    
+    <h2>📊 Product Preview (First 50 products)</h2>
+    <table>
+        <tr>
+            <th>Image</th>
+            <th>Title</th>
+            <th>EAN</th>
+            <th>Price</th>
+            <th>Category</th>
+            <th>Description</th>
+        </tr>
+"""
+        
+        # Add first 50 products to HTML table
+        for i, row in enumerate(unique_data[:50]):
+            img_tag = f'<img src="{row["picture_1"]}" class="image" onerror="this.style.display=\'none\'">' if row["picture_1"] else "No image"
+            html_content += f"""
+        <tr>
+            <td>{img_tag}</td>
+            <td>{row["title"][:50]}...</td>
+            <td class="ean">{row["ean"]}</td>
+            <td class="price">€{row["price_cs"]}</td>
+            <td>{row["category"]}</td>
+            <td class="description">{row["description"][:100]}...</td>
+        </tr>
+"""
+        
+        html_content += """
+    </table>
+    
+    <div style="margin-top: 40px; padding: 20px; background: #f0f0f0; border-radius: 5px;">
+        <h3>📋 Files Available:</h3>
+        <ul>
+            <li><strong>kaufland_feed.csv</strong> - Main feed file for Kaufland</li>
+            <li><strong>feed_info.json</strong> - Technical information about the feed</li>
+            <li><strong>index.html</strong> - This preview page</li>
+        </ul>
+        
+        <h3>🔄 Update Schedule:</h3>
+        <p>This feed updates automatically every 6 hours with fresh BigBuy data.</p>
+    </div>
+</body>
+</html>
+"""
+        
+        with open('index.html', 'w', encoding='utf-8') as f:
+            f.write(html_content)
+        
+        # Create info file
+        info_data = {
+            "last_updated": datetime.now().isoformat(),
+            "product_count": len(unique_data),
+            "margin_applied": f"{margin*100}%",
+            "categories_processed": len(taxonomies)
+        }
+        
+        with open('feed_info.json', 'w') as f:
+            json.dump(info_data, f, indent=2)
+        
+        print("✅ SUCCESS!")
+        print(f"📁 Created kaufland_feed.csv with {len(unique_data)} products")
+        print(f"🌐 Created index.html preview page")
+        print(f"💰 Applied {margin*100}% margin")
+        
+        # Show price range
+        prices = [row['price_cs'] for row in unique_data]
+        print(f"💰 Price range: €{min(prices):.2f} - €{max(prices):.2f}")
+        
+        # Debug: Check if files were created
+        import os
+        files_created = []
+        for filename in ['kaufland_feed.csv', 'index.html', 'feed_info.json']:
+            if os.path.exists(filename):
+                file_size = os.path.getsize(filename)
+                files_created.append(f"{filename} ({file_size} bytes)")
+        
+        print(f"✅ Files created: {', '.join(files_created)}")
+        print(f"🌐 Preview will be available at: https://your-username.github.io/kaufland-feed/")
+        print(f"📡 Feed URL: https://your-username.github.io/kaufland-feed/kaufland_feed.csv")
             
-            print("✅ SUCCESS!")
-            print(f"📁 Created kaufland_feed.csv with {len(kaufland_df)} products")
-            print(f"💰 Applied {margin*100}% margin")
-            print(f"🌐 Feed will be available at: https://[your-username].github.io/kaufland-feed/kaufland_feed.csv")
-            
-        else:
-            print("❌ No products processed")
-            
-    except Exception as e:
-        print(f"❌ Error in main process: {e}")
-        raise
+    else:
+        print("❌ No products to export")
+        # Still create an empty CSV file
+        with open('kaufland_feed.csv', 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(['id_offer', 'ean', 'locale', 'category', 'title', 'description'])
+        print("📁 Created empty kaufland_feed.csv file")
 
 if __name__ == "__main__":
     main()
