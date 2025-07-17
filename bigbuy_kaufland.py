@@ -54,9 +54,9 @@ class BigBuyAPI:
         """Get products for category"""
         return self._make_request(f"/rest/catalog/products.json?parentTaxonomy={taxonomy_id}")
 
-    def get_product_info(self, taxonomy_id):
-        """Get product descriptions"""
-        return self._make_request(f"/rest/catalog/productsinformation.json?isoCode=it&parentTaxonomy={taxonomy_id}")
+    def get_product_info(self, taxonomy_id, language="it"):
+        """Get product descriptions in specified language"""
+        return self._make_request(f"/rest/catalog/productsinformation.json?isoCode={language}&parentTaxonomy={taxonomy_id}")
 
     def get_product_images(self, taxonomy_id):
         """Get product images"""
@@ -548,15 +548,19 @@ def main():
             "last_updated": datetime.now().isoformat(),
             "product_count": len(unique_data),
             "total_products_available": len(csv_data),
-            "selection_method": "Random sample for testing",
+            "selection_method": "Random sample with price filter",
             "sample_size": len(unique_data),
+            "max_price_filter": max_price_limit,
             "margin_applied": f"{margin*100}%",
             "categories_processed": len(taxonomies),
-            "feed_url": "https://your-username.github.io/kaufland-feed/kaufland_feed.csv",
-            "note": "This is a test version with a small random sample"
+            "country": country,
+            "locale": config['locale'],
+            "language": config['language'],
+            "feed_url": f"https://poppulseemporium.github.io/kaufland-feed/{filename}",
+            "note": f"Feed for {config['name']} with {len(unique_data)} random products under €{max_price_limit}"
         }
         
-        with open('feed_info.json', 'w') as f:
+        with open(f'feed_info_{country.lower()}.json', 'w') as f:
             json.dump(info_data, f, indent=2)
         print("✅ JSON info file created")
         
