@@ -423,9 +423,16 @@ def main():
         print("🔄 Creating HTML page...")
         try:
             html_content = create_html_page(unique_data, margin, files_created, country, config)
-            with open('index.html', 'w', encoding='utf-8') as f:
+            
+            # Create country-specific HTML filename
+            if country == 'IT':
+                html_filename = 'index.html'  # Keep Italy as main page
+            else:
+                html_filename = f'index_{country.lower()}.html'
+            
+            with open(html_filename, 'w', encoding='utf-8') as f:
                 f.write(html_content)
-            print("✅ HTML page created")
+            print(f"✅ HTML page created: {html_filename}")
         except Exception as e:
             print(f"❌ Error creating HTML: {e}")
             # Create simple fallback
