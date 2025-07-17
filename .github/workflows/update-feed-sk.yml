@@ -37,7 +37,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          git add kaufland_feed_sk.csv index_cz.html feed_info_sk.json
+          git add kaufland_feed_sk.csv index_sk.html feed_info_sk.json
           
           if git diff --cached --quiet; then
             echo "Nessuna modifica per la Slovacchia"
