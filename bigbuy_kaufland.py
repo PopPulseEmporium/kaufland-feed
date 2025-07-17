@@ -371,7 +371,7 @@ def main():
     print(f"✅ Found {len(unique_data)} unique products")
     
     # For testing: randomly select a small sample
-    test_sample_size = 50  # Small sample for testing
+    test_sample_size = 25000  # Small sample for testing
     
     if len(unique_data) > test_sample_size:
         # Randomly shuffle and take first N products
