@@ -1,555 +1,434 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
-    <title>Kaufland Feed - Pop Pulse Emporium</title>
+    <meta charset="UTF-8">
+    <title>Feed Prodotti Kaufland - Pop Pulse Emporium</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .header { background: #f0f0f0; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
-        .stats { display: flex; gap: 20px; margin-bottom: 20px; }
-        .stat-box { background: #e8f4f8; padding: 15px; border-radius: 5px; text-align: center; }
-        .stat-number { font-size: 24px; font-weight: bold; color: #2c5aa0; }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f8f9fa; }
+        .header { background: #667eea; color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px; text-align: center; }
+        .stats { display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap; }
+        .stat-box { background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex: 1; min-width: 150px; }
+        .stat-number { font-size: 28px; font-weight: bold; color: #667eea; }
         .stat-label { font-size: 14px; color: #666; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; font-weight: bold; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .price { color: #2c5aa0; font-weight: bold; }
-        .ean { font-family: monospace; font-size: 12px; }
-        .image { max-width: 50px; max-height: 50px; }
-        .feed-url { background: #e8f4f8; padding: 15px; border-radius: 5px; margin: 20px 0; }
-        .feed-url code { background: #fff; padding: 5px; border-radius: 3px; font-size: 14px; word-break: break-all; }
-        .description { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .success { background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .feed-url { background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 30px 0; }
+        .feed-url code { background: #fff; padding: 10px; border-radius: 5px; font-size: 14px; word-break: break-all; display: block; margin: 10px 0; }
+        table { border-collapse: collapse; width: 100%; margin-top: 30px; background: white; border-radius: 10px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #667eea; color: white; }
+        .price { color: #4caf50; font-weight: bold; }
+        .image { max-width: 60px; max-height: 60px; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🛍️ Kaufland Product Feed</h1>
-        <p><strong>Pop Pulse Emporium</strong> - Last Updated: 2025-07-17 13:13:03</p>
+        <h1>🛍️ Feed Prodotti Kaufland</h1>
+        <p><strong>Pop Pulse Emporium</strong> - Ultimo Aggiornamento: 17/07/2025 14:11:10</p>
+    </div>
+    
+    <div>
+        <h2>🇪🇺 Paese: Germany (DE)</h2>
+        <p><strong>Lingua:</strong> DE | <strong>Locale:</strong> de-DE</p>
     </div>
     
     <div class="stats">
         <div class="stat-box">
             <div class="stat-number">25,000</div>
-            <div class="stat-label">Products</div>
+            <div class="stat-label">Prodotti</div>
         </div>
         <div class="stat-box">
-            <div class="stat-number">20.0%</div>
-            <div class="stat-label">Margin</div>
+            <div class="stat-number">20%</div>
+            <div class="stat-label">Margine</div>
         </div>
         <div class="stat-box">
-            <div class="stat-number">€1.04</div>
-            <div class="stat-label">Min Price</div>
+            <div class="stat-number">€1.34</div>
+            <div class="stat-label">Prezzo Min</div>
         </div>
         <div class="stat-box">
-            <div class="stat-number">€30848.25</div>
-            <div class="stat-label">Max Price</div>
+            <div class="stat-number">€299.92</div>
+            <div class="stat-label">Prezzo Max</div>
         </div>
     </div>
     
-    <div class="success">
-        <h3>🧪 Test Version - Random Sample</h3>
-        <p>This is a test version with 25000 randomly selected products.</p>
-        <p>Perfect for testing Kaufland integration before scaling up!</p>
-        <p><strong>Available:</strong> 25000 products selected from a total catalog of ~168,000 products</p>
+    <div style="background: #d4edda; padding: 20px; border-radius: 10px; margin: 30px 0;">
+        <h3>✅ Pronto per Kaufland Germany!</h3>
+        <p>Feed ottimizzato per Germany con 25,000 prodotti (max €300 ciascuno).</p>
     </div>
     
     <div class="feed-url">
-        <h3>📡 Feed URL for Kaufland:</h3>
-        <code>https://your-username.github.io/kaufland-feed/kaufland_feed.csv</code>
-        <p><small>Copy this URL and paste it into Kaufland's "Percorso del file" field</small></p>
+        <h3>📡 URL del Feed per Kaufland:</h3>
+        <code>https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_de.csv</code>
+        <p><small>Copia questo URL nel campo "Percorso del file" di Kaufland</small></p>
     </div>
     
-    <h2>📊 Product Preview (First 50 products)</h2>
+    <h2>📊 Anteprima Prodotti (Primi 50)</h2>
     <table>
         <tr>
-            <th>Image</th>
-            <th>Title</th>
+            <th>Immagine</th>
+            <th>Titolo</th>
             <th>EAN</th>
-            <th>Price</th>
-            <th>Category</th>
-            <th>Description</th>
+            <th>Prezzo</th>
+            <th>Descrizione</th>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8410104155674_S0588624_P02.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Ricariche Per Diffusore Elettrico Air Wick Fiori (...</td>
-            <td class="ean">8410104155674</td>
-            <td class="price">€5.95</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se ti piace curare ogni singolo dettaglio della casa ed essere sempre alla moda in tema di prodotti ...</td>
+            <td><img src="https://cdnbigbuy.com/images/5901299950326_S9117607_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Nageltrockner Esperanza EBN007 Weiß Schwarz 80 W...</strong></td>
+            <td>5901299950326</td>
+            <td class="price">€21.13</td>
+            <td><p>Hätten Sie gerne die Pflegelinie zur <b>Schönheitsbehandlung</b> in Ihrem Zuhause mit hochwertige...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8437009592113_0_P02.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Trattamento Anticaduta Keratin Fibers The Cosmetic...</td>
-            <td class="ean">8437009592113</td>
-            <td class="price">€29.08</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Vuoi valorizzare la tua immagine ed esaltare la tua bellezza? Allora con <b>Trattamento Anticadut...</td>
+            <td><img src="https://cdnbigbuy.com/images/8435501082156_S5737605_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Bürostuhl Algarra CPDM Piqueras y Crespo BFN05RP H...</strong></td>
+            <td>8435501082156</td>
+            <td class="price">€151.40</td>
+            <td>Gehen Sie zurück ins Büro, ohne Details zu vergessen: Kaufen Sie <b>Bürostuhl Algarra CPDM Piqueras ...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8425998311235_R0_WBG2.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Plafoniera Stagna LED EDM 31123 Bianco 9 W</td>
-            <td class="ean">8425998311235</td>
-            <td class="price">€10.94</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se ti piace curare ogni singolo dettaglio della casa ed essere sempre alla moda in tema di prodotti ...</td>
+            <td><img src="https://cdnbigbuy.com/images/8424002103828_S3055306_P40.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Vorhang Home ESPRIT Terrakotta 140 x 260 x 260 cm...</strong></td>
+            <td>8424002103828</td>
+            <td class="price">€17.62</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8436591929529_S4513348_P01.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Asciugamani in Microfibra IDC Institute</td>
-            <td class="ean">8436591929529</td>
-            <td class="price">€4.82</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Vuoi valorizzare la tua immagine ed esaltare la tua bellezza? Allora con <b>Asciugamani in Microf...</td>
+            <td><img src="https://cdnbigbuy.com/images/8447454063090_S5734940_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Bürostuhl Piqueras y Crespo 2D066G2 Dunkelgrau</strong></td>
+            <td>8447454063090</td>
+            <td class="price">€252.32</td>
+            <td>Gehen Sie zurück ins Büro, ohne Details zu vergessen: Kaufen Sie <b>Bürostuhl Piqueras y Crespo 2D06...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8447459324981_S5727167_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Sedia da Ufficio Piqueras y Crespo B0005RN Verde A...</td>
-            <td class="ean">8447459324981</td>
-            <td class="price">€187.81</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Torna in ufficio senza dimenticarti di nulla! Compra <b>Sedia da Ufficio Piqueras y Crespo B0005RN V...</td>
+            <td><img src="https://cdnbigbuy.com/images/4059729517494_S05142887_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Mousse Make-up Basis Essence FOUNDATION Nº 170 10 ...</strong></td>
+            <td>4059729517494</td>
+            <td class="price">€7.70</td>
+            <td><p><b>Mousse Make-up Basis Essence FOUNDATION Nº 170 10 g </b>ist das, was Sie brauchen, um attrakti...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/4047438040648_M0316467_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Accessorio Mobotix MX-O-M7SA-320T040 (1 Unità)</td>
-            <td class="ean">4047438040648</td>
-            <td class="price">€2182.27</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se sei un appassionato d'<b>informatica ed elettronica</b>, ti piace stare al passo con la più recen...</td>
+            <td><img src="https://cdnbigbuy.com/images/8437014606652_D2000094_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Viskoelastische Matratze Drakefor Dalia 135 x 200 ...</strong></td>
+            <td>8437014606652</td>
+            <td class="price">€274.77</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/4018653963418_S71014805_P01.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Fodera Protettiva per Auto per Animali Domestici K...</td>
-            <td class="ean">4018653963418</td>
-            <td class="price">€62.53</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se sei alla ricerca di novità alla moda sul mercato, ti presentiamo <b>Fodera Protettiva per Auto pe...</td>
+            <td><img src="https://cdnbigbuy.com/images/6924922256823_S91112383_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Tischleuchte Yeelight YLBGD-0109 Schwarz 5 W</strong></td>
+            <td>6924922256823</td>
+            <td class="price">€47.47</td>
+            <td>Wenn Sie auf der Suche nach trendigen Neuheiten auf dem Markt sind, präsentieren wir Ihnen <b>Tischl...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/1200093040016_S4263283_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Tintura Permanente Lisap Lk Opc Azzurro 100 ml</td>
-            <td class="ean">1200093040016</td>
-            <td class="price">€9.3</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Vuoi valorizzare la tua immagine ed esaltare la tua bellezza? Allora con <b>Tintura Permanente Li...</td>
+            <td><img src="https://cdnbigbuy.com/images/8445146127297_S8806725_P20.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Teppich Beige 200 x 1 x 300 cm</strong></td>
+            <td>8445146127297</td>
+            <td class="price">€191.89</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/6942103140112I00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Auricolari Bluetooth Huawei SE 3</td>
-            <td class="ean">6942103140112</td>
-            <td class="price">€62.09</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se sei alla ricerca di novità alla moda sul mercato, ti presentiamo <b>Auricolari Bluetooth Huawei S...</td>
+            <td><img src="https://cdnbigbuy.com/images/8447454027504_S5732962_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Bürostuhl Piqueras y Crespo 4B086G1 Petroleum grün...</strong></td>
+            <td>8447454027504</td>
+            <td class="price">€296.26</td>
+            <td>Wenn Sie auf der Suche nach trendigen Neuheiten auf dem Markt sind, präsentieren wir Ihnen <b>Bürost...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/3614272951631_R00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Base per Trucco Fluida Giorgio Armani Luminous Sil...</td>
-            <td class="ean">3614272951631</td>
-            <td class="price">€38.64</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p><b>Base per Trucco Fluida Giorgio Armani Luminous Silk Nº 5.5 12 ml</b> &egrave; ci&ograve; che t...</td>
+            <td><img src="https://cdnbigbuy.com/images/8711252196251_S7923104_P20.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Bluetooth-Lautsprecher Dunlop TWS 15 W Schwarz USB...</strong></td>
+            <td>8711252196251</td>
+            <td class="price">€18.11</td>
+            <td>Wenn Sie sich leidenschaftlich mit <b>IT und Elektronik</b> beschäftigen, mit der Technologie auf de...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8683342456500_S71019424_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Set di copripiumino Multicolore 220 x 240 cm</td>
-            <td class="ean">8683342456500</td>
-            <td class="price">€43.94</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se sei alla ricerca di novità alla moda sul mercato, ti presentiamo <b>Set di copripiumino Multicolo...</td>
+            <td><img src="https://cdnbigbuy.com/images/3174269061656_S71014268_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Grundierung Ripolin Weiß Mattierend 10 L</strong></td>
+            <td>3174269061656</td>
+            <td class="price">€112.73</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/S3626832_P0_icon0.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Vaso 3D Viso Dorato Poliresina 12 x 24,5 x 16 cm (...</td>
-            <td class="ean">4899888618652</td>
-            <td class="price">€55.42</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Se vuoi dare un tocco d'originalità alla tua casa, con <b>Vaso 3D Viso Dorato Poliresina 12 x 24,...</td>
+            <td><img src="https://cdnbigbuy.com/images/8435501060192_S5711693_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Bürostuhl Piqueras y Crespo B1D01RP Rosa</strong></td>
+            <td>8435501060192</td>
+            <td class="price">€111.72</td>
+            <td>Gehen Sie zurück ins Büro, ohne Details zu vergessen: Kaufen Sie <b>Bürostuhl Piqueras y Crespo B1D0...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8424002118211_S3057094_P10.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Piatto da pranzo Home ESPRIT Giallo Verde Gres Lim...</td>
-            <td class="ean">8424002118211</td>
-            <td class="price">€14.19</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se ti piace curare ogni singolo dettaglio della casa ed essere sempre alla moda in tema di prodotti ...</td>
+            <td><img src="https://cdnbigbuy.com/images/8435501089698_S5738342_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Bürostuhl Algarra CPDM Piqueras y Crespo B2D01RF R...</strong></td>
+            <td>8435501089698</td>
+            <td class="price">€136.58</td>
+            <td>Gehen Sie zurück ins Büro, ohne Details zu vergessen: Kaufen Sie <b>Bürostuhl Algarra CPDM Piqueras ...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/3145891742664_S05144276_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Rossetti Chanel ROUGE COCO Nº 266-Sun Kiss 3 g</td>
-            <td class="ean">3145891742664</td>
-            <td class="price">€55.87</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se sei alla ricerca di novità alla moda sul mercato, ti presentiamo <b>Rossetti Chanel ROUGE COCO Nº...</td>
+            <td><img src="https://cdnbigbuy.com/images/4059952616148_S71015248_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Akku-Rasenmäher BOSCH Easy Mower 18V-32-200 31 L 1...</strong></td>
+            <td>4059952616148</td>
+            <td class="price">€268.31</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8434563852080_S9811451_P10.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Federa Decolores Nens Multicolore 175 Fili 65 x 65...</td>
-            <td class="ean">8434563852080</td>
-            <td class="price">€11.42</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se ti piace curare ogni singolo dettaglio della casa ed essere sempre alla moda in tema di prodotti ...</td>
+            <td><img src="https://cdnbigbuy.com/images/S3626312_P0_icon1.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Dekorativer Korb Braun Schwarz Binsen 8 L 36 x 30 ...</strong></td>
+            <td>4899888626558</td>
+            <td class="price">€91.68</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/S3630998_S3630998_P1_icon0.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Portacandele Macramé Bianco Cotone 24 x 90 x 24 cm...</td>
-            <td class="ean">4899888723271</td>
-            <td class="price">€45.46</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Se vuoi dare un tocco d'originalità alla tua casa, con <b>Portacandele Macramé Bianco Cotone 24 x...</td>
+            <td>No img</td>
+            <td><strong>Satz von Kaffeetassen La Mediterránea Napoli Abstr...</strong></td>
+            <td>4899888781691</td>
+            <td class="price">€36.71</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8434563304275_S9805259_P01.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Runner da Tavolo Belum Naiara 4-100 Multicolore 45...</td>
-            <td class="ean">8434563304275</td>
-            <td class="price">€13.27</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se ti piace curare ogni singolo dettaglio della casa ed essere sempre alla moda in tema di prodotti ...</td>
+            <td><img src="https://cdnbigbuy.com/images/8021233143090_00_WBG3.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Föhn Parlux Digitalyon Silberfarben 2400 W Ionisch...</strong></td>
+            <td>8021233143090</td>
+            <td class="price">€185.20</td>
+            <td>Wenn Sie Haushaltsgeräte zum besten Großhandelspreis suchen, dann verpassen Sie nicht Ihre Chance au...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/4899888743668_M0704421_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Thermos da Viaggio ThermoSport 350 ml Multicolore ...</td>
-            <td class="ean">4899888743668</td>
-            <td class="price">€76.75</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se ti piace curare ogni singolo dettaglio della casa ed essere sempre alla moda in tema di prodotti ...</td>
+            <td><img src="https://cdnbigbuy.com/images/8425998363951_00_WBG3.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Taschenlampe LED EDM 36395 Cob 3 W 2 W 80 Lm 150 L...</strong></td>
+            <td>8425998363951</td>
+            <td class="price">€7.37</td>
+            <td>Wenn Sie auf der Suche nach trendigen Neuheiten auf dem Markt sind, präsentieren wir Ihnen <b>Tasche...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/5060412110617_R01.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Profumo Unisex Thomas Kosmala EDP Musk Õtone (100 ...</td>
-            <td class="ean">5060412110617</td>
-            <td class="price">€99.39</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Lasciati sorprendere con <strong>Profumo Unisex Thomas Kosmala EDP Musk Õtone (100 ml) 100% origi...</td>
+            <td><img src="https://cdnbigbuy.com/images/8445146098474_S8804695_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Vase Weiß Kristall 20 x 20 x 30 cm</strong></td>
+            <td>8445146098474</td>
+            <td class="price">€38.52</td>
+            <td><p>Wenn Sie Ihrem Zuhause einen Hauch von Originalität verleihen möchten, tun Sie dies mit <b>Vase W...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8435531100981_S05106025_P01.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Set Cosmetica Unisex USU Cosmetics My K-Beauty Eye...</td>
-            <td class="ean">8435531100981</td>
-            <td class="price">€29.77</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Ti piacerebbe regalare un <b>pacco di profumeria e cosmesi</b>? <b>Set Cosmetica Unisex USU Cosme...</td>
+            <td><img src="https://cdnbigbuy.com/images/8435527825188_V0103733_000_MKT4.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Heißluftfritteuse mit Waage InnovaGoods Fryinn Bal...</strong></td>
+            <td>8435527825188</td>
+            <td class="price">€59.16</td>
+            <td><b>InnovaGoods</b> hilft Ihnen auf einfache und unterhaltsame Weise, und bietet Ihnen die Neuheiten ...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8021735208655_I00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Cinturino per Orologio Celly WBANDSIL40VL</td>
-            <td class="ean">8021735208655</td>
+            <td><img src="https://cdnbigbuy.com/images/8021735208655_I00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Uhrband Celly WBANDSIL40VL</strong></td>
+            <td>8021735208655</td>
             <td class="price">€7.03</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se sei alla ricerca di novità alla moda sul mercato, ti presentiamo <b>Cinturino per Orologio Celly ...</td>
+            <td>Wenn Sie auf der Suche nach trendigen Neuheiten auf dem Markt sind, präsentieren wir Ihnen <b>Uhrban...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/S5707341_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Sedia Gaming Piqueras y Crespo Z0033</td>
-            <td class="ean">8435501018131</td>
-            <td class="price">€30.91</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Se vuoi dare un tocco d'originalità alla tua casa, con <b>Sedia Gaming Piqueras y Crespo Z0033</b...</td>
+            <td><img src="https://cdnbigbuy.com/images/4058075094253_S7926352_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Halogenlampe Osram 35 W 765 Lm (2900 K) (1 Stück)...</strong></td>
+            <td>4058075094253</td>
+            <td class="price">€4.35</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8414793736794_S2711610_P4_icon0.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Ciotola Bidasoa Fosil Nero Ceramica Ovale 14 x 12,...</td>
-            <td class="ean">8414793736794</td>
-            <td class="price">€31.82</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se ti piace curare ogni singolo dettaglio della casa ed essere sempre alla moda in tema di prodotti ...</td>
+            <td><img src="https://cdnbigbuy.com/images/8011000022444_S5625408_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Wecker Trevi SL 3068 S Schwarz</strong></td>
+            <td>8011000022444</td>
+            <td class="price">€13.21</td>
+            <td><p>Wenn Sie Ihrem Zuhause einen Hauch von Originalität verleihen möchten, tun Sie dies mit <b>Wecker...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/5061005351172_S7194390_P01.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Videogioco PlayStation 5 Outright Games Jumanji: W...</td>
-            <td class="ean">5061005351172</td>
-            <td class="price">€48.61</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se sei un appassionato d'<b>informatica ed elettronica</b>, ti piace stare al passo con la più recen...</td>
+            <td><img src="https://cdnbigbuy.com/images/S5708016_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Bürostuhl Piqueras y Crespo B1D05RN Dunkelorange...</strong></td>
+            <td>8435501023425</td>
+            <td class="price">€156.07</td>
+            <td>Gehen Sie zurück ins Büro, ohne Details zu vergessen: Kaufen Sie <b>Bürostuhl Piqueras y Crespo B1D0...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/4021609219637_S05126161_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Tintura Permanente Goldwell COLORANCE Nº 8V 60 ml</td>
-            <td class="ean">4021609219637</td>
-            <td class="price">€10.21</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Vuoi valorizzare la tua immagine ed esaltare la tua bellezza? Allora con <b>Tintura Permanente Go...</td>
+            <td><img src="https://cdnbigbuy.com/images/3664944398240_S05114419_P01.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Bürste The Concept Factory   Gold Katze</strong></td>
+            <td>3664944398240</td>
+            <td class="price">€4.97</td>
+            <td><p>M&ouml;chten Sie Ihren Look verbessern und Ihre Sch&ouml;nheit zum Vorschein bringen? Dann wird <...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8424001850655_S3019506_A03.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Statua Decorativa DKD Home Decor 18,5 x 11,5 x 23,...</td>
-            <td class="ean">8424001850655</td>
-            <td class="price">€39.66</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Se vuoi dare un tocco d'originalità alla tua casa, con <b>Statua Decorativa DKD Home Decor 18,5 x...</td>
+            <td><img src="https://cdnbigbuy.com/images/8809643522984_S8320568_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Augenkonturcreme Missha Bee Pollen 30 ml</strong></td>
+            <td>8809643522984</td>
+            <td class="price">€33.91</td>
+            <td><p><b>Augenkonturcreme Missha Bee Pollen 30 ml</b> ist ein Qualitätsprodukt, das für anspruchsvolle ...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/3600542446556_S0594595_P02.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Shampoo Anticaduta Garnier Fructis Vitamin Force A...</td>
-            <td class="ean">3600542446556</td>
-            <td class="price">€6.56</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Vuoi valorizzare la tua immagine ed esaltare la tua bellezza? Allora con <b>Shampoo Anticaduta Ga...</td>
+            <td><img src="https://cdnbigbuy.com/images/0018084884928_R00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Reinigungscreme Aveda Botanical Kinetics Purifying...</strong></td>
+            <td>0018084884928</td>
+            <td class="price">€27.89</td>
+            <td><p>Reinigungscreme Aveda Botanical Kinetics Purifying 150 ml Make-up Entferner (1 Stück) ist ein exk...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/6950676216585_S91112368_P21.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Powerbank Havit PB92 Nero 20000 mAh</td>
-            <td class="ean">6950676216585</td>
-            <td class="price">€21.98</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se sei alla ricerca di novità alla moda sul mercato, ti presentiamo <b>Powerbank Havit PB92 Nero 200...</td>
+            <td><img src="https://cdnbigbuy.com/images/0850049716314_I00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Unisex-Parfüm Michael Kors POUR FEMME Pour Femme E...</strong></td>
+            <td>0850049716314</td>
+            <td class="price">€66.07</td>
+            <td><p>Lassen Sie das <strong>100 % Original-Unisex-Parfüm Michael Kors POUR FEMME Pour Femme EDP 50 ml<...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8447459330531_S5727722_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Sedia da Ufficio Piqueras y Crespo B2D01RF Rosa Al...</td>
-            <td class="ean">8447459330531</td>
-            <td class="price">€186.56</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Torna in ufficio senza dimenticarti di nulla! Compra <b>Sedia da Ufficio Piqueras y Crespo B2D01RF R...</td>
+            <td><img src="https://cdnbigbuy.com/images/8447459292556_S5723944_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Bürostuhl Piqueras y Crespo BFN01RP Grau Lang</strong></td>
+            <td>8447459292556</td>
+            <td class="price">€199.02</td>
+            <td>Gehen Sie zurück ins Büro, ohne Details zu vergessen: Kaufen Sie <b>Bürostuhl Piqueras y Crespo BFN0...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8435501080855_S5737479_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Sedia da Ufficio Algarra CPDM Piqueras y Crespo BF...</td>
-            <td class="ean">8435501080855</td>
-            <td class="price">€152.45</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Torna in ufficio senza dimenticarti di nulla! Compra <b>Sedia da Ufficio Algarra CPDM Piqueras y Cre...</td>
+            <td><img src="https://cdnbigbuy.com/images/3023191611104_S71019408_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Lernglas ThermoBaby</strong></td>
+            <td>3023191611104</td>
+            <td class="price">€28.65</td>
+            <td>Wenn Sie auf der Suche nach trendigen Neuheiten auf dem Markt sind, präsentieren wir Ihnen <b>Lerngl...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8682952796259_S4263699_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Gel Doccia Lorenti Whitening 1 L</td>
-            <td class="ean">8682952796259</td>
-            <td class="price">€7.09</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Ti piacerebbe avere la migliore linea di <b>trattamenti estetici</b> a casa tua con prodotti di q...</td>
+            <td><img src="https://cdnbigbuy.com/images/8424002176211_S3059759_P20.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Zahnbürstenhalter Home ESPRIT Grau Creme Dolomite ...</strong></td>
+            <td>8424002176211</td>
+            <td class="price">€10.16</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8435501039891_S5709663_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Sedia da Ufficio Piqueras y Crespo BFN05RF Grigio ...</td>
-            <td class="ean">8435501039891</td>
-            <td class="price">€146.7</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Torna in ufficio senza dimenticarti di nulla! Compra <b>Sedia da Ufficio Piqueras y Crespo BFN05RF G...</td>
+            <td><img src="https://cdnbigbuy.com/images/3174269073505_S71014356_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Grundierung Ripolin Beige Mattierend 2,5 L</strong></td>
+            <td>3174269073505</td>
+            <td class="price">€74.65</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8420001025925_D1612298_P01.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Cuscino HappyFriday Mr Fox Multicolore Razzo 40 x ...</td>
-            <td class="ean">8420001025925</td>
-            <td class="price">€15.13</td>
-            <td>Gardening & DIY</td>
-            <td class="description">I bambini meritano il meglio, per questo ti presentiamo <b>Cuscino HappyFriday Mr Fox Multicolore Ra...</td>
+            <td><img src="https://cdnbigbuy.com/images/S7902713_2714_1692703392-cropped1.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Schere Mota TJ08F Drahtschneider 8" Chrom-Vanadium...</strong></td>
+            <td>8435223415508</td>
+            <td class="price">€17.85</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8424001996353_S3034273_P12.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Sedia da Sala da Pranzo DKD Home Decor Nero Argent...</td>
-            <td class="ean">8424001996353</td>
-            <td class="price">€135.54</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Se vuoi dare un tocco d'originalità alla tua casa, con <b>Sedia DKD Home Decor Nero Poliestere Ve...</td>
+            <td><img src="https://cdnbigbuy.com/images/4064666036052_S0585279_P03.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Aufbauspülungsbalsam Wella Elements (1000 ml)</strong></td>
+            <td>4064666036052</td>
+            <td class="price">€38.26</td>
+            <td><p>M&ouml;chten Sie Ihren Look verbessern und Ihre Sch&ouml;nheit zum Vorschein bringen? Dann wird <...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8447459319642_S5726634_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Sedia da Ufficio Piqueras y Crespo B1D05RT Nero Al...</td>
-            <td class="ean">8447459319642</td>
-            <td class="price">€235.87</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Torna in ufficio senza dimenticarti di nulla! Compra <b>Sedia da Ufficio Piqueras y Crespo B1D05RT N...</td>
+            <td><img src="https://cdnbigbuy.com/images/8435501010531_S5704134_P02.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Bürostuhl Piqueras y Crespo 5B10CRP grün</strong></td>
+            <td>8435501010531</td>
+            <td class="price">€241.46</td>
+            <td>Gehen Sie zurück ins Büro, ohne Details zu vergessen: Kaufen Sie <b>Bürostuhl Piqueras y Crespo 5B10...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/3253581758144_S05107627_P01.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Crema Viso L'Occitane En Provence Siempreviva Prec...</td>
-            <td class="ean">3253581758144</td>
-            <td class="price">€43.72</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p><b>Crema Viso L'Occitane En Provence Siempreviva Preciosa 75 ml</b> è un prodotto di qualità prog...</td>
+            <td><img src="https://cdnbigbuy.com/images/8434563824933_S9809561_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Kissenbezug Decolores Arona C Bunt 30 x 50 cm</strong></td>
+            <td>8434563824933</td>
+            <td class="price">€9.87</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8022033004628_S4242651_P02.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Gel Fissante Forte HD Life Style Farmavita (150 ml...</td>
-            <td class="ean">8022033004628</td>
-            <td class="price">€7.73</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Vuoi valorizzare la tua immagine ed esaltare la tua bellezza? Allora con <b>Gel Fissante Forte HD...</td>
+            <td><img src="https://cdnbigbuy.com/images/0840023299100_S0465545_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Smartphone Motorola PB7Y0053ES 8 GB RAM 6,72" 512 ...</strong></td>
+            <td>0840023299100</td>
+            <td class="price">€230.99</td>
+            <td>Wenn Sie auf der Suche nach trendigen Neuheiten auf dem Markt sind, präsentieren wir Ihnen <b>Smartp...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8710103904939_S7185671_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Robot da Cucina Philips HR7510 / 10 800 W</td>
-            <td class="ean">8710103904939</td>
-            <td class="price">€127.59</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se cerchi elettrodomestici per la tua casa ai migliori prezzi, non lasciarti sfuggire <b>Robot da Cu...</td>
+            <td><img src="https://cdnbigbuy.com/images/8445146100207_S8804810_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Wandspiegel Gold Vertikal 72 x 3,5 x 110 cm</strong></td>
+            <td>8445146100207</td>
+            <td class="price">€95.81</td>
+            <td><p>Wenn Sie Ihrem Zuhause einen Hauch von Originalität verleihen möchten, tun Sie dies mit <b>Wandsp...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8447454016171_S5731909_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Sedia da Ufficio Piqueras y Crespo 1D086G2 Bianco</td>
-            <td class="ean">8447454016171</td>
-            <td class="price">€280.2</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Torna in ufficio senza dimenticarti di nulla! Compra <b>Sedia da Ufficio Piqueras y Crespo 1D086G2 B...</td>
+            <td><img src="https://cdnbigbuy.com/images/8423220220904_R01.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Schalter Solera erp21</strong></td>
+            <td>8423220220904</td>
+            <td class="price">€6.90</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/3523930106224_S71012218_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Sbattitore a Fruste Livoo (1 Unità)</td>
-            <td class="ean">3523930106224</td>
-            <td class="price">€42.58</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se sei alla ricerca di novità alla moda sul mercato, ti presentiamo <b>Sbattitore a Fruste Livoo (1 ...</td>
+            <td><img src="https://cdnbigbuy.com/images/8435501088479_S5738220_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Bürostuhl Algarra CPDM Piqueras y Crespo B2D05RP M...</strong></td>
+            <td>8435501088479</td>
+            <td class="price">€158.92</td>
+            <td>Gehen Sie zurück ins Büro, ohne Details zu vergessen: Kaufen Sie <b>Bürostuhl Algarra CPDM Piqueras ...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8435700822096_D1617807_P01.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Statua Decorativa Romimex Beige Rattan Poliresina ...</td>
-            <td class="ean">8435700822096</td>
-            <td class="price">€32.59</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Se vuoi dare un tocco d'originalità alla tua casa, con <b>Statua Decorativa Romimex Beige Rattan ...</td>
+            <td><img src="https://cdnbigbuy.com/images/5905669547833_S05124208_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Satz falscher Wimpern Nanolash Fantasy</strong></td>
+            <td>5905669547833</td>
+            <td class="price">€18.98</td>
+            <td><p><b>Satz falscher Wimpern Nanolash Fantasy </b>ist das, was Sie brauchen, um attraktiver zu wirken...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/s2238052_1747290309_icon0.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Posacenere Confortime Acciaio (24 Unità)</td>
-            <td class="ean">4899888776437</td>
-            <td class="price">€41.26</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se sei alla ricerca di novità alla moda sul mercato, ti presentiamo <b>Posacenere Confortime Acciaio...</td>
+            <td><img src="https://cdnbigbuy.com/images/8424002003470_S3041121_P21.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Tücher-Set DKD Home Decor 4 Stücke</strong></td>
+            <td>8424002003470</td>
+            <td class="price">€2.90</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8434563848243_S9809755_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Lenzuolo con angoli aderenti Decolores Arona Multi...</td>
-            <td class="ean">8434563848243</td>
-            <td class="price">€27.23</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se ti piace curare ogni singolo dettaglio della casa ed essere sempre alla moda in tema di prodotti ...</td>
+            <td><img src="https://cdnbigbuy.com/images/8436002834718_S4244232_P02.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Entfärber Exitenn Decoloracion Polvo Pulver (500 g...</strong></td>
+            <td>8436002834718</td>
+            <td class="price">€19.66</td>
+            <td><p>M&ouml;chten Sie Ihren Look verbessern und Ihre Sch&ouml;nheit zum Vorschein bringen? Dann wird <...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/4242005327072_S0455529_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Forno BOSCH HRG7761B1 3600 W 71 L</td>
-            <td class="ean">4242005327072</td>
-            <td class="price">€1766.38</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se stai pensando di rinnovare la tua cucina, acquista <b>Forno BOSCH HRG7761B1 3600 W 71 L</b> e alt...</td>
+            <td><img src="https://cdnbigbuy.com/images/8445147220928_S8804056_P01.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Weihnachtsbaum Kupfer Kunststoff Ananas 50 cm</strong></td>
+            <td>8445147220928</td>
+            <td class="price">€15.26</td>
+            <td><p>Wenn Sie Ihrem Zuhause einen Hauch von Originalität verleihen möchten, tun Sie dies mit <b>Weihna...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/3701393711258_S7191505_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Copripiumino Lovely Home Nero Bicolore 140 x 200 c...</td>
-            <td class="ean">3701393711258</td>
-            <td class="price">€32.74</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se ti piace curare ogni singolo dettaglio della casa ed essere sempre alla moda in tema di prodotti ...</td>
+            <td><img src="https://cdnbigbuy.com/images/8435304880553_S7921475_P01.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Schneidebrett Andrea House cc72078 Bambus 45 x 35 ...</strong></td>
+            <td>8435304880553</td>
+            <td class="price">€24.35</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/3145891209402_S8318013_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Lozione Idratante Gabrielle Chanel Gabrielle (200 ...</td>
-            <td class="ean">3145891209402</td>
-            <td class="price">€85.38</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p><b>Lozione Idratante Gabrielle Chanel Gabrielle (200 ml) 200 ml</b> è un prodotto di qualità prog...</td>
+            <td><img src="https://cdnbigbuy.com/images/8430025004578_S6500063_P0_WBG3.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Mischbatterie Fontastock Zink</strong></td>
+            <td>8430025004578</td>
+            <td class="price">€21.28</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/5056245026317_R00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Profumo Donna Penhaligon's Highgrove Bouquet EDP 1...</td>
-            <td class="ean">5056245026317</td>
-            <td class="price">€206.63</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Lasciati sorprendere con <strong>Profumo Donna Penhaligon's Highgrove Bouquet EDP 100 ml 100% ori...</td>
+            <td><img src="https://cdnbigbuy.com/images/959730750.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Kopfhörer Poly 85R38AA</strong></td>
+            <td>0197497573640</td>
+            <td class="price">€18.38</td>
+            <td>Wenn Sie sich leidenschaftlich mit <b>IT und Elektronik</b> beschäftigen, mit der Technologie auf de...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/0077315006034_S4255628_P01.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Balsamo Dax Cosmetics Super 100% Pure Lanolin (397...</td>
-            <td class="ean">0077315006034</td>
-            <td class="price">€9.49</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p>Vuoi valorizzare la tua immagine ed esaltare la tua bellezza? Allora con <b>Balsamo Dax Cosmetics...</td>
+            <td><img src="https://cdnbigbuy.com/images/8430316969623_D2102737_P20.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Steppdecke Pierre Cardin OLIMPIA Weiß Double size ...</strong></td>
+            <td>8430316969623</td>
+            <td class="price">€56.87</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/8435674771970_S7832229_P00.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Custodia per Cellulare PcCom iPhone 15 Trasparente...</td>
-            <td class="ean">8435674771970</td>
-            <td class="price">€16.11</td>
-            <td>Gardening & DIY</td>
-            <td class="description">Se sei un appassionato d'<b>informatica ed elettronica</b>, ti piace stare al passo con la più recen...</td>
+            <td><img src="https://cdnbigbuy.com/images/8716184071096_I0_WBG3.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>TV Halterung One For All ONE WM2453 (32"-65")</strong></td>
+            <td>8716184071096</td>
+            <td class="price">€75.30</td>
+            <td>Wenn Sie sich leidenschaftlich mit <b>IT und Elektronik</b> beschäftigen, mit der Technologie auf de...</td>
         </tr>
-
         <tr>
-            <td><img src="https://cdnbigbuy.com/images/3052503811130_0_P02.jpg" class="image" onerror="this.style.display='none'"></td>
-            <td>Matita Occhi Feutre Bourjois 381113 (0,8 ml) Nº 11...</td>
-            <td class="ean">3052503811130</td>
-            <td class="price">€8.36</td>
-            <td>Gardening & DIY</td>
-            <td class="description"><p><b>Matita Occhi Feutre Bourjois 381113 (0,8 ml) Nº 11 0,8 ml</b> &egrave; ci&ograve; che ti serve...</td>
+            <td><img src="https://cdnbigbuy.com/images/8434563184105_S9802732_P00.jpg" class="image" alt="Prodotto"></td>
+            <td><strong>Fleckenabweisende geharzte Tischdecke Belum Christ...</strong></td>
+            <td>8434563184105</td>
+            <td class="price">€31.49</td>
+            <td>Wenn Sie bei der Einrichtung ihres Heims Wert auf Details legen und bei Produkten, die Ihnen das Leb...</td>
         </tr>
-
     </table>
     
-    <div style="margin-top: 40px; padding: 20px; background: #f0f0f0; border-radius: 5px;">
-        <h3>📋 Files Available:</h3>
+    <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 30px;">
+        <h3>📋 Informazioni</h3>
         <ul>
-            <li><strong>kaufland_feed.csv</strong> - Main feed file for Kaufland</li>
-            <li><strong>feed_info.json</strong> - Technical information about the feed</li>
-            <li><strong>index.html</strong> - This preview page</li>
+            <li><strong>Aggiornamento:</strong> Ogni 6 ore automaticamente</li>
+            <li><strong>Selezione:</strong> Casuale dal catalogo BigBuy</li>
+            <li><strong>Filtro prezzo:</strong> Massimo €300 per prodotto</li>
+            <li><strong>Condizione:</strong> Solo prodotti NUOVI</li>
         </ul>
-        
-        <h3>🔄 Update Schedule:</h3>
-        <p>This feed updates automatically every 6 hours with fresh BigBuy data.</p>
-        
-        <h3>⚙️ Kaufland Setup:</h3>
-        <ol>
-            <li>Copy the URL above</li>
-            <li>Paste it in Kaufland's "Percorso del file" field</li>
-            <li>Select your preferred update schedule (daily recommended)</li>
-            <li>Click "Salva le modifiche"</li>
-            <li><strong>Test with this small sample first!</strong></li>
-        </ol>
-        
-        <h3>📈 Next Steps:</h3>
-        <p>Once you're happy with the test integration:</p>
-        <ol>
-            <li>Change <code>test_sample_size = 50</code> to <code>test_sample_size = 80000</code> in the script</li>
-            <li>Or remove the limit entirely for the full catalog</li>
-            <li>Your feed will automatically update with more products</li>
-        </ol>
     </div>
 </body>
 </html>
