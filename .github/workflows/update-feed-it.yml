@@ -1,4 +1,4 @@
-name: Aggiorna Feed Kaufland
+name: Aggiorna Feed Kaufland Italia
 on:
   schedule:
     - cron: '0 */6 * * *'  # Ogni 6 ore
