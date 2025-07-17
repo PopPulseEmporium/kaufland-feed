@@ -32,17 +32,56 @@ jobs:
           COUNTRY_CODE: DE
         run: python bigbuy_kaufland.py
       
+      - name: Check generated files
+        run: |
+          echo "Files generated:"
+          ls -la *.csv *.html *.json 2>/dev/null || echo "No files found"
+          echo "Looking for Germany-specific files:"
+          find . -name "*_de.*" -o -name "index_de.html" -o -name "kaufland_feed_de.csv" 2>/dev/null || echo "No DE files found"
+      
       - name: Commit feed Germania
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          git add kaufland_feed_de.csv index_de.html feed_info_de.json
+          # Pull latest changes first
+          git pull origin main --rebase
           
-          if git diff --cached --quiet; then
-            echo "Nessuna modifica per la Germania"
+          # Add Germany-specific files only if they exist
+          files_to_add=""
+          
+          if [ -f "kaufland_feed_de.csv" ]; then
+            files_to_add="$files_to_add kaufland_feed_de.csv"
+            echo "✅ Found kaufland_feed_de.csv"
           else
-            git commit -m "Aggiorna feed Germania $(date '+%Y-%m-%d %H:%M:%S')"
-            git push
-            echo "Feed Germania aggiornato con successo!"
+            echo "❌ Missing kaufland_feed_de.csv"
+          fi
+          
+          if [ -f "index_de.html" ]; then
+            files_to_add="$files_to_add index_de.html"
+            echo "✅ Found index_de.html"
+          else
+            echo "❌ Missing index_de.html"
+          fi
+          
+          if [ -f "feed_info_de.json" ]; then
+            files_to_add="$files_to_add feed_info_de.json"
+            echo "✅ Found feed_info_de.json"
+          else
+            echo "❌ Missing feed_info_de.json"
+          fi
+          
+          if [ -n "$files_to_add" ]; then
+            git add $files_to_add
+            
+            if git diff --cached --quiet; then
+              echo "Nessuna modifica per la Germania"
+            else
+              git commit -m "Aggiorna feed Germania $(date '+%Y-%m-%d %H:%M:%S')"
+              git push
+              echo "Feed Germania aggiornato con successo!"
+            fi
+          else
+            echo "❌ Nessun file Germania generato - controllare il log Python"
+            exit 1
           fi
