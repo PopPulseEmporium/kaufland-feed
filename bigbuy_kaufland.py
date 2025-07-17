@@ -327,11 +327,11 @@ def main():
         wholesale = safe_float(product.get('wholesalePrice', 0))
         price = round((wholesale * (1 + vat) * (1 + margin)) + base_price, 2)
         
-        # Create row with optimized data
+        # Create row with optimized data (matching working format)
         row = {
-            'id_offer': product_id,
+            'id_offer': str(product_id),  # Convert to string like manual file
             'ean': safe_str(product.get('ean13')),
-            'locale': 'it-IT',
+            'locale': 'it-IT',  # Keep Italian for Italy
             'category': 'Gardening & DIY',
             'title': safe_str(info.get('name', 'Product'))[:100],  # Limit title length
             'short_description': safe_str(info.get('description', ''))[:150],  # Shorter description
@@ -341,7 +341,7 @@ def main():
             'picture_2': images.get('image2', ''),
             'picture_3': images.get('image3', ''),
             'picture_4': images.get('image4', ''),
-            'price_cs': price,
+            'price_cs': round(price, 2),  # Ensure proper rounding
             'quantity': 100,
             'condition': 'NEW',
             'length': round(safe_float(product.get('depth')), 2),
