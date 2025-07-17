@@ -1,8 +1,8 @@
 import requests
 import json
 import csv
-from datetime import datetime
 import os
+from datetime import datetime
 import time
 
 class BigBuyAPI:
@@ -90,7 +90,7 @@ def main():
     # Configuration
     margin = 0.20
     vat = 0.22
-    base_price = 1
+    base_price = 0.75
     
     # Get data
     taxonomies = api.get_taxonomies()
@@ -337,7 +337,6 @@ def main():
         print(f"💰 Price range: €{min(prices):.2f} - €{max(prices):.2f}")
         
         # Debug: Check if files were created
-        import os
         files_created = []
         for filename in ['kaufland_feed.csv', 'index.html', 'feed_info.json']:
             if os.path.exists(filename):
