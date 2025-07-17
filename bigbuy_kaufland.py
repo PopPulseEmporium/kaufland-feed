@@ -76,6 +76,18 @@ def safe_str(value, default=""):
     except:
         return default
 
+def get_currency_info(country):
+    """Get currency and conversion info for country"""
+    currency_config = {
+        'AT': {'currency': 'EUR', 'rate': 1.0},
+        'DE': {'currency': 'EUR', 'rate': 1.0},
+        'IT': {'currency': 'EUR', 'rate': 1.0},
+        'SK': {'currency': 'EUR', 'rate': 1.0},  # Slovakia uses EUR
+        'PL': {'currency': 'PLN', 'rate': 4.3},  # Approximate EUR to PLN
+        'CZ': {'currency': 'CZK', 'rate': 25.0}  # Approximate EUR to CZK
+    }
+    return currency_config.get(country, {'currency': 'EUR', 'rate': 1.0})
+
 def create_html_page(unique_data, margin, files_created, country, config):
     """Create HTML page with product data"""
     
@@ -86,12 +98,16 @@ def create_html_page(unique_data, margin, files_created, country, config):
         print("❌ No data to create HTML page")
         return "<html><body><h1>Nessun prodotto disponibile</h1></body></html>"
     
+    # Get currency info
+    currency_info = get_currency_info(country)
+    currency_symbol = currency_info['currency']
+    
     # Calculate price range safely
     try:
         prices = [row['price_cs'] for row in unique_data if 'price_cs' in row and row['price_cs']]
         min_price = min(prices) if prices else 0
         max_price = max(prices) if prices else 0
-        print(f"💰 Price range calculated: €{min_price:.2f} - €{max_price:.2f}")
+        print(f"💰 Price range calculated: {currency_symbol}{min_price:.2f} - {currency_symbol}{max_price:.2f}")
     except Exception as e:
         print(f"❌ Error calculating prices: {e}")
         min_price = 0
@@ -129,7 +145,7 @@ def create_html_page(unique_data, margin, files_created, country, config):
     
     <div>
         <h2>🇪🇺 Paese: {config['name']} ({country})</h2>
-        <p><strong>Lingua:</strong> {config['language'].upper()} | <strong>Locale:</strong> {config['locale']}</p>
+        <p><strong>Lingua:</strong> {config['language'].upper()} | <strong>Locale:</strong> {config['locale']} | <strong>Valuta:</strong> {currency_symbol}</p>
     </div>
     
     <div class="stats">
@@ -142,18 +158,18 @@ def create_html_page(unique_data, margin, files_created, country, config):
             <div class="stat-label">Margine</div>
         </div>
         <div class="stat-box">
-            <div class="stat-number">€{min_price:.2f}</div>
+            <div class="stat-number">{currency_symbol}{min_price:.2f}</div>
             <div class="stat-label">Prezzo Min</div>
         </div>
         <div class="stat-box">
-            <div class="stat-number">€{max_price:.2f}</div>
+            <div class="stat-number">{currency_symbol}{max_price:.2f}</div>
             <div class="stat-label">Prezzo Max</div>
         </div>
     </div>
     
     <div style="background: #d4edda; padding: 20px; border-radius: 10px; margin: 30px 0;">
         <h3>✅ Pronto per Kaufland {config['name']}!</h3>
-        <p>Feed ottimizzato per {config['name']} con {len(unique_data):,} prodotti (max €300 ciascuno).</p>
+        <p>Feed ottimizzato per {config['name']} con {len(unique_data):,} prodotti (max {currency_symbol}300 equivalente).</p>
     </div>
     
     <div class="feed-url">
@@ -183,6 +199,7 @@ def create_html_page(unique_data, margin, files_created, country, config):
             
         ean = safe_str(row.get("ean", ""))
         price = row.get("price_cs", 0)
+        currency = row.get("currency", currency_symbol)
         description = safe_str(row.get("description", ""))[:100]
         if len(description) > 97:
             description += "..."
@@ -192,12 +209,12 @@ def create_html_page(unique_data, margin, files_created, country, config):
             <td>{img_tag}</td>
             <td><strong>{title}</strong></td>
             <td>{ean}</td>
-            <td class="price">€{price:.2f}</td>
+            <td class="price">{currency}{price:.2f}</td>
             <td>{description}</td>
         </tr>"""
     
     # Close the HTML
-    html_content += """
+    html_content += f"""
     </table>
     
     <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 30px;">
@@ -205,9 +222,10 @@ def create_html_page(unique_data, margin, files_created, country, config):
         <ul>
             <li><strong>Aggiornamento:</strong> Ogni 6 ore automaticamente</li>
             <li><strong>Selezione:</strong> Casuale dal catalogo BigBuy</li>
-            <li><strong>Filtro prezzo:</strong> Massimo €300 per prodotto</li>
+            <li><strong>Filtro prezzo:</strong> Massimo {currency_symbol}300 equivalente per prodotto</li>
             <li><strong>Filtro stock:</strong> Minimo 2 unità disponibili</li>
             <li><strong>Condizione:</strong> Solo prodotti NUOVI</li>
+            <li><strong>Valuta:</strong> {currency_symbol}</li>
         </ul>
     </div>
 </body>
@@ -243,7 +261,10 @@ def main():
         return
     
     config = country_config[country]
+    currency_info = get_currency_info(country)
+    
     print(f"🌍 Processing for {config['name']} ({country})")
+    print(f"💱 Currency: {currency_info['currency']} (rate: {currency_info['rate']})")
     
     api = BigBuyAPI(api_key)
     
@@ -251,9 +272,12 @@ def main():
     margin = 0.20
     vat = 0.22
     base_price = 0.75
-    max_price_limit = 300.0  # Maximum price filter
+    max_price_limit_eur = 300.0  # Maximum price filter in EUR
+    max_price_limit = max_price_limit_eur * currency_info['rate']  # Convert to local currency
     sample_size = 25000  # 25k products per country
     stock_minimum = 2  # Minimum stock required
+    
+    print(f"💰 Max price limit: {currency_info['currency']}{max_price_limit:.2f} (EUR {max_price_limit_eur})")
     
     # Get data
     taxonomies = api.get_taxonomies()
@@ -338,15 +362,18 @@ def main():
         info = info_dict.get(sku, {})
         images = image_dict.get(product_id, {})
         
-        # Calculate price
-        wholesale = safe_float(product.get('wholesalePrice', 0))
-        price = round((wholesale * (1 + vat) * (1 + margin)) + base_price, 2)
+        # Calculate price in EUR first
+        wholesale_eur = safe_float(product.get('wholesalePrice', 0))
+        price_eur = round((wholesale_eur * (1 + vat) * (1 + margin)) + base_price, 2)
         
-        # Filter by maximum price
-        if price > max_price_limit:
+        # Filter by maximum price in EUR
+        if price_eur > max_price_limit_eur:
             continue
         
-        # Create row with country-specific locale
+        # Convert price to local currency
+        price_local = round(price_eur * currency_info['rate'], 2)
+        
+        # Create row with country-specific locale and currency
         row = {
             'id_offer': str(product_id),
             'ean': safe_str(product.get('ean13')),
@@ -360,7 +387,7 @@ def main():
             'picture_2': images.get('image2', ''),
             'picture_3': images.get('image3', ''),
             'picture_4': images.get('image4', ''),
-            'price_cs': price,
+            'price_cs': price_local,
             'quantity': min(100, int(stock_quantity)),  # Use actual stock, max 100
             'condition': 'NEW',
             'length': round(safe_float(product.get('depth')), 2),
@@ -368,7 +395,7 @@ def main():
             'height': round(safe_float(product.get('height')), 2),
             'weight': round(safe_float(product.get('weight')), 2),
             'content_volume': round(safe_float(product.get('width')) * safe_float(product.get('height')) * safe_float(product.get('depth')), 2),
-            'currency': 'EUR',
+            'currency': currency_info['currency'],  # FIXED: Use country-specific currency
             'handling_time': 2,
             'delivery_time_max': 5,
             'delivery_time_min': 3
@@ -376,7 +403,7 @@ def main():
         
         csv_data.append(row)
     
-    print(f"✅ Created {len(csv_data)} products under €{max_price_limit} for {config['name']}")
+    print(f"✅ Created {len(csv_data)} products under {currency_info['currency']}{max_price_limit:.2f} for {config['name']}")
     
     # Remove duplicates and randomly select products
     seen_eans = set()
@@ -398,7 +425,11 @@ def main():
     else:
         print(f"📊 Using all {len(unique_data)} products for {config['name']}")
     
-    # Write files - FIXED file naming
+    print(f"🔧 DEBUG: Country = {country}")
+    print(f"🔧 DEBUG: Country config = {config}")
+    print(f"🔧 DEBUG: Currency = {currency_info['currency']}")
+    
+    # Write files - FIXED file naming with DEBUG
     if unique_data:
         # Create country-specific files
         if country == 'IT':
@@ -409,35 +440,51 @@ def main():
             filename = f'kaufland_feed_{country.lower()}.csv'
             html_filename = f'index_{country.lower()}.html'
             info_filename = f'feed_info_{country.lower()}.json'
+        
+        print(f"🔧 DEBUG: Will create files:")
+        print(f"   CSV: {filename}")
+        print(f"   HTML: {html_filename}")
+        print(f"   JSON: {info_filename}")
             
-        with open(filename, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=unique_data[0].keys())
-            writer.writeheader()
-            writer.writerows(unique_data)
+        # Create CSV
+        try:
+            with open(filename, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=unique_data[0].keys())
+                writer.writeheader()
+                writer.writerows(unique_data)
+            print(f"✅ Created {filename} with {len(unique_data)} products")
+        except Exception as e:
+            print(f"❌ Error creating CSV: {e}")
+            return
         
         files_created = [filename]
-        print(f"✅ Created {filename} with {len(unique_data)} products")
         
         # Create info file
-        info_data = {
-            "last_updated": datetime.now().isoformat(),
-            "product_count": len(unique_data),
-            "total_products_available": len(csv_data),
-            "max_price_filter": max_price_limit,
-            "stock_minimum": stock_minimum,
-            "margin_applied": f"{margin*100}%",
-            "country": country,
-            "locale": config['locale'],
-            "language": config['language'],
-            "feed_url": f"https://poppulseemporium.github.io/kaufland-feed/{filename}"
-        }
-        
-        with open(info_filename, 'w') as f:
-            json.dump(info_data, f, indent=2)
-        print("✅ JSON info file created")
+        try:
+            info_data = {
+                "last_updated": datetime.now().isoformat(),
+                "product_count": len(unique_data),
+                "total_products_available": len(csv_data),
+                "max_price_filter": max_price_limit,
+                "max_price_filter_eur": max_price_limit_eur,
+                "currency": currency_info['currency'],
+                "currency_rate": currency_info['rate'],
+                "stock_minimum": stock_minimum,
+                "margin_applied": f"{margin*100}%",
+                "country": country,
+                "locale": config['locale'],
+                "language": config['language'],
+                "feed_url": f"https://poppulseemporium.github.io/kaufland-feed/{filename}"
+            }
+            
+            with open(info_filename, 'w') as f:
+                json.dump(info_data, f, indent=2)
+            print(f"✅ JSON info file created: {info_filename}")
+        except Exception as e:
+            print(f"❌ Error creating JSON: {e}")
         
         # Create HTML page
-        print("🔄 Creating HTML page...")
+        print(f"🔄 Creating HTML page: {html_filename}")
         try:
             html_content = create_html_page(unique_data, margin, files_created, country, config)
             
@@ -445,19 +492,48 @@ def main():
                 f.write(html_content)
             print(f"✅ HTML page created: {html_filename}")
             
+            # Verify file was actually created
+            if os.path.exists(html_filename):
+                size = os.path.getsize(html_filename)
+                print(f"✅ HTML file verified: {html_filename} ({size} bytes)")
+            else:
+                print(f"❌ HTML file NOT found after creation: {html_filename}")
+            
         except Exception as e:
             print(f"❌ Error creating HTML: {e}")
+            import traceback
+            traceback.print_exc()
+            
             # Create simple fallback
-            simple_html = f"""<!DOCTYPE html>
+            print("🔄 Creating fallback HTML...")
+            try:
+                simple_html = f"""<!DOCTYPE html>
 <html><head><title>Feed Kaufland {config['name']}</title></head>
 <body>
 <h1>Feed Kaufland - {len(unique_data)} Prodotti</h1>
 <p>Paese: {config['name']} ({country})</p>
+<p>Valuta: {currency_info['currency']}</p>
 <p>URL Feed: <a href="{filename}">{filename}</a></p>
 </body></html>"""
-            with open(html_filename, 'w', encoding='utf-8') as f:
-                f.write(simple_html)
-            print(f"✅ Simple HTML created: {html_filename}")
+                with open(html_filename, 'w', encoding='utf-8') as f:
+                    f.write(simple_html)
+                print(f"✅ Simple HTML created: {html_filename}")
+            except Exception as e2:
+                print(f"❌ Even fallback HTML failed: {e2}")
+        
+        # Final file check
+        print("🔧 DEBUG: Final file check:")
+        print(f"   CSV exists: {os.path.exists(filename)}")
+        print(f"   HTML exists: {os.path.exists(html_filename)}")  
+        print(f"   JSON exists: {os.path.exists(info_filename)}")
+        
+        # List all files in current directory
+        print("🔧 DEBUG: All files in current directory:")
+        import glob
+        all_files = glob.glob("*")
+        for file in sorted(all_files):
+            if os.path.isfile(file):
+                print(f"   {file} ({os.path.getsize(file)} bytes)")
         
         # Stats
         prices = [row['price_cs'] for row in unique_data]
@@ -469,8 +545,8 @@ def main():
         country_locale = config['locale']
         print(f"📁 Creato {filename} con {len(unique_data):,} prodotti per {country_name}")
         print(f"📡 URL: https://poppulseemporium.github.io/kaufland-feed/{filename}")
-        print(f"💰 Gamma prezzi: €{min_price:.2f} - €{max_price:.2f} (max €{max_price_limit})")
-        print(f"🌍 Configurato per: {country_name} ({country_locale})")
+        print(f"💰 Gamma prezzi: {currency_info['currency']}{min_price:.2f} - {currency_info['currency']}{max_price:.2f}")
+        print(f"🌍 Configurato per: {country_name} ({country_locale}) - {currency_info['currency']}")
         
     else:
         print("❌ Nessun prodotto da esportare")
