@@ -228,7 +228,7 @@ def main():
     # Get country from environment (for multi-country support)
     country = os.getenv('COUNTRY_CODE', 'IT').upper()
     
-    # Country configuration
+    # Country configuration - FIXED with Poland added
     country_config = {
         'AT': {'locale': 'de-AT', 'language': 'de', 'name': 'Austria'},
         'DE': {'locale': 'de-DE', 'language': 'de', 'name': 'Germany'}, 
@@ -398,13 +398,17 @@ def main():
     else:
         print(f"📊 Using all {len(unique_data)} products for {config['name']}")
     
-    # Write files
+    # Write files - FIXED file naming
     if unique_data:
-        # Create country-specific CSV file
+        # Create country-specific files
         if country == 'IT':
             filename = 'kaufland_feed.csv'  # Keep Italy as main file
+            html_filename = 'index.html'
+            info_filename = 'feed_info.json'
         else:
             filename = f'kaufland_feed_{country.lower()}.csv'
+            html_filename = f'index_{country.lower()}.html'
+            info_filename = f'feed_info_{country.lower()}.json'
             
         with open(filename, 'w', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=unique_data[0].keys())
@@ -415,11 +419,6 @@ def main():
         print(f"✅ Created {filename} with {len(unique_data)} products")
         
         # Create info file
-        if country == 'IT':
-            info_filename = 'feed_info.json'
-        else:
-            info_filename = f'feed_info_{country.lower()}.json'
-            
         info_data = {
             "last_updated": datetime.now().isoformat(),
             "product_count": len(unique_data),
@@ -442,12 +441,6 @@ def main():
         try:
             html_content = create_html_page(unique_data, margin, files_created, country, config)
             
-            # Create country-specific HTML filename
-            if country == 'IT':
-                html_filename = 'index.html'  # Keep Italy as main page
-            else:
-                html_filename = f'index_{country.lower()}.html'
-            
             with open(html_filename, 'w', encoding='utf-8') as f:
                 f.write(html_content)
             print(f"✅ HTML page created: {html_filename}")
@@ -455,7 +448,6 @@ def main():
         except Exception as e:
             print(f"❌ Error creating HTML: {e}")
             # Create simple fallback
-            html_filename = f'index_{country.lower()}.html' if country != 'IT' else 'index.html'
             simple_html = f"""<!DOCTYPE html>
 <html><head><title>Feed Kaufland {config['name']}</title></head>
 <body>
