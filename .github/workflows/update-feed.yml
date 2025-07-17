@@ -1,0 +1,33 @@
+name: Aggiorna Feed Kaufland
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Ogni 6 ore
+  workflow_dispatch:  # Pulsante manuale
+
+jobs:
+  update-feed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scarica codice
+        uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Installa dipendenze
+        run: pip install -r requirements.txt
+      
+      - name: Esegui sincronizzazione BigBuy
+        env:
+          BIGBUY_API_KEY: ${{ secrets.BIGBUY_API_KEY }}
+        run: python bigbuy_kaufland.py
+      
+      - name: Commit feed aggiornato
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add kaufland_feed.csv
+          git commit -m "Aggiorna feed $(date)" || exit 0
+          git push
