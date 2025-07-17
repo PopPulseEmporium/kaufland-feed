@@ -1,0 +1,41 @@
+name: Aggiorna Feed Kaufland Slovacchia
+on:
+  schedule:
+    - cron: '45 */6 * * *'  # Ogni 6 ore (offset di 45 min)
+  workflow_dispatch:
+
+jobs:
+  update-feed-sk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scarica codice
+        uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Installa dipendenze
+        run: pip install -r requirements.txt
+      
+      - name: Esegui sincronizzazione BigBuy Slovacchia
+        env:
+          BIGBUY_API_KEY: ${{ secrets.BIGBUY_API_KEY }}
+          COUNTRY_CODE: SK
+        run: python bigbuy_kaufland.py
+      
+      - name: Commit feed Slovacchia
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          git add kaufland_feed_sk.csv index.html feed_info_sk.json
+          
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica per la Slovacchia"
+          else
+            git commit -m "Aggiorna feed Slovacchia $(date '+%Y-%m-%d %H:%M:%S')"
+            git push
+            echo "Feed Slovacchia aggiornato con successo!"
+          fi
