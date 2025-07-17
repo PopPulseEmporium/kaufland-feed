@@ -196,7 +196,7 @@ def create_html_page(unique_data, margin, files_created, country, config):
     
     <div style="background: #d4edda; padding: 20px; border-radius: 10px; margin: 30px 0;">
         <h3>✅ Pronto per Kaufland {config['name']}!</h3>
-        <p>Feed ottimizzato per {config['name']} con {len(unique_data):,} prodotti (max {currency_symbol}200 equivalente).</p>
+        <p>Feed ottimizzato per {config['name']} con {len(unique_data):,} prodotti (max {currency_symbol}200 equivalente, ≤25kg, ≤70L).</p>
     </div>
     
     <div class="feed-url">
@@ -214,6 +214,7 @@ def create_html_page(unique_data, margin, files_created, country, config):
             <th>EAN</th>
             <th>Prezzo</th>
             <th>Quantità</th>
+            <th>Peso</th>
             <th>Descrizione</th>
         </tr>"""
     
@@ -223,16 +224,17 @@ def create_html_page(unique_data, margin, files_created, country, config):
         img_tag = f'<img src="{img_url}" class="image" alt="Prodotto">' if img_url else "No img"
         
         sku = safe_str(row.get("id_offer", ""))
-        title = safe_str(row.get("title", ""))[:40]
-        if len(title) > 37:
+        title = safe_str(row.get("title", ""))[:35]
+        if len(title) > 32:
             title += "..."
             
         ean = safe_str(row.get("ean", ""))
         price = row.get("price_cs", 0)
         quantity = row.get("quantity", 0)
+        weight = row.get("weight", 0)
         currency = row.get("currency", currency_symbol)
-        description = safe_str(row.get("description", ""))[:80]
-        if len(description) > 77:
+        description = safe_str(row.get("description", ""))[:70]
+        if len(description) > 67:
             description += "..."
         
         html_content += f"""
@@ -243,6 +245,7 @@ def create_html_page(unique_data, margin, files_created, country, config):
             <td>{ean}</td>
             <td class="price">{currency}{price:.2f}</td>
             <td>{quantity}</td>
+            <td>{weight:.1f}kg</td>
             <td>{description}</td>
         </tr>"""
     
@@ -251,13 +254,15 @@ def create_html_page(unique_data, margin, files_created, country, config):
     </table>
     
     <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 30px;">
-        <h3>📋 Informazioni</h3>
+        <h3>📋 Informazioni Filtri</h3>
         <ul>
             <li><strong>Aggiornamento:</strong> Ogni 6 ore automaticamente</li>
             <li><strong>Selezione:</strong> Casuale dal catalogo BigBuy</li>
-            <li><strong>Filtro prezzo:</strong> Massimo {currency_symbol}200 equivalente per prodotto</li>
-            <li><strong>Filtro stock:</strong> Minimo 2 unità disponibili</li>
-            <li><strong>Filtro volume:</strong> Massimo 70,000 cm³</li>
+            <li><strong>Margine:</strong> 30% applicato</li>
+            <li><strong>Prezzo massimo:</strong> {currency_symbol}200 equivalente</li>
+            <li><strong>Peso massimo:</strong> 25 kg</li>
+            <li><strong>Volume massimo:</strong> 70,000 cm³ (70 litri)</li>
+            <li><strong>Stock minimo:</strong> 2 unità disponibili</li>
             <li><strong>Condizione:</strong> Solo prodotti NUOVI</li>
             <li><strong>Quantità:</strong> Stock reale con margine di sicurezza</li>
             <li><strong>Valuta:</strong> {currency_symbol}</li>
@@ -271,6 +276,7 @@ def create_html_page(unique_data, margin, files_created, country, config):
 def main():
     """Main function"""
     print("🚀 Starting BigBuy to Kaufland Multi-Country sync...")
+    print(f"⏰ Current time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     # Get API key
     api_key = os.getenv('BIGBUY_API_KEY')
@@ -303,18 +309,21 @@ def main():
     
     api = BigBuyAPI(api_key)
     
-    # Configuration - UPDATED WITH YOUR REQUIREMENTS
-    margin = 0.20
+    # Configuration - UPDATED WITH ALL YOUR REQUIREMENTS
+    margin = 0.30  # UPDATED: 30% margin
     vat = 0.22
     base_price = 0.75
-    max_price_limit_eur = 200.0  # FIXED: €200 max price for all countries
+    max_price_limit_eur = 200.0  # €200 max price for all countries
     max_price_limit = max_price_limit_eur * currency_info['rate']  # Convert to local currency
-    max_content_volume = 70000  # ADDED: Maximum content volume in cm³
+    max_content_volume = 70000  # Maximum content volume in cm³ (70 liters)
+    max_weight = 25.0  # ADDED: Maximum weight in kg
     sample_size = 25000  # 25k products per country
     stock_minimum = 2  # Minimum stock required
     
     print(f"💰 Max price limit: {currency_info['currency']}{max_price_limit:.2f} (EUR {max_price_limit_eur})")
-    print(f"📦 Max content volume: {max_content_volume:,} cm³")
+    print(f"📦 Max content volume: {max_content_volume:,} cm³ (70 liters)")
+    print(f"⚖️ Max weight: {max_weight} kg")
+    print(f"📈 Margin applied: {margin*100:.0f}%")
     
     # Get data
     taxonomies = api.get_taxonomies()
@@ -379,17 +388,31 @@ def main():
                 'image4': images[3].get('url', '') if len(images) > 3 else ''
             }
     
-    # Create CSV with price and stock filtering
+    # Create CSV with ALL FILTERS APPLIED
     csv_data = []
+    filters_applied = {
+        'total_products': 0,
+        'condition_filtered': 0,
+        'stock_filtered': 0,
+        'weight_filtered': 0,
+        'volume_filtered': 0,
+        'price_filtered': 0,
+        'quantity_filtered': 0,
+        'final_products': 0
+    }
     
     for product in all_products:
+        filters_applied['total_products'] += 1
+        
         # Only NEW products
         if product.get('condition', '').upper() != 'NEW':
+            filters_applied['condition_filtered'] += 1
             continue
             
         # Filter out products with low stock
         stock_quantity = safe_float(product.get('inStock', 0))
         if stock_quantity < stock_minimum:
+            filters_applied['stock_filtered'] += 1
             continue
             
         sku = product['sku']
@@ -399,14 +422,21 @@ def main():
         info = info_dict.get(sku, {})
         images = image_dict.get(product_id, {})
         
+        # ADDED: Filter by weight
+        weight = safe_float(product.get('weight', 0))
+        if weight > max_weight:
+            filters_applied['weight_filtered'] += 1
+            continue
+        
         # Calculate dimensions and content volume
         width = safe_float(product.get('width', 0))
         height = safe_float(product.get('height', 0))
         depth = safe_float(product.get('depth', 0))
         content_volume = round(width * height * depth, 2)
         
-        # ADDED: Filter by content volume
+        # Filter by content volume
         if content_volume > max_content_volume:
+            filters_applied['volume_filtered'] += 1
             continue
             
         # Calculate price in EUR first
@@ -415,21 +445,25 @@ def main():
         
         # Filter by maximum price in EUR
         if price_eur > max_price_limit_eur:
+            filters_applied['price_filtered'] += 1
             continue
         
         # Convert price to local currency
         price_local = round(price_eur * currency_info['rate'], 2)
         
-        # FIXED: Calculate real quantity based on actual stock
+        # Calculate real quantity based on actual stock
         real_quantity = calculate_real_quantity(stock_quantity)
         
         # Skip if calculated quantity is 0
         if real_quantity <= 0:
+            filters_applied['quantity_filtered'] += 1
             continue
+        
+        filters_applied['final_products'] += 1
         
         # Create row with country-specific locale and currency
         row = {
-            'id_offer': str(sku),  # FIXED: Use SKU instead of product_id
+            'id_offer': str(sku),  # Use SKU instead of product_id
             'ean': safe_str(product.get('ean13')),
             'locale': config['locale'],
             'category': 'Gardening & DIY',
@@ -442,12 +476,12 @@ def main():
             'picture_3': images.get('image3', ''),
             'picture_4': images.get('image4', ''),
             'price_cs': price_local,
-            'quantity': real_quantity,  # FIXED: Use calculated real quantity
+            'quantity': real_quantity,  # Use calculated real quantity
             'condition': 'NEW',
             'length': round(depth, 2),  # Using depth as length
             'width': round(width, 2),
             'height': round(height, 2),
-            'weight': round(safe_float(product.get('weight')), 2),
+            'weight': round(weight, 2),
             'content_volume': content_volume,
             'currency': currency_info['currency'],  # Use country-specific currency
             'handling_time': 2,
@@ -457,7 +491,16 @@ def main():
         
         csv_data.append(row)
     
-    print(f"✅ Created {len(csv_data)} products under {currency_info['currency']}{max_price_limit:.2f} and volume ≤{max_content_volume:,}cm³ for {config['name']}")
+    # Print filter statistics
+    print("🔍 FILTER STATISTICS:")
+    print(f"   Total products: {filters_applied['total_products']:,}")
+    print(f"   ❌ Condition filtered: {filters_applied['condition_filtered']:,}")
+    print(f"   ❌ Stock filtered: {filters_applied['stock_filtered']:,}")
+    print(f"   ❌ Weight filtered (>{max_weight}kg): {filters_applied['weight_filtered']:,}")
+    print(f"   ❌ Volume filtered (>{max_content_volume:,}cm³): {filters_applied['volume_filtered']:,}")
+    print(f"   ❌ Price filtered (>{currency_info['currency']}{max_price_limit:.2f}): {filters_applied['price_filtered']:,}")
+    print(f"   ❌ Quantity filtered (0 units): {filters_applied['quantity_filtered']:,}")
+    print(f"   ✅ Final products: {filters_applied['final_products']:,}")
     
     # Remove duplicates and randomly select products
     seen_eans = set()
@@ -482,6 +525,7 @@ def main():
     print(f"🔧 DEBUG: Country = {country}")
     print(f"🔧 DEBUG: Country config = {config}")
     print(f"🔧 DEBUG: Currency = {currency_info['currency']}")
+    print(f"🔧 DEBUG: Margin = {margin*100:.0f}%")
     
     # Write files - FIXED file naming with DEBUG
     if unique_data:
@@ -522,13 +566,15 @@ def main():
                 "max_price_filter": max_price_limit,
                 "max_price_filter_eur": max_price_limit_eur,
                 "max_content_volume": max_content_volume,
+                "max_weight": max_weight,
                 "currency": currency_info['currency'],
                 "currency_rate": currency_info['rate'],
                 "stock_minimum": stock_minimum,
-                "margin_applied": f"{margin*100}%",
+                "margin_applied": f"{margin*100:.0f}%",
                 "country": country,
                 "locale": config['locale'],
                 "language": config['language'],
+                "filters_applied": filters_applied,
                 "feed_url": f"https://poppulseemporium.github.io/kaufland-feed/{filename}"
             }
             
@@ -568,7 +614,9 @@ def main():
 <h1>Feed Kaufland - {len(unique_data)} Prodotti</h1>
 <p>Paese: {config['name']} ({country})</p>
 <p>Valuta: {currency_info['currency']}</p>
+<p>Margine: {margin*100:.0f}%</p>
 <p>Prezzo max: {currency_info['currency']}{max_price_limit:.2f}</p>
+<p>Peso max: {max_weight} kg</p>
 <p>Volume max: {max_content_volume:,} cm³</p>
 <p>URL Feed: <a href="{filename}">{filename}</a></p>
 </body></html>"""
@@ -584,23 +632,17 @@ def main():
         print(f"   HTML exists: {os.path.exists(html_filename)}")  
         print(f"   JSON exists: {os.path.exists(info_filename)}")
         
-        # List all files in current directory
-        print("🔧 DEBUG: All files in current directory:")
-        import glob
-        all_files = glob.glob("*")
-        for file in sorted(all_files):
-            if os.path.isfile(file):
-                print(f"   {file} ({os.path.getsize(file)} bytes)")
-        
         # Stats
         prices = [row['price_cs'] for row in unique_data]
         quantities = [row['quantity'] for row in unique_data]
         volumes = [row['content_volume'] for row in unique_data]
+        weights = [row['weight'] for row in unique_data]
         
         min_price = min(prices) if prices else 0
         max_price = max(prices) if prices else 0
         avg_quantity = sum(quantities) / len(quantities) if quantities else 0
         max_volume = max(volumes) if volumes else 0
+        max_weight_found = max(weights) if weights else 0
         
         print("✅ SUCCESSO!")
         country_name = config['name']
@@ -610,10 +652,16 @@ def main():
         print(f"💰 Gamma prezzi: {currency_info['currency']}{min_price:.2f} - {currency_info['currency']}{max_price:.2f}")
         print(f"📦 Quantità media: {avg_quantity:.1f} unità")
         print(f"📏 Volume massimo: {max_volume:,.0f} cm³")
+        print(f"⚖️ Peso massimo: {max_weight_found:.1f} kg")
+        print(f"📈 Margine applicato: {margin*100:.0f}%")
         print(f"🌍 Configurato per: {country_name} ({country_locale}) - {currency_info['currency']}")
         
     else:
         print("❌ Nessun prodotto da esportare")
+        print("💡 Suggerimenti:")
+        print("   - Aumentare il limite di prezzo")
+        print("   - Aumentare il limite di peso/volume")
+        print("   - Verificare la disponibilità prodotti per questa lingua")
 
 if __name__ == "__main__":
     main()
