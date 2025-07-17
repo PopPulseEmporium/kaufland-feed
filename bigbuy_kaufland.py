@@ -83,8 +83,8 @@ def get_currency_info(country):
         'DE': {'currency': 'EUR', 'rate': 1.0},
         'IT': {'currency': 'EUR', 'rate': 1.0},
         'SK': {'currency': 'EUR', 'rate': 1.0},  # Slovakia uses EUR
-        'PL': {'currency': 'PLN', 'rate': 4.3},  # Approximate EUR to PLN
-        'CZ': {'currency': 'CZK', 'rate': 25.0}  # Approximate EUR to CZK
+        'PL': {'currency': 'PLN', 'rate': 4.2},  # Approximate EUR to PLN
+        'CZ': {'currency': 'CZK', 'rate': 24.0}  # Approximate EUR to CZK
     }
     return currency_config.get(country, {'currency': 'EUR', 'rate': 1.0})
 
@@ -272,7 +272,16 @@ def main():
     margin = 0.20
     vat = 0.22
     base_price = 0.75
-    max_price_limit_eur = 300.0  # Maximum price filter in EUR
+    # Dynamic price limits based on country
+    if currency_info['currency'] == 'EUR':
+        max_price_limit_eur = 300.0  # €300 for EUR countries
+    elif currency_info['currency'] == 'PLN':
+        max_price_limit_eur = 600.0  # €600 equivalent for Poland (2,700 PLN)
+    elif currency_info['currency'] == 'CZK':
+        max_price_limit_eur = 600.0  # €600 equivalent for Czech Republic (14,400 CZK)
+    else:
+        max_price_limit_eur = 300.0
+    
     max_price_limit = max_price_limit_eur * currency_info['rate']  # Convert to local currency
     sample_size = 25000  # 25k products per country
     stock_minimum = 2  # Minimum stock required
