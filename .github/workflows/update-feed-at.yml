@@ -1,7 +1,7 @@
 name: Aggiorna Feed Kaufland Austria
 on:
   schedule:
-    - cron: '15 */6 * * *'  # Fixed cron syntax
+    - cron: '15 */6 * * *'  # Ogni 6 ore (offset di 15 min)
   workflow_dispatch: 
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
           git pull origin main --rebase
           
           # Add Austria-specific files
-          git add kaufland_feed_at.csv index.html feed_info_at.json
+          git add kaufland_feed_at.csv index_at.html feed_info_at.json
           
           if git diff --cached --quiet; then
             echo "Nessuna modifica per l'Austria"
