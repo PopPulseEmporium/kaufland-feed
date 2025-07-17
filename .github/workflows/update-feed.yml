@@ -24,10 +24,26 @@ jobs:
           BIGBUY_API_KEY: ${{ secrets.BIGBUY_API_KEY }}
         run: python bigbuy_kaufland.py
       
+      - name: Verifica file creati
+        run: |
+          echo "Files in current directory:"
+          ls -la
+          echo "Looking for CSV files:"
+          find . -name "*.csv" -type f
+      
       - name: Commit feed aggiornato
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add kaufland_feed.csv
-          git commit -m "Aggiorna feed $(date)" || exit 0
-          git push
+          
+          # Add all generated files
+          git add kaufland_feed.csv index.html feed_info.json
+          
+          # Check if there are changes to commit
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update feed $(date '+%Y-%m-%d %H:%M:%S')"
+            git push
+            echo "Feed updated successfully!"
+          fi
