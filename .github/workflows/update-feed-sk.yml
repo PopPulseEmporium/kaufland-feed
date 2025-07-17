@@ -44,6 +44,9 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
+          # Pull latest changes first
+          git pull origin main --rebase
+          
           # Add Slovakia-specific files only if they exist
           files_to_add=""
           
