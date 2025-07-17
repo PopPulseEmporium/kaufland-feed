@@ -10,6 +10,13 @@ jobs:
     steps:
       - name: Scarica codice
         uses: actions/checkout@v3
+
+      - name: Wait for other workflows to complete
+        uses: softprops/turnstyle@v1
+        with:
+          poll-interval-seconds: 10
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Setup Python
         uses: actions/setup-python@v4
