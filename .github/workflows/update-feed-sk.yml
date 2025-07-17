@@ -32,17 +32,53 @@ jobs:
           COUNTRY_CODE: SK
         run: python bigbuy_kaufland.py
       
+      - name: Check generated files
+        run: |
+          echo "Files generated:"
+          ls -la *.csv *.html *.json 2>/dev/null || echo "No files found"
+          echo "Looking for Slovakia-specific files:"
+          find . -name "*_sk.*" -o -name "index_sk.html" -o -name "kaufland_feed_sk.csv" 2>/dev/null || echo "No SK files found"
+      
       - name: Commit feed Slovacchia
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          git add kaufland_feed_sk.csv index_sk.html feed_info_sk.json
+          # Add Slovakia-specific files only if they exist
+          files_to_add=""
           
-          if git diff --cached --quiet; then
-            echo "Nessuna modifica per la Slovacchia"
+          if [ -f "kaufland_feed_sk.csv" ]; then
+            files_to_add="$files_to_add kaufland_feed_sk.csv"
+            echo "✅ Found kaufland_feed_sk.csv"
           else
-            git commit -m "Aggiorna feed Slovacchia $(date '+%Y-%m-%d %H:%M:%S')"
-            git push
-            echo "Feed Slovacchia aggiornato con successo!"
+            echo "❌ Missing kaufland_feed_sk.csv"
+          fi
+          
+          if [ -f "index_sk.html" ]; then
+            files_to_add="$files_to_add index_sk.html"
+            echo "✅ Found index_sk.html"
+          else
+            echo "❌ Missing index_sk.html"
+          fi
+          
+          if [ -f "feed_info_sk.json" ]; then
+            files_to_add="$files_to_add feed_info_sk.json"
+            echo "✅ Found feed_info_sk.json"
+          else
+            echo "❌ Missing feed_info_sk.json"
+          fi
+          
+          if [ -n "$files_to_add" ]; then
+            git add $files_to_add
+            
+            if git diff --cached --quiet; then
+              echo "Nessuna modifica per la Slovacchia"
+            else
+              git commit -m "Aggiorna feed Slovacchia $(date '+%Y-%m-%d %H:%M:%S')"
+              git push
+              echo "Feed Slovacchia aggiornato con successo!"
+            fi
+          else
+            echo "❌ Nessun file Slovacchia generato - controllare il log Python"
+            exit 1
           fi
