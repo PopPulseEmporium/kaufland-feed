@@ -77,7 +77,7 @@ def safe_str(value, default=""):
         return default
 
 def create_html_page(unique_data, margin, files_created, country, config):
-    """Create HTML page with product data in Italian"""
+    """Create HTML page with product data"""
     
     print(f"🔄 Creating HTML for {len(unique_data)} products...")
     
@@ -101,7 +101,7 @@ def create_html_page(unique_data, margin, files_created, country, config):
     current_time = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
     
     html_content = f"""<!DOCTYPE html>
-<html lang="it">
+<html lang="{config['language']}">
 <head>
     <meta charset="UTF-8">
     <title>Feed Prodotti Kaufland - Pop Pulse Emporium</title>
@@ -206,6 +206,7 @@ def create_html_page(unique_data, margin, files_created, country, config):
             <li><strong>Aggiornamento:</strong> Ogni 6 ore automaticamente</li>
             <li><strong>Selezione:</strong> Casuale dal catalogo BigBuy</li>
             <li><strong>Filtro prezzo:</strong> Massimo €300 per prodotto</li>
+            <li><strong>Filtro stock:</strong> Minimo 2 unità disponibili</li>
             <li><strong>Condizione:</strong> Solo prodotti NUOVI</li>
         </ul>
     </div>
@@ -252,6 +253,7 @@ def main():
     base_price = 0.75
     max_price_limit = 300.0  # Maximum price filter
     sample_size = 25000  # 25k products per country
+    stock_minimum = 2  # Minimum stock required
     
     # Get data
     taxonomies = api.get_taxonomies()
@@ -316,7 +318,7 @@ def main():
                 'image4': images[3].get('url', '') if len(images) > 3 else ''
             }
     
-    # Create CSV with price filtering
+    # Create CSV with price and stock filtering
     csv_data = []
     
     for product in all_products:
@@ -324,9 +326,9 @@ def main():
         if product.get('condition', '').upper() != 'NEW':
             continue
             
-        # Filter out products with 0 or low stock
+        # Filter out products with low stock
         stock_quantity = safe_float(product.get('inStock', 0))
-        if stock_quantity < 2:  # Skip products with less than 5 in stock
+        if stock_quantity < stock_minimum:
             continue
             
         sku = product['sku']
@@ -423,6 +425,7 @@ def main():
             "product_count": len(unique_data),
             "total_products_available": len(csv_data),
             "max_price_filter": max_price_limit,
+            "stock_minimum": stock_minimum,
             "margin_applied": f"{margin*100}%",
             "country": country,
             "locale": config['locale'],
@@ -448,6 +451,7 @@ def main():
             with open(html_filename, 'w', encoding='utf-8') as f:
                 f.write(html_content)
             print(f"✅ HTML page created: {html_filename}")
+            
         except Exception as e:
             print(f"❌ Error creating HTML: {e}")
             # Create simple fallback
@@ -469,10 +473,12 @@ def main():
         max_price = max(prices) if prices else 0
         
         print("✅ SUCCESSO!")
-        print(f"📁 Creato {filename} con {len(unique_data):,} prodotti per {config['name']}")
+        country_name = config['name']
+        country_locale = config['locale']
+        print(f"📁 Creato {filename} con {len(unique_data):,} prodotti per {country_name}")
         print(f"📡 URL: https://poppulseemporium.github.io/kaufland-feed/{filename}")
         print(f"💰 Gamma prezzi: €{min_price:.2f} - €{max_price:.2f} (max €{max_price_limit})")
-        print(f"🌍 Configurato per: {config['name']} ({config['locale']})")
+        print(f"🌍 Configurato per: {country_name} ({country_locale})")
         
     else:
         print("❌ Nessun prodotto da esportare")
