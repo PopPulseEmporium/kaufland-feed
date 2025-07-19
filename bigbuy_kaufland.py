@@ -516,6 +516,7 @@ def main():
         'no_product_info': 0,
         'invalid_name': 0,
         'price_too_high': 0,
+        'price_too_low': 0,
         'weight_too_high': 0,
         'volume_too_high': 0,
         'valid_products': 0
