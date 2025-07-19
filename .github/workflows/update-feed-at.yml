@@ -25,40 +25,27 @@ jobs:
         with:
           python-version: '3.9'
       
-      - name: Clear pip cache and install dependencies
-        run: |
-          pip cache purge
-          pip install --no-cache-dir -r requirements.txt
-      
-      - name: Show current time and random seed info
-        run: |
-          echo "Current time: $(date)"
-          echo "Hour: $(date +%H)"
-          echo "Day: $(date +%d)"
-          echo "This will be used for randomization"
+      - name: Installa dipendenze
+        run: pip install -r requirements.txt
       
       - name: Esegui sincronizzazione BigBuy Austria
         env:
           BIGBUY_API_KEY: ${{ secrets.BIGBUY_API_KEY }}
           COUNTRY_CODE: AT
-          PYTHONUNBUFFERED: 1
         run: python bigbuy_kaufland.py
       
-      - name: Check generated files and content
+      - name: Check generated files
         run: |
           echo "=== Files generated ==="
           ls -la *.csv *.html *.json 2>/dev/null || echo "No files found"
-          
           echo "=== Austria-specific files ==="
           find . -name "*_at.*" -o -name "index_at.html" -o -name "kaufland_feed_at.csv" 2>/dev/null || echo "No AT files found"
-          
           echo "=== File sizes ==="
           if [ -f "kaufland_feed_at.csv" ]; then
             wc -l kaufland_feed_at.csv
             echo "First few lines of CSV:"
             head -5 kaufland_feed_at.csv
           fi
-          
           if [ -f "feed_info_at.json" ]; then
             echo "JSON info content:"
             cat feed_info_at.json
@@ -69,8 +56,14 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          # Pull latest changes first
-          git pull origin main --rebase
+          # Clean up any unstaged changes first
+          git stash --include-untracked || true
+          
+          # Pull latest changes
+          git pull origin main || git pull origin master || true
+          
+          # Apply stash if it exists
+          git stash pop || true
           
           # Add Austria-specific files only if they exist
           files_to_add=""
@@ -112,24 +105,39 @@ jobs:
               # Get data fingerprint for commit message
               fingerprint=""
               if [ -f "feed_info_at.json" ]; then
-                fingerprint=$(grep -o '"data_fingerprint": "[^"]*"' feed_info_at.json | cut -d'"' -f4)
+                fingerprint=$(grep -o '"random_seed": [0-9]*' feed_info_at.json | grep -o '[0-9]*')
+              fi
+              
+              # Create commit message with stats
+              product_count=""
+              if [ -f "feed_info_at.json" ]; then
+                product_count=$(grep -o '"product_count": [0-9]*' feed_info_at.json | grep -o '[0-9]*')
+              fi
+              
+              commit_msg="Aggiorna feed Austria $(date '+%Y-%m-%d %H:%M:%S')"
+              if [ -n "$product_count" ]; then
+                commit_msg="$commit_msg - ${product_count} prodotti validati"
+              fi
+              if [ -n "$fingerprint" ]; then
+                commit_msg="$commit_msg [seed: $fingerprint]"
               fi
               
               # Try to commit and push with retry logic
               for i in {1..3}; do
-                commit_msg="Aggiorna feed Austria $(date '+%Y-%m-%d %H:%M:%S')"
-                if [ -n "$fingerprint" ]; then
-                  commit_msg="$commit_msg [fingerprint: $fingerprint]"
-                fi
-                
                 if git commit -m "$commit_msg" && git push; then
-                  echo "Feed Austria aggiornato con successo!"
+                  echo "✅ Feed Austria aggiornato con successo!"
                   echo "📡 Available at: https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_at.csv"
+                  echo "🌐 HTML page: https://poppulseemporium.github.io/kaufland-feed/index_at.html"
+                  if [ -n "$product_count" ]; then
+                    echo "📊 Products: $product_count with confirmed stock"
+                  fi
                   break
                 else
-                  echo "Push fallito, tentativo $i/3. Riprovando in 10 secondi..."
+                  echo "❌ Push fallito, tentativo $i/3. Riprovando in 10 secondi..."
                   sleep 10
-                  git pull origin main --rebase
+                  git stash --include-untracked || true
+                  git pull origin main || git pull origin master || true
+                  git stash pop || true
                 fi
               done
             fi
