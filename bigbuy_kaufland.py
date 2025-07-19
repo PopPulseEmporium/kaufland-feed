@@ -178,7 +178,7 @@ def validate_product_data(product, info, variations, stock_data):
     
     total_stock = direct_stock + variation_stock
     
-    if total_stock <= 0:
+    if total_stock <= 1:
         return False, f"No stock available (direct: {direct_stock}, variations: {variation_stock})"
     
     # Validate product info exists
@@ -396,12 +396,15 @@ def main():
     vat = 0.22
     base_price = 0.75
     max_price_limit_eur = 200.0
+    min_price_limit_eur = 6.0
     max_price_limit = max_price_limit_eur * currency_info['rate']
+    min_price_limit = min_price_limit_eur * currency_info['rate']
     max_content_volume = 70000
     max_weight = 25.0
     sample_size = 25000  # Production sample size
     
     print(f"💰 Max price limit: {currency_info['currency']}{max_price_limit:.2f}")
+    print(f"💰 Min price limit: {currency_info['currency']}{min_price_limit:.2f}")
     print(f"📦 Max content volume: {max_content_volume:,} cm³")
     print(f"⚖️ Max weight: {max_weight} kg")
     print(f"🎯 Target sample size: {sample_size}")
@@ -573,6 +576,12 @@ def main():
         if price_local > max_price_limit:
             validation_stats['price_too_high'] += 1
             continue
+
+        min_price_eur = min_price_limit
+        min_price_local = min_price_eur * currency_info['rate']
+        if price_local < min_price_local:
+            validation_stats['price_too_low'] += 1  # Add this to validation_stats dict
+            continue
         
         # Calculate safe quantity
         real_quantity = calculate_real_quantity(total_stock)
@@ -697,7 +706,9 @@ def main():
             "validation_stats": validation_stats,
             "stock_validation_enabled": True,
             "max_price_filter": max_price_limit,
+            "min_price_filter": min_price_limit, 
             "max_price_filter_eur": max_price_limit_eur,
+            "min_price_filter_eur": min_price_limit_eur,
             "max_content_volume": max_content_volume,
             "max_weight": max_weight,
             "currency": currency_info['currency'],
