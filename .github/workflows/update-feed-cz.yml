@@ -1,7 +1,7 @@
 name: Aggiorna Feed Kaufland Czech Republic
 on:
   schedule:
-    - cron: '55 */6 * * *'  # Ogni 6 ore (offset di 55 min)
+    - cron: '55 */24 * * *'  # Ogni 6 ore (offset di 55 min)
   workflow_dispatch: 
 
 jobs:
