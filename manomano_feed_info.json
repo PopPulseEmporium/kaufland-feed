@@ -1,0 +1,32 @@
+{
+  "last_updated": "2025-07-19T19:39:38.623486",
+  "product_count": 2991,
+  "random_seed": 475,
+  "validation_stats": {
+    "total_processed": 5927,
+    "missing_sku": 0,
+    "invalid_ean": 0,
+    "not_new_condition": 11,
+    "invalid_price": 0,
+    "no_stock": 1645,
+    "no_product_info": 0,
+    "invalid_name": 0,
+    "price_too_high": 43,
+    "price_too_low": 134,
+    "weight_too_high": 3,
+    "volume_too_high": 393,
+    "valid_products": 2992
+  },
+  "stock_validation_enabled": true,
+  "marketplace": "ManoMano",
+  "country": "Italy",
+  "min_price_eur": 6.0,
+  "max_price_eur": 500.0,
+  "max_content_volume": 100000,
+  "max_weight": 50.0,
+  "currency": "EUR",
+  "margin_applied": "30%",
+  "language": "it",
+  "feed_url": "https://poppulseemporium.github.io/kaufland-feed/manomano_feed.csv",
+  "quality_assurance": "ALL_PRODUCTS_HAVE_CONFIRMED_STOCK_AND_VALID_DATA_FOR_MANOMANO"
+}
