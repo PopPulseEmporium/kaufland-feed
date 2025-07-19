@@ -1,0 +1,231 @@
+name: Debug BigBuy Script
+on:
+  workflow_dispatch: # Manual trigger only for debugging
+
+jobs:
+  debug-bigbuy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: |
+          pip install requests
+          
+      - name: Test API key
+        env:
+          BIGBUY_API_KEY: ${{ secrets.BIGBUY_API_KEY }}
+        run: |
+          echo "Testing API key availability..."
+          if [ -z "$BIGBUY_API_KEY" ]; then
+            echo "❌ BIGBUY_API_KEY secret is not set!"
+            exit 1
+          else
+            echo "✅ BIGBUY_API_KEY secret is available (length: ${#BIGBUY_API_KEY})"
+          fi
+          
+      - name: Test BigBuy API connection
+        env:
+          BIGBUY_API_KEY: ${{ secrets.BIGBUY_API_KEY }}
+        run: |
+          python3 << 'EOF'
+          import requests
+          import os
+          import json
+          
+          api_key = os.getenv('BIGBUY_API_KEY')
+          print(f"API Key length: {len(api_key) if api_key else 0}")
+          
+          headers = {
+              'Authorization': f'Bearer {api_key}',
+              'Content-Type': 'application/json'
+          }
+          
+          url = "https://api.bigbuy.eu/rest/catalog/taxonomies.json?firstLevel"
+          
+          try:
+              response = requests.get(url, headers=headers, timeout=30)
+              print(f"Status Code: {response.status_code}")
+              print(f"Response Headers: {dict(response.headers)}")
+              
+              if response.status_code == 200:
+                  data = response.json()
+                  print(f"✅ Success! Found {len(data)} taxonomies")
+                  if data:
+                      print(f"First taxonomy: {data[0].get('name', 'Unknown')}")
+              else:
+                  print(f"❌ Error: {response.status_code}")
+                  print(f"Response: {response.text}")
+                  
+          except Exception as e:
+              print(f"❌ Exception: {e}")
+          EOF
+          
+      - name: Run minimal BigBuy test
+        env:
+          BIGBUY_API_KEY: ${{ secrets.BIGBUY_API_KEY }}
+          COUNTRY_CODE: AT
+        run: |
+          python3 << 'EOF'
+          import requests
+          import os
+          import json
+          import csv
+          from datetime import datetime
+          
+          print("🧪 Running minimal BigBuy test...")
+          
+          api_key = os.getenv('BIGBUY_API_KEY')
+          country = os.getenv('COUNTRY_CODE', 'AT')
+          
+          headers = {
+              'Authorization': f'Bearer {api_key}',
+              'Content-Type': 'application/json'
+          }
+          
+          base_url = "https://api.bigbuy.eu"
+          
+          # Get taxonomies
+          print("1. Getting taxonomies...")
+          response = requests.get(f"{base_url}/rest/catalog/taxonomies.json?firstLevel", headers=headers)
+          
+          if response.status_code != 200:
+              print(f"❌ Failed to get taxonomies: {response.status_code}")
+              print(response.text)
+              exit(1)
+              
+          taxonomies = response.json()
+          print(f"✅ Got {len(taxonomies)} taxonomies")
+          
+          if not taxonomies:
+              print("❌ No taxonomies found")
+              exit(1)
+          
+          # Get products from first taxonomy
+          first_taxonomy = taxonomies[0]
+          tax_id = first_taxonomy['id']
+          tax_name = first_taxonomy['name']
+          
+          print(f"2. Getting products from '{tax_name}' (ID: {tax_id})...")
+          response = requests.get(f"{base_url}/rest/catalog/products.json?parentTaxonomy={tax_id}", headers=headers)
+          
+          if response.status_code != 200:
+              print(f"❌ Failed to get products: {response.status_code}")
+              print(response.text)
+              exit(1)
+              
+          products = response.json()
+          print(f"✅ Got {len(products)} products")
+          
+          if not products:
+              print("❌ No products found")
+              exit(1)
+          
+          # Create minimal CSV with first 10 products
+          print("3. Creating minimal CSV...")
+          csv_data = []
+          
+          for i, product in enumerate(products[:10]):
+              row = {
+                  'id_offer': str(product.get('sku', '')),
+                  'ean': str(product.get('ean13', '')),
+                  'locale': 'de-AT',
+                  'title': str(product.get('name', 'Product'))[:50],
+                  'price_cs': round(float(product.get('wholesalePrice', 0)) * 1.5, 2),
+                  'quantity': min(10, int(product.get('inStock', 0))),
+                  'condition': 'NEW',
+                  'currency': 'EUR'
+              }
+              csv_data.append(row)
+          
+          # Write test CSV
+          filename = f'test_kaufland_feed_{country.lower()}.csv'
+          with open(filename, 'w', newline='', encoding='utf-8') as f:
+              if csv_data:
+                  writer = csv.DictWriter(f, fieldnames=csv_data[0].keys())
+                  writer.writeheader()
+                  writer.writerows(csv_data)
+          
+          print(f"✅ Created {filename} with {len(csv_data)} products")
+          
+          # Create test info file
+          info_data = {
+              "test_run": True,
+              "timestamp": datetime.now().isoformat(),
+              "products_found": len(csv_data),
+              "country": country,
+              "taxonomy_used": tax_name,
+              "api_working": True
+          }
+          
+          info_filename = f'test_feed_info_{country.lower()}.json'
+          with open(info_filename, 'w') as f:
+              json.dump(info_data, f, indent=2)
+          
+          print(f"✅ Created {info_filename}")
+          print("🎉 Minimal test completed successfully!")
+          
+          EOF
+          
+      - name: Check generated test files
+        run: |
+          echo "=== Generated files ==="
+          ls -la test_*.csv test_*.json 2>/dev/null || echo "No test files found"
+          
+          if [ -f "test_kaufland_feed_at.csv" ]; then
+            echo "=== CSV content preview ==="
+            head -5 test_kaufland_feed_at.csv
+            echo "=== CSV line count ==="
+            wc -l test_kaufland_feed_at.csv
+          fi
+          
+          if [ -f "test_feed_info_at.json" ]; then
+            echo "=== JSON content ==="
+            cat test_feed_info_at.json
+          fi
+          
+      - name: Test git operations
+        run: |
+          echo "=== Testing git operations ==="
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Test"
+          
+          # Check git status
+          echo "Git status:"
+          git status
+          
+          # Try to add test files
+          if [ -f "test_kaufland_feed_at.csv" ]; then
+            echo "Adding test CSV..."
+            git add test_kaufland_feed_at.csv
+          fi
+          
+          if [ -f "test_feed_info_at.json" ]; then
+            echo "Adding test JSON..."
+            git add test_feed_info_at.json
+          fi
+          
+          # Check what would be committed
+          echo "Files staged for commit:"
+          git diff --cached --name-only
+          
+          # Don't actually commit in test, just show what would happen
+          echo "Would commit with message: 'Test run $(date)'"
+          
+      - name: Environment debug
+        run: |
+          echo "=== Environment Debug ==="
+          echo "Working directory: $(pwd)"
+          echo "Python version: $(python3 --version)"
+          echo "Pip list:"
+          pip list
+          echo "Environment variables (filtered):"
+          env | grep -E "(GITHUB|COUNTRY)" | head -10
+          echo "Git branch: $(git branch --show-current)"
+          echo "Git remote: $(git remote -v)"
