@@ -1,8 +1,8 @@
-name: Aggiorna Feed Kaufland Germania
+name: Aggiorna Feed Kaufland Germany
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Ogni 6 ore
-  workflow_dispatch:  # Pulsante manuale
+    - cron: '25 */6 * * *'  # Ogni 6 ore (offset di 25 min)
+  workflow_dispatch: 
 
 jobs:
   update-feed-de:
@@ -10,7 +10,9 @@ jobs:
     steps:
       - name: Scarica codice
         uses: actions/checkout@v3
-
+        with:
+          fetch-depth: 0
+          
       - name: Wait for other workflows to complete
         uses: softprops/turnstyle@v1
         with:
@@ -26,7 +28,7 @@ jobs:
       - name: Installa dipendenze
         run: pip install -r requirements.txt
       
-      - name: Esegui sincronizzazione BigBuy Germania
+      - name: Esegui sincronizzazione BigBuy Germany
         env:
           BIGBUY_API_KEY: ${{ secrets.BIGBUY_API_KEY }}
           COUNTRY_CODE: DE
@@ -34,27 +36,50 @@ jobs:
       
       - name: Check generated files
         run: |
-          echo "Files generated:"
+          echo "=== Files generated ==="
           ls -la *.csv *.html *.json 2>/dev/null || echo "No files found"
-          echo "Looking for Germany-specific files:"
-          find . -name "*_de.*" -o -name "index_de.html" -o -name "kaufland_feed_de.csv" 2>/dev/null || echo "No DE files found"
+          echo "=== Germany-specific files ==="
+          find . -name "*_de.*" -o -name "kaufland_feed_de.csv" 2>/dev/null || echo "No DE files found"
+          echo "=== File sizes ==="
+          if [ -f "kaufland_feed_de.csv" ]; then
+            wc -l kaufland_feed_de.csv
+            echo "First few lines of CSV:"
+            head -3 kaufland_feed_de.csv
+          fi
+          if [ -f "feed_info_de.json" ]; then
+            echo "JSON info content:"
+            cat feed_info_de.json
+          fi
       
-      - name: Commit feed Germania
+      - name: Commit feed Germany con retry
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          # Pull latest changes first
-          git pull origin main --rebase
+          # Clean up any unstaged changes first
+          git stash --include-untracked || true
+          
+          # Pull latest changes
+          git pull origin main || git pull origin master || true
+          
+          # Apply stash if it exists
+          git stash pop || true
           
           # Add Germany-specific files only if they exist
           files_to_add=""
           
           if [ -f "kaufland_feed_de.csv" ]; then
-            files_to_add="$files_to_add kaufland_feed_de.csv"
-            echo "✅ Found kaufland_feed_de.csv"
+            lines=$(wc -l < kaufland_feed_de.csv)
+            if [ "$lines" -gt 1 ]; then
+              files_to_add="$files_to_add kaufland_feed_de.csv"
+              echo "✅ Found kaufland_feed_de.csv with $lines lines"
+            else
+              echo "❌ kaufland_feed_de.csv exists but is empty"
+              exit 1
+            fi
           else
             echo "❌ Missing kaufland_feed_de.csv"
+            exit 1
           fi
           
           if [ -f "index_de.html" ]; then
@@ -75,13 +100,48 @@ jobs:
             git add $files_to_add
             
             if git diff --cached --quiet; then
-              echo "Nessuna modifica per la Germania"
+              echo "Nessuna modifica per la Germany"
             else
-              git commit -m "Aggiorna feed Germania $(date '+%Y-%m-%d %H:%M:%S')"
-              git push
-              echo "Feed Germania aggiornato con successo!"
+              # Get data fingerprint for commit message
+              fingerprint=""
+              if [ -f "feed_info_de.json" ]; then
+                fingerprint=$(grep -o '"random_seed": [0-9]*' feed_info_de.json | grep -o '[0-9]*')
+              fi
+              
+              # Create commit message with stats
+              product_count=""
+              if [ -f "feed_info_de.json" ]; then
+                product_count=$(grep -o '"product_count": [0-9]*' feed_info_de.json | grep -o '[0-9]*')
+              fi
+              
+              commit_msg="Aggiorna feed Germany $(date '+%Y-%m-%d %H:%M:%S')"
+              if [ -n "$product_count" ]; then
+                commit_msg="$commit_msg - ${product_count} prodotti validati"
+              fi
+              if [ -n "$fingerprint" ]; then
+                commit_msg="$commit_msg [seed: $fingerprint]"
+              fi
+              
+              # Try to commit and push with retry logic
+              for i in {1..3}; do
+                if git commit -m "$commit_msg" && git push; then
+                  echo "✅ Feed Germany aggiornato con successo!"
+                  echo "📡 Available at: https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_de.csv"
+                  echo "🌐 HTML page: https://poppulseemporium.github.io/kaufland-feed/index_de.html"
+                  if [ -n "$product_count" ]; then
+                    echo "📊 Products: $product_count with confirmed stock"
+                  fi
+                  break
+                else
+                  echo "❌ Push fallito, tentativo $i/3. Riprovando in 10 secondi..."
+                  sleep 10
+                  git stash --include-untracked || true
+                  git pull origin main || git pull origin master || true
+                  git stash pop || true
+                fi
+              done
             fi
           else
-            echo "❌ Nessun file Germania generato - controllare il log Python"
+            echo "❌ Nessun file Germany generato - controllare il log Python"
             exit 1
           fi
