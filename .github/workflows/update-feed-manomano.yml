@@ -1,7 +1,7 @@
 name: Aggiorna Feed ManoMano Italy
 on:
   schedule:
-    - cron: '10 */6 * * *'  # Ogni 6 ore (offset di 10 min)
+    - cron: '10 */24 * * *'  # Ogni 24 ore (offset di 10 min)
   workflow_dispatch: 
 
 jobs:
