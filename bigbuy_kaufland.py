@@ -399,7 +399,7 @@ def main():
     min_price_limit_eur = 6.0
     max_price_limit = max_price_limit_eur * currency_info['rate']
     min_price_limit = min_price_limit_eur * currency_info['rate']
-    max_content_volume = 70000
+    max_content_volume = 110000
     max_weight = 25.0
     sample_size = 25000  # Production sample size
     
