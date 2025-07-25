@@ -419,13 +419,13 @@ def main():
     api = BigBuyAPI(api_key)
     
     # Configuration for ManoMano
-    margin = 0.30
+    margin = 0.40
     vat = 0.22
     base_price = 0.75
-    min_price_eur = 6.0  # Minimum €6
-    max_price_eur = 500.0  # Higher limit for ManoMano (tools, equipment)
+    min_price_eur = 100.0  # Minimum €6
+    max_price_eur = 200.0  # Higher limit for ManoMano (tools, equipment)
     max_content_volume = 100000  # Larger volume for ManoMano (100L)
-    max_weight = 50.0  # Higher weight limit for tools/equipment
+    max_weight = 25.0  # Higher weight limit for tools/equipment
     sample_size = 20000  # Target sample size for ManoMano
     
     print(f"💰 Price range: €{min_price_eur} - €{max_price_eur}")
@@ -654,7 +654,7 @@ def main():
             'image_url_3': images.get('image3', ''),
             'image_url_4': images.get('image4', ''),
             'shipping_cost': '0',  # Free shipping
-            'delivery_time': '3-5 giorni',
+            'delivery_time': '3-6 giorni',
             'warranty': '24 mesi',
             'origin_country': 'EU',
             'material': '',  # Could be extracted from attributes if available
