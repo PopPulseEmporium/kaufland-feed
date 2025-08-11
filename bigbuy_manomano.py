@@ -251,7 +251,7 @@ def create_html_page(unique_data, margin, files_created, config):
         return "<html><body><h1>Nessun prodotto disponibile</h1></body></html>"
     
     try:
-        prices = [row['price'] for row in unique_data if 'price' in row and row['price']]
+        prices = [row['product_price_vat_inc'] for row in unique_data if 'product_price_vat_inc' in row and row['product_price_vat_inc']]
         min_price = min(prices) if prices else 0
         max_price = max(prices) if prices else 0
     except Exception:
@@ -795,7 +795,7 @@ def main():
     print(f"📊 Products: {len(unique_data)} (ALL with confirmed stock ≥2 units)")
     
     if unique_data:
-        prices = [row['price'] for row in unique_data]
+        prices = [row['product_price_vat_inc'] for row in unique_data]
         quantities = [row['quantity'] for row in unique_data]
         categories = list(set([row['category'] for row in unique_data]))
         
