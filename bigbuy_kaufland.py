@@ -392,11 +392,11 @@ def main():
     api = BigBuyAPI(api_key)
     
     # Configuration
-    margin = 0.35
+    margin = 0.40
     vat = 0.22
     base_price = 0.75
     max_price_limit_eur = 200.0
-    min_price_limit_eur = 100.0
+    min_price_limit_eur = 10.0
     max_price_limit = max_price_limit_eur * currency_info['rate']
     min_price_limit = min_price_limit_eur * currency_info['rate']
     max_content_volume = 110000
