@@ -422,7 +422,7 @@ def main():
     margin = 0.40
     vat = 0.22
     base_price = 0.75
-    min_price_eur = 100.0  # Minimum €6
+    min_price_eur = 10.0  # Minimum amount
     max_price_eur = 200.0  # Higher limit for ManoMano (tools, equipment)
     max_content_volume = 100000  # Larger volume for ManoMano (100L)
     max_weight = 25.0  # Higher weight limit for tools/equipment
