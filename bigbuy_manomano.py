@@ -419,7 +419,7 @@ def main():
     api = BigBuyAPI(api_key)
     
     # Configuration for ManoMano
-    margin = 0.40
+    margin = 0.50
     vat = 0.22
     base_price = 0.75
     min_price_eur = 6.0  # Minimum amount
@@ -638,28 +638,29 @@ def main():
         row = {
             'sku': str(sku),
             'ean': safe_str(product.get('ean13')),
+            'sku_manufacturer': str(sku),
+            'brand': 'Autres',
+            'category': manomano_category,
             'title': safe_str(info.get('name', 'Product'))[:100],
             'description': safe_str(info.get('description', ''))[:2000],
-            'brand': 'Pop Pulse Emporium',
-            'category': manomano_category,
-            'price': round(price_eur, 2),
+            'image_1': images.get('image1', ''),
+            'image_2': images.get('image2', ''),
+            'image_3': images.get('image3', ''),
+            'image_4': images.get('image4', ''),
+            'image_5': images.get('image5', ''),
+            'product_price_vat_inc': round(price_eur, 2),
+            'min_quantity', 1,
+            'increment', 1,
             'quantity': real_quantity,
-            'condition': 'Nuovo',
+            'use_grid', 1,
+            'carrier_grid_1', "Generale",
+            'shipping_time_carrier_grid_1', "5#7",
             'weight': round(weight, 2),
             'length': round(depth, 2),
             'width': round(width, 2),
             'height': round(height, 2),
-            'image_url': images.get('image1', ''),
-            'image_url_2': images.get('image2', ''),
-            'image_url_3': images.get('image3', ''),
-            'image_url_4': images.get('image4', ''),
-            'shipping_cost': '0',  # Free shipping
-            'delivery_time': '3-6 giorni',
-            'warranty': '24 mesi',
-            'origin_country': 'EU',
-            'material': '',  # Could be extracted from attributes if available
-            'color': '',     # Could be extracted from attributes if available
-            'size': '',      # Could be extracted from attributes if available
+            'DisplayWeight': round(weight, 2),
+            'volume': round(depth * width * height, 2)
         }
         
         csv_data.append(row)
