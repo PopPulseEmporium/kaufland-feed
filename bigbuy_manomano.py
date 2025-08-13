@@ -423,9 +423,9 @@ def main():
     vat = 0.22
     base_price = 0.75
     min_price_eur = 6.0  # Minimum amount
-    max_price_eur = 200.0  # Higher limit for ManoMano (tools, equipment)
-    max_content_volume = 100000  # Larger volume for ManoMano (100L)
-    max_weight = 25.0  # Higher weight limit for tools/equipment
+    max_price_eur = 300.0  # Higher limit for ManoMano (tools, equipment)
+    max_content_volume = 1000000  # Larger volume for ManoMano (100L)
+    max_weight = 50.0  # Higher weight limit for tools/equipment
     sample_size = 20000  # Target sample size for ManoMano
     
     print(f"💰 Price range: €{min_price_eur} - €{max_price_eur}")
