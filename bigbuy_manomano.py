@@ -419,13 +419,13 @@ def main():
     api = BigBuyAPI(api_key)
     
     # Configuration for ManoMano
-    margin = 0.50
+    margin = 0.40
     vat = 0.22
     base_price = 0.75
     min_price_eur = 6.0  # Minimum amount
     max_price_eur = 300.0  # Higher limit for ManoMano (tools, equipment)
-    max_content_volume = 1000000  # Larger volume for ManoMano (100L)
-    max_weight = 50.0  # Higher weight limit for tools/equipment
+    max_content_volume = 10000000  # Larger volume for ManoMano (100L)
+    max_weight = 500.0  # Higher weight limit for tools/equipment
     sample_size = 20000  # Target sample size for ManoMano
     
     print(f"💰 Price range: €{min_price_eur} - €{max_price_eur}")
