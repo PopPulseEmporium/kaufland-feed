@@ -177,7 +177,7 @@ def validate_product_data(product, info, variations, stock_data):
     total_stock = direct_stock + variation_stock
     
     # ManoMano requires minimum 2 units in stock
-    if total_stock < 2:
+    if total_stock < 1:
         return False, f"Insufficient stock (need ≥2, have: {total_stock})"
     
     # Validate product info exists
