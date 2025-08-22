@@ -422,9 +422,9 @@ def main():
     margin = 0.40
     vat = 0.22
     base_price = 0.75
-    min_price_eur = 6.0  # Minimum amount
-    max_price_eur = 300.0  # Higher limit for ManoMano (tools, equipment)
-    max_content_volume = 10000000  # Larger volume for ManoMano (100L)
+    min_price_eur = 1.0  # Minimum amount
+    max_price_eur = 1000.0  # Higher limit for ManoMano (tools, equipment)
+    max_content_volume = 1000000000  # Larger volume for ManoMano (100L)
     max_weight = 500.0  # Higher weight limit for tools/equipment
     sample_size = 20000  # Target sample size for ManoMano
     
@@ -434,7 +434,7 @@ def main():
     print(f"🎯 Target sample size: {sample_size}")
     
     # Get taxonomies focused on ManoMano categories
-    taxonomies = api.get_taxonomies(limit=15)  # Focus on relevant categories
+    taxonomies = api.get_taxonomies(limit=25)  # Focus on relevant categories
     if not taxonomies:
         print("❌ No taxonomies found")
         return
@@ -458,7 +458,7 @@ def main():
         print(f"📦 {i+1}/{len(taxonomies)}: {tax_name} {'⭐' if is_preferred else ''}")
         
         # Get more products from preferred categories
-        product_limit = 800 if is_preferred else 400
+        product_limit = 1200 if is_preferred else 600
         
         # Get products
         products = api.get_products(tax_id)
