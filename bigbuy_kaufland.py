@@ -395,12 +395,12 @@ def main():
     margin = 0.40
     vat = 0.22
     base_price = 0.75
-    max_price_limit_eur = 200.0
+    max_price_limit_eur = 400.0
     min_price_limit_eur = 10.0
     max_price_limit = max_price_limit_eur * currency_info['rate']
     min_price_limit = min_price_limit_eur * currency_info['rate']
-    max_content_volume = 110000
-    max_weight = 25.0
+    max_content_volume = 180000
+    max_weight = 35.0
     sample_size = 25000  # Production sample size
     
     print(f"💰 Max price limit: {currency_info['currency']}{max_price_limit:.2f}")
