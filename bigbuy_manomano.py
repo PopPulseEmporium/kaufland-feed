@@ -388,4 +388,4 @@ def main():
     
     print(f"💰 Price range: €{min_price_eur} - €{max_price_eur}")
     print(f"🎯 Target sample size: {sample_size} (increased from 20,000)")
-    print(f"📦 Allow zero stock: {allow_zero_stock} (like Excel - 77.
+    print(f"📦 Minimum stock required: 1 unit (as requested)")
