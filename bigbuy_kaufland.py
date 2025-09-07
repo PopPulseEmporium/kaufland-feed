@@ -396,7 +396,7 @@ def main():
     vat = 0.22
     base_price = 0.75
     max_price_limit_eur = 400.0
-    min_price_limit_eur = 10.0
+    min_price_limit_eur = 18
     max_price_limit = max_price_limit_eur * currency_info['rate']
     min_price_limit = min_price_limit_eur * currency_info['rate']
     max_content_volume = 180000
