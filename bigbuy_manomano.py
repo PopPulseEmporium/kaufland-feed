@@ -248,7 +248,7 @@ def create_csv_row_from_variation(variation, parent_product, info_dict, image_di
         'ean': safe_str(variation.get('ean13')),
         'sku_manufacturer': str(variation_sku),
         'brand': 'Autres',
-        'mm_category': map_to_manomano_category_numeric(taxonomy_name, parent_product.get('taxonomy') if parent_product else None),
+        'mm_category': "20204",
         'title': variation_title[:100],
         'description': safe_str(parent_info.get('description', ''))[:2000],
         'image_1': images.get('image1', ''),
