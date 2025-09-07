@@ -191,7 +191,7 @@ def create_csv_row_from_product(product, info_dict, image_dict, taxonomy_name, m
         'ean': safe_str(product.get('ean13')),
         'sku_manufacturer': str(sku),
         'brand': 'Autres',
-        'mm_category': map_to_manomano_category_numeric(taxonomy_name, product.get('taxonomy')),
+        'mm_category': "20204",
         'title': safe_str(info.get('name', 'Product'))[:100],
         'description': safe_str(info.get('description', ''))[:2000],
         'image_1': images.get('image1', ''),
