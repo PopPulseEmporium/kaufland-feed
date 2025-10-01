@@ -178,7 +178,7 @@ def validate_product_data(product, info, variations, stock_data):
     
     total_stock = direct_stock + variation_stock
     
-    if total_stock <= 1:
+    if total_stock <= 2:
         return False, f"No stock available (direct: {direct_stock}, variations: {variation_stock})"
     
     # Validate product info exists
@@ -399,8 +399,8 @@ def main():
     min_price_limit_eur = 18
     max_price_limit = max_price_limit_eur * currency_info['rate']
     min_price_limit = min_price_limit_eur * currency_info['rate']
-    max_content_volume = 180000
-    max_weight = 35.0
+    max_content_volume = 120000
+    max_weight = 25.0
     sample_size = 25000  # Production sample size
     
     print(f"💰 Max price limit: {currency_info['currency']}{max_price_limit:.2f}")
