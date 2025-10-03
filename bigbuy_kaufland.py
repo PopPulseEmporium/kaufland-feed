@@ -178,7 +178,7 @@ def validate_product_data(product, info, variations, stock_data):
     
     total_stock = direct_stock + variation_stock
     
-    if total_stock <= 2:
+    if total_stock <= 1:
         return False, f"No stock available (direct: {direct_stock}, variations: {variation_stock})"
     
     # Validate product info exists
@@ -392,15 +392,15 @@ def main():
     api = BigBuyAPI(api_key)
     
     # Configuration
-    margin = 0.5
+    margin = 0.45
     vat = 0.22
-    base_price = 0.75
+    base_price = 0.25
     max_price_limit_eur = 400.0
-    min_price_limit_eur = 18
+    min_price_limit_eur = 15
     max_price_limit = max_price_limit_eur * currency_info['rate']
     min_price_limit = min_price_limit_eur * currency_info['rate']
-    max_content_volume = 120000
-    max_weight = 25.0
+    max_content_volume = 180000
+    max_weight = 35.0
     sample_size = 25000  # Production sample size
     
     print(f"💰 Max price limit: {currency_info['currency']}{max_price_limit:.2f}")
