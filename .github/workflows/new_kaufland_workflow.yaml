@@ -1,4 +1,4 @@
-name: Aggiorna Feed Kaufland Germany NEW
+name: Update Kaufland Feeds - All Countries
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch: 
 
 jobs:
-  update-feed-de:
+  update-all-feeds:
     runs-on: ubuntu-latest
     steps:
       - name: Scarica codice
@@ -14,7 +14,7 @@ jobs:
         with:
           fetch-depth: 0
           
-      - name: Wait for other workflows to complete
+      - name: Wait for other workflows
         uses: softprops/turnstyle@v1
         with:
           poll-interval-seconds: 10
@@ -29,156 +29,143 @@ jobs:
       - name: Installa dipendenze
         run: pip install -r requirements.txt
       
-      - name: Esegui sincronizzazione BigBuy Germany
+      - name: Generate multi-language feeds
         env:
           BIGBUY_API_KEY: ${{ secrets.BIGBUY_API_KEY }}
-          COUNTRY_CODE: DE
-        run: python bigbuy_kaufland.py
+        run: python refactored_kaufland_feed_generator.py
       
-      - name: Check generated files
+      - name: Verify generated files
         run: |
-          echo "=== Separated Feeds Generated ==="
-          ls -la *.csv *.html *.json 2>/dev/null || echo "No files found"
-          
+          echo "=" | tr '\n' '=' | head -c 70; echo ""
+          echo "MULTI-LANGUAGE FEED GENERATION RESULTS"
+          echo "=" | tr '\n' '=' | head -c 70; echo ""
           echo ""
-          echo "=== Product Feed (Manual Upload) ==="
-          if [ -f "kaufland_products_de.csv" ]; then
-            echo "✅ kaufland_products_de.csv: $(wc -l < kaufland_products_de.csv) lines"
-            echo "First line: $(head -1 kaufland_products_de.csv)"
+          
+          echo "📦 Product Feed (all languages):"
+          if [ -f "kaufland_products_all.csv" ]; then
+            lines=$(wc -l < kaufland_products_all.csv)
+            echo "   ✅ kaufland_products_all.csv: $lines lines"
+            echo "   Header: $(head -1 kaufland_products_all.csv | cut -c1-100)..."
           else
-            echo "❌ Missing kaufland_products_de.csv"
+            echo "   ❌ Missing kaufland_products_all.csv"
+            exit 1
           fi
           
           echo ""
-          echo "=== Offer Feed (Auto Upload) ==="
-          if [ -f "kaufland_offers_de.csv" ]; then
-            echo "✅ kaufland_offers_de.csv: $(wc -l < kaufland_offers_de.csv) lines"
-            echo "First line: $(head -1 kaufland_offers_de.csv)"
-          else
-            echo "❌ Missing kaufland_offers_de.csv"
-          fi
+          echo "💰 Offer Feeds (per country):"
+          for country in de at sk pl cz; do
+            file="kaufland_offers_${country}.csv"
+            if [ -f "$file" ]; then
+              lines=$(wc -l < "$file")
+              echo "   ✅ $file: $lines lines"
+            else
+              echo "   ❌ Missing $file"
+            fi
+          done
           
           echo ""
-          echo "=== Metadata ==="
-          if [ -f "feed_info_de.json" ]; then
-            echo "✅ feed_info_de.json exists"
-            cat feed_info_de.json | grep -E '"product_count"|"offer_count"|"currency"' || true
+          echo "📋 Metadata:"
+          if [ -f "feed_info.json" ]; then
+            echo "   ✅ feed_info.json"
+            cat feed_info.json | grep -E '"product_count"|"offer_counts"' || true
           fi
       
-      - name: Commit separated feeds Germany
+      - name: Commit and push all feeds
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          # Pull latest changes
+          # Pull latest
           git pull origin main --rebase || true
           
-          # Verify both feed files exist
+          # Collect all files
           files_to_add=""
-          errors=""
           
-          # Check product feed
-          if [ -f "kaufland_products_de.csv" ]; then
-            lines=$(wc -l < kaufland_products_de.csv)
-            if [ "$lines" -gt 1 ]; then
-              files_to_add="$files_to_add kaufland_products_de.csv"
-              echo "✅ Product feed ready: $lines lines"
-            else
-              errors="Product feed empty"
-            fi
+          # Product feed (required)
+          if [ -f "kaufland_products_all.csv" ]; then
+            files_to_add="$files_to_add kaufland_products_all.csv"
+            echo "✅ Will commit product feed"
           else
-            errors="Missing product feed"
-          fi
-          
-          # Check offer feed
-          if [ -f "kaufland_offers_de.csv" ]; then
-            lines=$(wc -l < kaufland_offers_de.csv)
-            if [ "$lines" -gt 1 ]; then
-              files_to_add="$files_to_add kaufland_offers_de.csv"
-              echo "✅ Offer feed ready: $lines lines"
-            else
-              errors="${errors}, Offer feed empty"
-            fi
-          else
-            errors="${errors}, Missing offer feed"
-          fi
-          
-          # Check optional files
-          if [ -f "index_de.html" ]; then
-            files_to_add="$files_to_add index_de.html"
-            echo "✅ HTML dashboard ready"
-          fi
-          
-          if [ -f "feed_info_de.json" ]; then
-            files_to_add="$files_to_add feed_info_de.json"
-            echo "✅ Metadata ready"
-          fi
-          
-          # Exit if critical files missing
-          if [ -n "$errors" ]; then
-            echo "❌ Critical errors: $errors"
+            echo "❌ Missing product feed"
             exit 1
           fi
           
-          # Add files to staging
+          # Offer feeds (all countries)
+          for country in de at sk pl cz; do
+            file="kaufland_offers_${country}.csv"
+            if [ -f "$file" ]; then
+              files_to_add="$files_to_add $file"
+              echo "✅ Will commit $file"
+            else
+              echo "⚠️ Missing $file (optional)"
+            fi
+          done
+          
+          # Metadata
+          if [ -f "feed_info.json" ]; then
+            files_to_add="$files_to_add feed_info.json"
+          fi
+          
+          # Stage files
           if [ -n "$files_to_add" ]; then
             git add $files_to_add
-            echo "📦 Files staged for commit"
             
-            # Check if there are changes
+            # Check for changes
             if git diff --cached --quiet; then
               echo "ℹ️ No changes detected"
               exit 0
             fi
             
-            # Get stats for commit message
+            # Get stats
             product_count=""
-            offer_count=""
-            
-            if [ -f "feed_info_de.json" ]; then
-              product_count=$(grep -o '"product_count": [0-9]*' feed_info_de.json | grep -o '[0-9]*' | head -1)
-              offer_count=$(grep -o '"offer_count": [0-9]*' feed_info_de.json | grep -o '[0-9]*' | head -1)
+            if [ -f "feed_info.json" ]; then
+              product_count=$(grep -o '"product_count": [0-9]*' feed_info.json | grep -o '[0-9]*' | head -1)
             fi
             
             # Build commit message
-            commit_msg="🇩🇪 Update Germany feeds $(date '+%Y-%m-%d %H:%M')"
-            if [ -n "$product_count" ] && [ -n "$offer_count" ]; then
-              commit_msg="$commit_msg - ${product_count} products, ${offer_count} offers"
+            commit_msg="🌍 Update all country feeds $(date '+%Y-%m-%d %H:%M')"
+            if [ -n "$product_count" ]; then
+              commit_msg="$commit_msg - ${product_count} products"
             fi
             
             # Commit and push with retry
             for i in {1..3}; do
-              echo "Attempt $i/3: Commit and push..."
+              echo "Attempt $i/3..."
               
               if git commit -m "$commit_msg"; then
                 if git push; then
                   echo ""
                   echo "=" | tr '\n' '=' | head -c 70; echo ""
-                  echo "✅ GERMANY FEEDS UPDATED SUCCESSFULLY!"
+                  echo "✅ ALL COUNTRY FEEDS UPDATED SUCCESSFULLY!"
                   echo "=" | tr '\n' '=' | head -c 70; echo ""
                   echo ""
-                  echo "📦 Product Feed (for manual upload with translations):"
-                  echo "   https://poppulseemporium.github.io/kaufland-feed/kaufland_products_de.csv"
+                  echo "📦 PRODUCT FEED (Multi-Language - Manual Upload):"
+                  echo "   https://poppulseemporium.github.io/kaufland-feed/kaufland_products_all.csv"
+                  echo "   Contains: DE, AT, SK, PL, CZ translations"
+                  echo "   Upload: Manually to Kaufland when products change"
                   echo ""
-                  echo "💰 Offer Feed (for automatic 3x daily upload - NO translation!):"
-                  echo "   https://poppulseemporium.github.io/kaufland-feed/kaufland_offers_de.csv"
+                  echo "💰 OFFER FEEDS (Auto-Upload 3x Daily):"
+                  for country in de at sk pl cz; do
+                    file="kaufland_offers_${country}.csv"
+                    if [ -f "$file" ]; then
+                      echo "   🇪🇺 ${country^^}: https://poppulseemporium.github.io/kaufland-feed/$file"
+                    fi
+                  done
                   echo ""
-                  echo "🌐 Dashboard:"
-                  echo "   https://poppulseemporium.github.io/kaufland-feed/index_de.html"
+                  echo "📋 SETUP INSTRUCTIONS:"
+                  echo "   1. Upload kaufland_products_all.csv to Kaufland (one-time/rare)"
+                  echo "   2. Configure auto-upload for each offer feed:"
+                  echo "      - Times: 02:00, 10:00, 18:00 (local time)"
+                  echo "      - NO translation needed!"
                   echo ""
-                  if [ -n "$product_count" ] && [ -n "$offer_count" ]; then
-                    echo "📊 Stats: ${product_count} products, ${offer_count} offers"
+                  if [ -n "$product_count" ]; then
+                    echo "📊 Products: $product_count with confirmed stock"
                   fi
-                  echo ""
-                  echo "📋 Next Steps:"
-                  echo "   1. Product Feed: Upload manually to Kaufland (rare, when products change)"
-                  echo "   2. Offer Feed: Set auto-upload in Kaufland at 02:00, 10:00, 18:00"
                   echo ""
                   exit 0
                 else
                   echo "⚠️ Push failed, attempt $i/3"
                   if [ $i -lt 3 ]; then
-                    echo "Pulling and retrying..."
                     git reset HEAD~1
                     git pull origin main --rebase || true
                     git add $files_to_add
