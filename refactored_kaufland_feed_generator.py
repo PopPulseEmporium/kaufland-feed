@@ -263,13 +263,32 @@ class FeedGenerator:
     def __init__(self, config: Config):
         self.config = config
 
+    def format_ean(self, ean_value) -> str:
+        """Format EAN to prevent scientific notation"""
+        if not ean_value:
+            return ''
+        # Convert to string and remove any decimals
+        ean_str = str(int(float(ean_value))) if isinstance(ean_value, (int, float)) else str(ean_value)
+        # Ensure it's 13 digits, pad with zeros if needed
+        return ean_str.zfill(13)
+
     def create_product_row(self, product: Dict, info_by_lang: Dict, 
                           images: List, locale: str) -> Dict:
-        """Create product catalog row for specific locale"""
-        info = info_by_lang.get(locale.split('-')[0], {})  # Get language from locale
+        """Create product catalog row for specific locale with ALL data"""
+        lang = locale.split('-')[0]  # Extract language from locale (de-DE -> de)
+        
+        # Get info for this language, fallback to German if not available
+        info = info_by_lang.get(lang, info_by_lang.get('de', {}))
+        
+        # If still no info, use a fallback
+        if not info:
+            info = {'name': 'Product', 'description': ''}
+        
+        # Format EAN properly (avoid scientific notation)
+        ean = self.format_ean(product.get('ean13', ''))
         
         return {
-            'ean': str(product.get('ean13', '')),
+            'ean': ean,
             'locale': locale,
             'title': (info.get('name', 'Product') or 'Product')[:100],
             'description': (info.get('description', '') or '')[:5000],
@@ -289,15 +308,18 @@ class FeedGenerator:
 
     def create_offer_row(self, product: Dict, quantity: int, 
                         country_config: CountryConfig) -> Dict:
-        """Create offer row for specific country"""
+        """Create offer row for specific country - use EAN as id_offer"""
         wholesale_eur = float(product.get('wholesalePrice', 0) or 0)
         price_eur = (wholesale_eur * (1 + self.config.vat) * 
                     (1 + self.config.margin) + self.config.base_price)
         price_local = price_eur * country_config.rate
         
+        # Format EAN properly
+        ean = self.format_ean(product.get('ean13', ''))
+        
         return {
-            'ean': str(product.get('ean13', '')),
-            'id_offer': str(product.get('sku', '')),
+            'ean': ean,
+            'id_offer': f'PPE-{ean}',  # Use EAN-based ID instead of SKU
             'condition': '100',
             'price': str(round(price_local, 2)),
             'currency': country_config.currency,
@@ -308,9 +330,9 @@ class FeedGenerator:
         }
 
     def save_csv(self, data: List[Dict], filename: str, separator: str = ';') -> bool:
-        """Save CSV file with Kaufland format"""
+        """Save CSV file with Kaufland format and proper UTF-8"""
         try:
-            with open(filename, 'w', newline='', encoding='utf-8') as f:
+            with open(filename, 'w', newline='', encoding='utf-8-sig') as f:
                 writer = csv.DictWriter(f, fieldnames=data[0].keys(), delimiter=separator)
                 writer.writeheader()
                 writer.writerows(data)
@@ -335,12 +357,20 @@ class FeedGenerator:
                 "max_price_eur": self.config.max_price_eur,
                 "min_price_eur": self.config.min_price_eur,
                 "countries": list(offer_counts.keys()),
+                "fixes_applied": [
+                    "EAN format fixed (no scientific notation)",
+                    "Character encoding fixed (UTF-8-sig)",
+                    "Images added to all locales",
+                    "Dimensions added to all locales",
+                    "ID_offer uses EAN instead of SKU",
+                    "Fallback to German for missing translations"
+                ],
                 "product_feed_info": "ONE file with ALL languages - upload manually",
                 "offer_feed_info": "SEPARATE files per country for FX - auto-upload 3x daily"
             }
             
-            with open(filename, 'w') as f:
-                json.dump(info, f, indent=2)
+            with open(filename, 'w', encoding='utf-8') as f:
+                json.dump(info, f, indent=2, ensure_ascii=False)
             print(f"✅ Created {filename}")
             return True
         except Exception as e:
@@ -350,7 +380,7 @@ class FeedGenerator:
 
 def main():
     """Main execution - generates multi-language product feed + per-country offers"""
-    print("🚀 KAUFLAND MULTI-LANGUAGE FEED GENERATOR")
+    print("🚀 KAUFLAND MULTI-LANGUAGE FEED GENERATOR (FIXED)")
     print("=" * 70)
     
     # Get API key
@@ -363,6 +393,12 @@ def main():
     all_countries = CountryConfig.get_all_countries()
     
     print(f"🌍 Generating feeds for: {', '.join(all_countries.keys())}")
+    print("🔧 Fixes applied:")
+    print("   ✅ EAN format (no scientific notation)")
+    print("   ✅ UTF-8-sig encoding for special characters")
+    print("   ✅ Images/dimensions for ALL locales")
+    print("   ✅ EAN-based id_offer (not SKU)")
+    print("   ✅ German fallback for missing translations")
     
     # Initialize components
     config = Config()
@@ -452,15 +488,14 @@ def main():
         if not sku:
             continue
         
-        # Check if we have info in at least one language
-        has_info = any(sku in info_maps[lang] for lang in info_maps)
-        if not has_info:
-            continue
-        
         # Use German info for validation (or first available)
-        info_for_validation = info_maps.get('de', {}).get(sku) or next(
-            (info_maps[lang].get(sku) for lang in info_maps if sku in info_maps[lang]), None
-        )
+        info_for_validation = info_maps.get('de', {}).get(sku)
+        if not info_for_validation:
+            # Try other languages
+            for lang in info_maps:
+                if sku in info_maps[lang]:
+                    info_for_validation = info_maps[lang][sku]
+                    break
         
         if not info_for_validation:
             continue
@@ -475,9 +510,9 @@ def main():
         if not is_valid:
             continue
         
-        # Check for duplicates
-        ean = str(product.get('ean13', ''))
-        if ean in seen_eans:
+        # Check for duplicates by EAN
+        ean = generator.format_ean(product.get('ean13', ''))
+        if ean in seen_eans or not ean or len(ean) != 13:
             continue
         seen_eans.add(ean)
         
@@ -486,10 +521,21 @@ def main():
         if safe_qty <= 0:
             continue
         
+        # Build info_by_lang for this product
+        product_info_by_lang = {}
+        for lang in info_maps:
+            if sku in info_maps[lang]:
+                product_info_by_lang[lang] = info_maps[lang][sku]
+        
+        # Ensure we have at least German as fallback
+        if 'de' not in product_info_by_lang and info_maps.get('de', {}).get(sku):
+            product_info_by_lang['de'] = info_maps['de'][sku]
+        
         valid_products.append({
             'product': product,
             'quantity': safe_qty,
-            'images': image_map.get(product.get('id'), [])
+            'images': image_map.get(product.get('id'), []),
+            'info_by_lang': product_info_by_lang
         })
         
         if validator.stats['total'] % 1000 == 0:
@@ -514,22 +560,14 @@ def main():
     for item in valid_products:
         product = item['product']
         images = item['images']
+        info_by_lang = item['info_by_lang']
         
-        # Create one row per language/locale
+        # Create one row per locale
         for country_code, country_config in all_countries.items():
-            lang = country_config.language
-            
-            # Get info for this language
-            info_by_lang = {}
-            for l in info_maps:
-                sku = product.get('sku')
-                if sku in info_maps[l]:
-                    info_by_lang[l] = info_maps[l][sku]
-            
             row = generator.create_product_row(product, info_by_lang, images, country_config.locale)
             product_rows.append(row)
     
-    print(f"✅ Created {len(product_rows)} product rows (multiple languages)")
+    print(f"✅ Created {len(product_rows)} product rows ({len(valid_products)} products × {len(all_countries)} locales)")
     
     # Generate per-country offer feeds
     print("\n💰 Creating per-country offer feeds...")
@@ -566,13 +604,15 @@ def main():
     print("=" * 70)
     print(f"\n📦 ONE Product Feed (all languages):")
     print(f"   {product_file} ({len(product_rows)} rows = {len(valid_products)} products × {len(all_countries)} languages)")
-    print(f"   Upload manually to Kaufland - contains ALL translations!")
+    print(f"   ✅ Proper EAN format (no scientific notation)")
+    print(f"   ✅ UTF-8 encoding with BOM")
+    print(f"   ✅ Images & dimensions for ALL locales")
     
     print(f"\n💰 Offer Feeds (per country):")
     for country_code, count in offer_counts.items():
         country = all_countries[country_code]
         print(f"   kaufland_offers_{country_code.lower()}.csv - {count} offers ({country.currency})")
-    print(f"   Auto-upload 3x daily - NO translation needed!")
+        print(f"      ✅ ID_offer uses EAN: PPE-{'{EAN}'}")
     
     print(f"\n🌐 URLs:")
     print(f"   📦 https://poppulseemporium.github.io/kaufland-feed/{product_file}")
@@ -580,7 +620,7 @@ def main():
         print(f"   💰 https://poppulseemporium.github.io/kaufland-feed/kaufland_offers_{country_code.lower()}.csv")
     
     print(f"\n📋 Setup:")
-    print(f"   1. Upload {product_file} manually to Kaufland (rare)")
+    print(f"   1. Upload {product_file} manually to Kaufland (all languages included!)")
     print(f"   2. Configure auto-upload for offer files per country")
     print(f"   3. Done! Offers update 3x daily automatically")
 
