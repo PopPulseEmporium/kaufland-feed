@@ -397,8 +397,8 @@ def main():
     base_price = 0.25
     max_price_limit_eur = 400.0
     min_price_limit_eur = 15
-    max_price_limit = max_price_limit_eur * currency_info['rate']
-    min_price_limit = min_price_limit_eur * currency_info['rate']
+    max_price_limit = max_price_limit_eur
+    min_price_limit = min_price_limit_eur
     max_content_volume = 180000
     max_weight = 35.0
     sample_size = 25000  # Production sample size
@@ -579,7 +579,7 @@ def main():
             continue
 
         min_price_eur = min_price_limit
-        min_price_local = min_price_eur * currency_info['rate']
+        min_price_local = min_price_limit
         if price_local < min_price_local:
             validation_stats['price_too_low'] += 1  # Add this to validation_stats dict
             continue
