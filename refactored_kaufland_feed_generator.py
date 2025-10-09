@@ -34,16 +34,19 @@ class CountryConfig:
     rate: float
 
     @classmethod
-    def get(cls, country_code: str) -> Optional['CountryConfig']:
-        configs = {
+    def get_all_countries(cls) -> Dict[str, 'CountryConfig']:
+        """Get all country configurations"""
+        return {
             'AT': cls('de-AT', 'de', 'Austria', 'EUR', 1.0),
             'DE': cls('de-DE', 'de', 'Germany', 'EUR', 1.0),
-            'IT': cls('it-IT', 'it', 'Italy', 'EUR', 1.0),
             'SK': cls('sk-SK', 'sk', 'Slovakia', 'EUR', 1.0),
             'PL': cls('pl-PL', 'pl', 'Poland', 'PLN', 4.5),
             'CZ': cls('cs-CZ', 'cs', 'Czech Republic', 'CZK', 24.0)
         }
-        return configs.get(country_code.upper())
+
+    @classmethod
+    def get(cls, country_code: str) -> Optional['CountryConfig']:
+        return cls.get_all_countries().get(country_code.upper())
 
 
 class BigBuyAPI:
@@ -87,7 +90,7 @@ class BigBuyAPI:
         return filtered[:limit]
 
     def get_category_data(self, taxonomy_id: int, language: str) -> Dict:
-        """Get all data for a category in one call structure"""
+        """Get all data for a category"""
         return {
             'products': self._request(f"/rest/catalog/products.json?parentTaxonomy={taxonomy_id}") or [],
             'variations': self._request(f"/rest/catalog/productsvariations.json?parentTaxonomy={taxonomy_id}") or [],
@@ -103,11 +106,11 @@ class StockCalculator:
     
     @staticmethod
     def calculate_safe_quantity(bigbuy_stock: int) -> int:
-        """Apply safety margins to prevent overselling - min 2 units in feed"""
+        """Apply safety margins - min 2 units in feed"""
         if bigbuy_stock <= 2:
-            return 0  # Reject products with only 1-2 units
+            return 0
         elif bigbuy_stock <= 5:
-            return 2  # List 2 if they have 3-5
+            return 2
         elif bigbuy_stock <= 10:
             return min(5, bigbuy_stock - 2)
         elif bigbuy_stock <= 20:
@@ -121,9 +124,8 @@ class StockCalculator:
 class ProductValidator:
     """Validate products against Kaufland requirements"""
     
-    def __init__(self, config: Config, country_config: CountryConfig):
+    def __init__(self, config: Config):
         self.config = config
-        self.country = country_config
         self.stats = {
             'total': 0, 'invalid_ean': 0, 'not_new': 0,
             'no_stock': 0, 'no_info': 0, 'price_high': 0,
@@ -132,7 +134,7 @@ class ProductValidator:
         }
 
     def validate(self, product: Dict, info: Dict, total_stock: int) -> Tuple[bool, str]:
-        """Validate product against all rules"""
+        """Validate product against all rules (price in EUR)"""
         self.stats['total'] += 1
         
         # EAN validation
@@ -146,7 +148,7 @@ class ProductValidator:
             self.stats['not_new'] += 1
             return False, "Not NEW condition"
         
-        # Stock check (require at least 3 to list 2)
+        # Stock check
         if total_stock <= 2:
             self.stats['no_stock'] += 1
             return False, "Insufficient stock"
@@ -170,27 +172,21 @@ class ProductValidator:
             self.stats['volume_high'] += 1
             return False, f"Volume too high: {volume}cm³"
         
-        # Price check
-        price = self._calculate_price(float(product.get('wholesalePrice', 0) or 0))
-        max_price = self.config.max_price_eur * self.country.rate
-        min_price = self.config.min_price_eur * self.country.rate
+        # Price check (in EUR)
+        wholesale_eur = float(product.get('wholesalePrice', 0) or 0)
+        price_eur = (wholesale_eur * (1 + self.config.vat) * 
+                    (1 + self.config.margin) + self.config.base_price)
         
-        if price > max_price:
+        if price_eur > self.config.max_price_eur:
             self.stats['price_high'] += 1
-            return False, f"Price too high: {price}"
+            return False, f"Price too high: {price_eur}"
         
-        if price < min_price:
+        if price_eur < self.config.min_price_eur:
             self.stats['price_low'] += 1
-            return False, f"Price too low: {price}"
+            return False, f"Price too low: {price_eur}"
         
         self.stats['valid'] += 1
         return True, "Valid"
-
-    def _calculate_price(self, wholesale_eur: float) -> float:
-        """Calculate final price in local currency"""
-        price_eur = (wholesale_eur * (1 + self.config.vat) * 
-                    (1 + self.config.margin) + self.config.base_price)
-        return price_eur * self.country.rate
 
 
 class DataAggregator:
@@ -264,15 +260,17 @@ class DataAggregator:
 class FeedGenerator:
     """Generate Kaufland-compliant feeds"""
     
-    def __init__(self, config: Config, country_config: CountryConfig):
+    def __init__(self, config: Config):
         self.config = config
-        self.country = country_config
 
-    def create_product_row(self, product: Dict, info: Dict, images: List) -> Dict:
-        """Create product catalog row (for manual upload with translations)"""
+    def create_product_row(self, product: Dict, info_by_lang: Dict, 
+                          images: List, locale: str) -> Dict:
+        """Create product catalog row for specific locale"""
+        info = info_by_lang.get(locale.split('-')[0], {})  # Get language from locale
+        
         return {
             'ean': str(product.get('ean13', '')),
-            'locale': self.country.locale,
+            'locale': locale,
             'title': (info.get('name', 'Product') or 'Product')[:100],
             'description': (info.get('description', '') or '')[:5000],
             'short_description': (info.get('description', '') or '')[:500],
@@ -289,30 +287,28 @@ class FeedGenerator:
             'height': str(round(float(product.get('height', 0) or 0), 2))
         }
 
-    def create_offer_row(self, product: Dict, quantity: int) -> Dict:
-        """Create offer row (for automatic upload - no translation needed)"""
-        price = self._calculate_price(float(product.get('wholesalePrice', 0) or 0))
+    def create_offer_row(self, product: Dict, quantity: int, 
+                        country_config: CountryConfig) -> Dict:
+        """Create offer row for specific country"""
+        wholesale_eur = float(product.get('wholesalePrice', 0) or 0)
+        price_eur = (wholesale_eur * (1 + self.config.vat) * 
+                    (1 + self.config.margin) + self.config.base_price)
+        price_local = price_eur * country_config.rate
         
         return {
             'ean': str(product.get('ean13', '')),
             'id_offer': str(product.get('sku', '')),
-            'condition': '100',  # Kaufland code: 100 = new
-            'price': str(round(price, 2)),
-            'currency': self.country.currency,
+            'condition': '100',
+            'price': str(round(price_local, 2)),
+            'currency': country_config.currency,
             'quantity': str(quantity),
             'handling_time': '2',
             'delivery_time_min': '3',
             'delivery_time_max': '8'
         }
 
-    def _calculate_price(self, wholesale_eur: float) -> float:
-        """Calculate final price"""
-        price_eur = (wholesale_eur * (1 + self.config.vat) * 
-                    (1 + self.config.margin) + self.config.base_price)
-        return price_eur * self.country.rate
-
     def save_csv(self, data: List[Dict], filename: str, separator: str = ';') -> bool:
-        """Save CSV file with Kaufland format (semicolon separator)"""
+        """Save CSV file with Kaufland format"""
         try:
             with open(filename, 'w', newline='', encoding='utf-8') as f:
                 writer = csv.DictWriter(f, fieldnames=data[0].keys(), delimiter=separator)
@@ -324,31 +320,23 @@ class FeedGenerator:
             print(f"❌ CSV Error: {e}")
             return False
 
-    def save_json(self, product_count: int, offer_count: int, stats: Dict, 
-                  filename: str, product_file: str, offer_file: str) -> bool:
+    def save_json(self, product_count: int, offer_counts: Dict, stats: Dict, 
+                  filename: str) -> bool:
         """Save metadata JSON"""
         try:
             info = {
                 "last_updated": datetime.now().isoformat(),
+                "feed_type": "MULTI_LANGUAGE_PRODUCT_SEPARATED_OFFERS",
                 "product_count": product_count,
-                "offer_count": offer_count,
+                "offer_counts": offer_counts,
                 "validation_stats": stats,
                 "stock_validation_enabled": True,
                 "min_stock_in_feed": 2,
                 "max_price_eur": self.config.max_price_eur,
                 "min_price_eur": self.config.min_price_eur,
-                "max_volume": self.config.max_volume_cm3,
-                "max_weight": self.config.max_weight_kg,
-                "currency": self.country.currency,
-                "currency_rate": self.country.rate,
-                "margin": f"{self.config.margin*100:.0f}%",
-                "country": self.country.name,
-                "locale": self.country.locale,
-                "product_feed_url": f"https://poppulseemporium.github.io/kaufland-feed/{product_file}",
-                "offer_feed_url": f"https://poppulseemporium.github.io/kaufland-feed/{offer_file}",
-                "feed_type": "SEPARATED",
-                "product_feed_info": "Upload manually with translations for product catalog",
-                "offer_feed_info": "Auto-upload 3x daily for price/stock updates - NO translation needed"
+                "countries": list(offer_counts.keys()),
+                "product_feed_info": "ONE file with ALL languages - upload manually",
+                "offer_feed_info": "SEPARATE files per country for FX - auto-upload 3x daily"
             }
             
             with open(filename, 'w') as f:
@@ -359,120 +347,10 @@ class FeedGenerator:
             print(f"❌ JSON Error: {e}")
             return False
 
-    def save_html(self, product_data: List[Dict], offer_data: List[Dict], 
-                  stats: Dict, filename: str, product_file: str, offer_file: str) -> bool:
-        """Save HTML dashboard"""
-        try:
-            prices = [float(row['price']) for row in offer_data]
-            min_price = min(prices) if prices else 0
-            max_price = max(prices) if prices else 0
-            
-            html = f"""<!DOCTYPE html>
-<html lang="{self.country.language}">
-<head>
-    <meta charset="UTF-8">
-    <title>Kaufland Feeds - {self.country.name}</title>
-    <style>
-        body {{ font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }}
-        .header {{ background: #667eea; color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px; text-align: center; }}
-        .feed-type {{ background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0; }}
-        .stats {{ display: flex; gap: 20px; margin: 20px 0; flex-wrap: wrap; }}
-        .stat-box {{ background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 150px; }}
-        .stat-number {{ font-size: 28px; font-weight: bold; color: #667eea; }}
-        .stat-label {{ font-size: 14px; color: #666; margin-top: 5px; }}
-        .feed-url {{ background: white; padding: 15px; border-radius: 5px; margin: 10px 0; font-family: monospace; word-break: break-all; }}
-        .important {{ background: #fff3cd; padding: 15px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #ffc107; }}
-        table {{ border-collapse: collapse; width: 100%; background: white; border-radius: 10px; margin-top: 20px; }}
-        th, td {{ border: 1px solid #ddd; padding: 12px; text-align: left; }}
-        th {{ background: #667eea; color: white; }}
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>🛍️ Kaufland Separated Feeds</h1>
-        <p><strong>Pop Pulse Emporium - {self.country.name}</strong></p>
-        <p>{datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
-    </div>
-    
-    <div class="important">
-        <h3>⚠️ Important: Two Separate Feeds</h3>
-        <p><strong>This setup uses SEPARATED product and offer feeds:</strong></p>
-        <ul>
-            <li>📦 <strong>Product Feed:</strong> Upload manually (rare) - contains translations</li>
-            <li>💰 <strong>Offer Feed:</strong> Auto-upload 3x daily - just prices/stock, NO translation needed</li>
-        </ul>
-    </div>
-    
-    <div class="stats">
-        <div class="stat-box">
-            <div class="stat-number">{len(product_data):,}</div>
-            <div class="stat-label">Products</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-number">{len(offer_data):,}</div>
-            <div class="stat-label">Offers</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-number">{self.country.currency}{min_price:.2f}</div>
-            <div class="stat-label">Min Price</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-number">{self.country.currency}{max_price:.2f}</div>
-            <div class="stat-label">Max Price</div>
-        </div>
-    </div>
-    
-    <div class="feed-type">
-        <h3>📦 Product Feed (Manual Upload)</h3>
-        <p><strong>File:</strong> {product_file}</p>
-        <div class="feed-url">https://poppulseemporium.github.io/kaufland-feed/{product_file}</div>
-        <p><strong>Contains:</strong> EAN, locale, title, description, images, category (with translations)</p>
-        <p><strong>Upload:</strong> Manually via Kaufland Seller Portal when products change</p>
-        <p><strong>Format:</strong> Semicolon-separated CSV, UTF-8</p>
-    </div>
-    
-    <div class="feed-type">
-        <h3>💰 Offer Feed (Automatic Upload)</h3>
-        <p><strong>File:</strong> {offer_file}</p>
-        <div class="feed-url">https://poppulseemporium.github.io/kaufland-feed/{offer_file}</div>
-        <p><strong>Contains:</strong> EAN, SKU, price, stock, condition (NO translations needed!)</p>
-        <p><strong>Upload:</strong> Automatically 3x daily (set in Kaufland)</p>
-        <p><strong>Schedule:</strong> 02:00, 10:00, 18:00 (Italy time)</p>
-        <p><strong>Format:</strong> Semicolon-separated CSV, UTF-8</p>
-    </div>
-    
-    <h3>📊 Sample Products</h3>
-    <table>
-        <tr><th>EAN</th><th>SKU</th><th>Title</th><th>Price</th><th>Stock</th></tr>"""
-            
-            for i, (prod, offer) in enumerate(zip(product_data[:20], offer_data[:20])):
-                title = prod['title'][:50] + '...' if len(prod['title']) > 50 else prod['title']
-                html += f"""
-        <tr>
-            <td>{prod['ean']}</td>
-            <td>{offer['id_offer']}</td>
-            <td>{title}</td>
-            <td>{offer['currency']}{offer['price']}</td>
-            <td><strong>{offer['quantity']}</strong></td>
-        </tr>"""
-            
-            html += """
-    </table>
-</body>
-</html>"""
-            
-            with open(filename, 'w', encoding='utf-8') as f:
-                f.write(html)
-            print(f"✅ Created {filename}")
-            return True
-        except Exception as e:
-            print(f"❌ HTML Error: {e}")
-            return False
-
 
 def main():
-    """Main execution"""
-    print("🚀 KAUFLAND SEPARATED FEED GENERATOR")
+    """Main execution - generates multi-language product feed + per-country offers"""
+    print("🚀 KAUFLAND MULTI-LANGUAGE FEED GENERATOR")
     print("=" * 70)
     
     # Get API key
@@ -481,23 +359,17 @@ def main():
         print("❌ BIGBUY_API_KEY environment variable not set")
         return
     
-    # Get country configuration
-    country_code = os.getenv('COUNTRY_CODE', 'IT').upper()
-    country_config = CountryConfig.get(country_code)
-    if not country_config:
-        print(f"❌ Unsupported country: {country_code}")
-        return
+    # Get all country configurations
+    all_countries = CountryConfig.get_all_countries()
     
-    print(f"🌍 Country: {country_config.name}")
-    print(f"💱 Currency: {country_config.currency}")
-    print(f"🗣️ Language: {country_config.language}")
+    print(f"🌍 Generating feeds for: {', '.join(all_countries.keys())}")
     
     # Initialize components
     config = Config()
     api = BigBuyAPI(api_key)
-    validator = ProductValidator(config, country_config)
+    validator = ProductValidator(config)
     aggregator = DataAggregator()
-    generator = FeedGenerator(config, country_config)
+    generator = FeedGenerator(config)
     stock_calc = StockCalculator()
     
     # Set random seed
@@ -513,52 +385,84 @@ def main():
     
     print(f"📊 Processing {len(categories)} categories")
     
-    # Collect all data
+    # Collect data for ALL languages
     all_products = []
-    all_data = {'info': [], 'images': [], 'stock': [], 'var_stock': [], 'variations': []}
+    all_data_by_lang = {}
     
-    print("\n🔄 Collecting data...")
-    for i, category in enumerate(categories, 1):
-        print(f"  {i}/{len(categories)}: {category['name']}")
+    print("\n🔄 Collecting data for all languages...")
+    
+    # Collect for each language
+    for country_code, country_config in all_countries.items():
+        lang = country_config.language
+        if lang in all_data_by_lang:
+            print(f"  ⏭️ Skipping {country_code} - already have {lang} data")
+            continue
         
-        data = api.get_category_data(category['id'], country_config.language)
+        print(f"  📚 Collecting {lang} ({country_code})...")
+        all_data_by_lang[lang] = {'info': [], 'images': [], 'stock': [], 'var_stock': [], 'variations': []}
         
-        # Limit products per category
-        products = data['products'][:config.products_per_category]
-        random.shuffle(products)
-        all_products.extend(products)
-        
-        all_data['info'].extend(data['info'])
-        all_data['images'].extend(data['images'])
-        all_data['stock'].extend(data['stock'])
-        all_data['var_stock'].extend(data['var_stock'])
-        all_data['variations'].extend(data['variations'])
-        
-        time.sleep(0.5)
+        for i, category in enumerate(categories, 1):
+            if i % 5 == 0:
+                print(f"     Category {i}/{len(categories)}...")
+            
+            data = api.get_category_data(category['id'], lang)
+            
+            # Collect products only once (from first language)
+            if not all_products:
+                products = data['products'][:config.products_per_category]
+                random.shuffle(products)
+                all_products.extend(products)
+            
+            all_data_by_lang[lang]['info'].extend(data['info'])
+            all_data_by_lang[lang]['images'].extend(data['images'])
+            all_data_by_lang[lang]['stock'].extend(data['stock'])
+            all_data_by_lang[lang]['var_stock'].extend(data['var_stock'])
+            all_data_by_lang[lang]['variations'].extend(data['variations'])
+            
+            time.sleep(0.3)
     
     print(f"✅ Collected {len(all_products)} products")
+    print(f"✅ Collected data for languages: {', '.join(all_data_by_lang.keys())}")
     
-    # Build lookup maps
-    prod_stock, var_stock = aggregator.build_stock_map(all_data['stock'], all_data['var_stock'])
-    info_map = aggregator.build_info_map(all_data['info'])
-    image_map = aggregator.build_image_map(all_data['images'])
-    variation_map = aggregator.build_variation_map(all_data['variations'])
+    # Use German data for building maps (any language works for stock/images)
+    de_data = all_data_by_lang.get('de', all_data_by_lang[list(all_data_by_lang.keys())[0]])
+    
+    prod_stock, var_stock = aggregator.build_stock_map(de_data['stock'], de_data['var_stock'])
+    image_map = aggregator.build_image_map(de_data['images'])
+    variation_map = aggregator.build_variation_map(de_data['variations'])
+    
+    # Build info maps for each language
+    info_maps = {}
+    for lang, data in all_data_by_lang.items():
+        info_maps[lang] = aggregator.build_info_map(data['info'])
     
     print(f"📊 Stock entries: {len(prod_stock)} products, {len(var_stock)} variations")
     
     # Process products
     print("\n🔍 Validating products...")
-    product_data = []
-    offer_data = []
+    valid_products = []
     seen_eans = set()
     random.shuffle(all_products)
     
     for product in all_products:
-        if len(product_data) >= config.sample_size:
+        if len(valid_products) >= config.sample_size:
             break
         
         sku = product.get('sku')
-        if not sku or sku not in info_map:
+        if not sku:
+            continue
+        
+        # Check if we have info in at least one language
+        has_info = any(sku in info_maps[lang] for lang in info_maps)
+        if not has_info:
+            continue
+        
+        # Use German info for validation (or first available)
+        info_for_validation = info_maps.get('de', {}).get(sku) or next(
+            (info_maps[lang].get(sku) for lang in info_maps if sku in info_maps[lang]), None
+        )
+        
+        if not info_for_validation:
             continue
         
         # Calculate stock
@@ -567,7 +471,7 @@ def main():
         )
         
         # Validate
-        is_valid, msg = validator.validate(product, info_map[sku], total_stock)
+        is_valid, msg = validator.validate(product, info_for_validation, total_stock)
         if not is_valid:
             continue
         
@@ -582,13 +486,11 @@ def main():
         if safe_qty <= 0:
             continue
         
-        # Create rows
-        images = image_map.get(product.get('id'), [])
-        product_row = generator.create_product_row(product, info_map[sku], images)
-        offer_row = generator.create_offer_row(product, safe_qty)
-        
-        product_data.append(product_row)
-        offer_data.append(offer_row)
+        valid_products.append({
+            'product': product,
+            'quantity': safe_qty,
+            'images': image_map.get(product.get('id'), [])
+        })
         
         if validator.stats['total'] % 1000 == 0:
             print(f"  Processed {validator.stats['total']:,}, found {validator.stats['valid']:,} valid")
@@ -599,48 +501,88 @@ def main():
         if value > 0:
             print(f"   {key}: {value:,}")
     
-    if not product_data:
+    if not valid_products:
         print("❌ No valid products found")
         return
     
-    print(f"\n✅ {len(product_data)} products ready")
-    print(f"✅ {len(offer_data)} offers ready")
+    print(f"\n✅ {len(valid_products)} valid products")
     
-    # Generate filenames
-    suffix = '' if country_code == 'IT' else f'_{country_code.lower()}'
-    product_file = f'kaufland_products{suffix}.csv'
-    offer_file = f'kaufland_offers{suffix}.csv'
-    html_file = f'index{suffix}.html'
-    json_file = f'feed_info{suffix}.json'
+    # Generate multi-language product feed
+    print("\n📦 Creating multi-language product feed...")
+    product_rows = []
+    
+    for item in valid_products:
+        product = item['product']
+        images = item['images']
+        
+        # Create one row per language/locale
+        for country_code, country_config in all_countries.items():
+            lang = country_config.language
+            
+            # Get info for this language
+            info_by_lang = {}
+            for l in info_maps:
+                sku = product.get('sku')
+                if sku in info_maps[l]:
+                    info_by_lang[l] = info_maps[l][sku]
+            
+            row = generator.create_product_row(product, info_by_lang, images, country_config.locale)
+            product_rows.append(row)
+    
+    print(f"✅ Created {len(product_rows)} product rows (multiple languages)")
+    
+    # Generate per-country offer feeds
+    print("\n💰 Creating per-country offer feeds...")
+    offer_data_by_country = {}
+    
+    for country_code, country_config in all_countries.items():
+        offers = []
+        for item in valid_products:
+            offer_row = generator.create_offer_row(item['product'], item['quantity'], country_config)
+            offers.append(offer_row)
+        offer_data_by_country[country_code] = offers
+        print(f"✅ {country_code}: {len(offers)} offers")
     
     # Save files
-    print("\n📁 Creating files...")
-    generator.save_csv(product_data, product_file, separator=';')
-    generator.save_csv(offer_data, offer_file, separator=';')
-    generator.save_json(len(product_data), len(offer_data), validator.stats, 
-                       json_file, product_file, offer_file)
-    generator.save_html(product_data, offer_data, validator.stats, 
-                       html_file, product_file, offer_file)
+    print("\n📁 Saving files...")
+    
+    # Save single multi-language product feed
+    product_file = 'kaufland_products_all.csv'
+    generator.save_csv(product_rows, product_file, separator=';')
+    
+    # Save per-country offer feeds
+    offer_counts = {}
+    for country_code, offers in offer_data_by_country.items():
+        offer_file = f'kaufland_offers_{country_code.lower()}.csv'
+        generator.save_csv(offers, offer_file, separator=';')
+        offer_counts[country_code] = len(offers)
+    
+    # Save metadata
+    generator.save_json(len(valid_products), offer_counts, validator.stats, 'feed_info.json')
     
     # Summary
     print("\n" + "=" * 70)
-    print("🎉 SEPARATED FEEDS GENERATION COMPLETE")
+    print("🎉 MULTI-LANGUAGE FEED GENERATION COMPLETE")
     print("=" * 70)
-    print(f"📦 Product Feed: {product_file} ({len(product_data)} products)")
-    print(f"💰 Offer Feed: {offer_file} ({len(offer_data)} offers)")
-    print(f"\n📋 Upload Instructions:")
-    print(f"   1. Product Feed (manual, rare): Upload {product_file} to Kaufland")
-    print(f"      - Contains translations in {country_config.language}")
-    print(f"      - Upload when products change or weekly")
-    print(f"   2. Offer Feed (automatic, 3x daily): Set auto-upload for {offer_file}")
-    print(f"      - Times: 02:00, 10:00, 18:00 (Italy time)")
-    print(f"      - NO translation needed - just price/stock!")
-    print(f"\n🌐 Feed URLs:")
+    print(f"\n📦 ONE Product Feed (all languages):")
+    print(f"   {product_file} ({len(product_rows)} rows = {len(valid_products)} products × {len(all_countries)} languages)")
+    print(f"   Upload manually to Kaufland - contains ALL translations!")
+    
+    print(f"\n💰 Offer Feeds (per country):")
+    for country_code, count in offer_counts.items():
+        country = all_countries[country_code]
+        print(f"   kaufland_offers_{country_code.lower()}.csv - {count} offers ({country.currency})")
+    print(f"   Auto-upload 3x daily - NO translation needed!")
+    
+    print(f"\n🌐 URLs:")
     print(f"   📦 https://poppulseemporium.github.io/kaufland-feed/{product_file}")
-    print(f"   💰 https://poppulseemporium.github.io/kaufland-feed/{offer_file}")
-    print(f"   🌐 https://poppulseemporium.github.io/kaufland-feed/{html_file}")
-    print(f"\n✅ Format: Semicolon-separated (;) CSV, UTF-8 encoding")
-    print(f"✅ All products have stock ≥2 units for safety")
+    for country_code in offer_counts:
+        print(f"   💰 https://poppulseemporium.github.io/kaufland-feed/kaufland_offers_{country_code.lower()}.csv")
+    
+    print(f"\n📋 Setup:")
+    print(f"   1. Upload {product_file} manually to Kaufland (rare)")
+    print(f"   2. Configure auto-upload for offer files per country")
+    print(f"   3. Done! Offers update 3x daily automatically")
 
 
 if __name__ == "__main__":
