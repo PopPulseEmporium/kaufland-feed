@@ -1,4 +1,5 @@
 name: Aggiorna Feed Kaufland Germany
+
 on:
   schedule:
     - cron: '25 */24 * * *'  # Ogni 24 ore (offset di 25 min)
@@ -43,36 +44,31 @@ jobs:
           echo "=== File sizes ==="
           if [ -f "kaufland_feed_de.csv" ]; then
             wc -l kaufland_feed_de.csv
-            echo "First few lines of CSV:"
-            head -3 kaufland_feed_de.csv
+            echo "✅ Found kaufland_feed_de.csv with $(wc -l < kaufland_feed_de.csv) lines"
           fi
           if [ -f "feed_info_de.json" ]; then
-            echo "JSON info content:"
-            cat feed_info_de.json
+            echo "✅ Found feed_info_de.json"
+          fi
+          if [ -f "index_de.html" ]; then
+            echo "✅ Found index_de.html"
           fi
       
-      - name: Commit feed Germany con retry
+      - name: Commit feed Germany
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          # Clean up any unstaged changes first
-          git stash --include-untracked || true
+          # Pull latest changes (no stash needed - files are new/modified)
+          git pull origin main --rebase || true
           
-          # Pull latest changes
-          git pull origin main || git pull origin master || true
-          
-          # Apply stash if it exists
-          git stash pop || true
-          
-          # Add Germany-specific files only if they exist
+          # Verify files exist
           files_to_add=""
           
           if [ -f "kaufland_feed_de.csv" ]; then
             lines=$(wc -l < kaufland_feed_de.csv)
             if [ "$lines" -gt 1 ]; then
               files_to_add="$files_to_add kaufland_feed_de.csv"
-              echo "✅ Found kaufland_feed_de.csv with $lines lines"
+              echo "✅ Will commit kaufland_feed_de.csv with $lines lines"
             else
               echo "❌ kaufland_feed_de.csv exists but is empty"
               exit 1
@@ -84,62 +80,72 @@ jobs:
           
           if [ -f "index_de.html" ]; then
             files_to_add="$files_to_add index_de.html"
-            echo "✅ Found index_de.html"
-          else
-            echo "❌ Missing index_de.html"
+            echo "✅ Will commit index_de.html"
           fi
           
           if [ -f "feed_info_de.json" ]; then
             files_to_add="$files_to_add feed_info_de.json"
-            echo "✅ Found feed_info_de.json"
-          else
-            echo "❌ Missing feed_info_de.json"
+            echo "✅ Will commit feed_info_de.json"
           fi
           
+          # Add files to staging
           if [ -n "$files_to_add" ]; then
             git add $files_to_add
+            echo "📦 Files staged for commit"
             
+            # Check if there are actual changes
             if git diff --cached --quiet; then
-              echo "Nessuna modifica per la Germany"
+              echo "ℹ️ Nessuna modifica per la Germany"
             else
-              # Get data fingerprint for commit message
-              fingerprint=""
-              if [ -f "feed_info_de.json" ]; then
-                fingerprint=$(grep -o '"random_seed": [0-9]*' feed_info_de.json | grep -o '[0-9]*')
-              fi
-              
-              # Create commit message with stats
+              # Get stats for commit message
               product_count=""
+              fingerprint=""
+              
               if [ -f "feed_info_de.json" ]; then
-                product_count=$(grep -o '"product_count": [0-9]*' feed_info_de.json | grep -o '[0-9]*')
+                product_count=$(grep -o '"product_count": [0-9]*' feed_info_de.json | grep -o '[0-9]*' | head -1)
+                fingerprint=$(grep -o '"random_seed": [0-9]*' feed_info_de.json | grep -o '[0-9]*' | head -1)
               fi
               
-              commit_msg="Aggiorna feed Germany $(date '+%Y-%m-%d %H:%M:%S')"
+              # Build commit message
+              commit_msg="🇩🇪 Aggiorna feed Germany $(date '+%Y-%m-%d %H:%M')"
               if [ -n "$product_count" ]; then
-                commit_msg="$commit_msg - ${product_count} prodotti validati"
+                commit_msg="$commit_msg - ${product_count} prodotti"
               fi
               if [ -n "$fingerprint" ]; then
                 commit_msg="$commit_msg [seed: $fingerprint]"
               fi
               
-              # Try to commit and push with retry logic
+              # Commit and push with retry
               for i in {1..3}; do
-                if git commit -m "$commit_msg" && git push; then
-                  echo "✅ Feed Germany aggiornato con successo!"
-                  echo "📡 Available at: https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_de.csv"
-                  echo "🌐 HTML page: https://poppulseemporium.github.io/kaufland-feed/index_de.html"
-                  if [ -n "$product_count" ]; then
-                    echo "📊 Products: $product_count with confirmed stock"
+                echo "Tentativo $i/3 di commit e push..."
+                
+                if git commit -m "$commit_msg"; then
+                  if git push; then
+                    echo "✅ Feed Germany aggiornato con successo!"
+                    echo "📡 Feed URL: https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_de.csv"
+                    echo "🌐 HTML page: https://poppulseemporium.github.io/kaufland-feed/index_de.html"
+                    if [ -n "$product_count" ]; then
+                      echo "📊 Products: $product_count with confirmed stock"
+                    fi
+                    exit 0
+                  else
+                    echo "⚠️ Push fallito, tentativo $i/3"
+                    if [ $i -lt 3 ]; then
+                      echo "Pulling latest changes and retrying..."
+                      git reset HEAD~1
+                      git pull origin main --rebase || true
+                      git add $files_to_add
+                      sleep 5
+                    fi
                   fi
-                  break
                 else
-                  echo "❌ Push fallito, tentativo $i/3. Riprovando in 10 secondi..."
-                  sleep 10
-                  git stash --include-untracked || true
-                  git pull origin main || git pull origin master || true
-                  git stash pop || true
+                  echo "❌ Commit fallito"
+                  exit 1
                 fi
               done
+              
+              echo "❌ Push fallito dopo 3 tentativi"
+              exit 1
             fi
           else
             echo "❌ Nessun file Germany generato - controllare il log Python"
