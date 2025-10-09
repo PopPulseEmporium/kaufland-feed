@@ -296,11 +296,23 @@ Product (all languages):
 https://poppulseemporium.github.io/kaufland-feed/kaufland_products_all.csv
 
 Offers per country:
-https://poppulseemporium.github.io/kaufland-feed/kaufland_offers_de.csv
-https://poppulseemporium.github.io/kaufland-feed/kaufland_offers_at.csv
-https://poppulseemporium.github.io/kaufland-feed/kaufland_offers_sk.csv
-https://poppulseemporium.github.io/kaufland-feed/kaufland_offers_pl.csv
-https://poppulseemporium.github.io/kaufland-feed/kaufland_offers_cz.csv
+Germany:
+https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_de.csv
+
+Austria:
+https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_at.csv
+
+Slovakia:
+https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_sk.csv
+
+Poland:
+https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_pl.csv
+
+Czech Republic:
+https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_cz.csv
+
+Italy (default):
+https://poppulseemporium.github.io/kaufland-feed/kaufland_feed.csv
 ```
 
 ### Update Schedule
