@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-10-09T09:20:16.349585",
+  "last_updated": "2025-10-09T10:41:46.551027",
   "feed_type": "MULTI_LANGUAGE_PRODUCT_SEPARATED_OFFERS",
   "product_count": 128,
   "offer_counts": {
@@ -31,6 +31,14 @@
     "SK",
     "PL",
     "CZ"
+  ],
+  "fixes_applied": [
+    "EAN format fixed (no scientific notation)",
+    "Character encoding fixed (UTF-8-sig)",
+    "Images added to all locales",
+    "Dimensions added to all locales",
+    "ID_offer uses EAN instead of SKU",
+    "Fallback to German for missing translations"
   ],
   "product_feed_info": "ONE file with ALL languages - upload manually",
   "offer_feed_info": "SEPARATE files per country for FX - auto-upload 3x daily"
