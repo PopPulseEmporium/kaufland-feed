@@ -12,10 +12,10 @@ from typing import Dict, List, Optional, Tuple
 @dataclass
 class Config:
     """Configuration for feed generation"""
-    margin: float = 0.35
+    margin: float = 0.45
     vat: float = 0.22
     base_price: float = 0.25
-    max_price_eur: float = 400.0
+    max_price_eur: float = 1000.0
     min_price_eur: float = 15.0
     max_volume_cm3: int = 180000
     max_weight_kg: float = 35.0
