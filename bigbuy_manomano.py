@@ -547,19 +547,16 @@ def main():
     print(f"\n✅ {len(csv_rows)} unique products ready")
 
     # Filenames (reuse your naming convention but with 'manomano')
+    # Filenames (use suffixes per country)
     if country_code == 'IT':
-        csv_file = 'manomano_feed.csv'
-        html_file = 'manomano_index.html'
-        json_file = 'manomano_info.json'
+        csv_file  = 'manomano_feed_it.csv'
+        html_file = 'manomano_index_it.html'
+        json_file = 'manomano_info_it.json'
     else:
-        csv_file = f'manomano_feed_{country_code.lower()}.csv'
+        csv_file  = f'manomano_feed_{country_code.lower()}.csv'
         html_file = f'manomano_index_{country_code.lower()}.html'
         json_file = f'manomano_info_{country_code.lower()}.json'
 
-    print("\n📁 Creating files...")
-    generator.save_csv(csv_rows, csv_file)
-    generator.save_json(csv_rows, validator.stats, json_file, csv_file)
-    generator.save_html(csv_rows, validator.stats, html_file, csv_file)
 
     print("\n" + "=" * 70)
     print("🎉 FEED GENERATION COMPLETE")
