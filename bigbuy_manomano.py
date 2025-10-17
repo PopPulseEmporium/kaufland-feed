@@ -77,7 +77,6 @@ class BigBuyAPI:
         result = self._request("/rest/catalog/taxonomies.json?firstLevel")
         if not result:
             return []
-        # filter adult content
         erotic_keywords = ['erotic', 'erotico', 'adult', 'sex', 'sexy', 'intimate', 'lingerie']
         filtered = [t for t in result if not any(kw in t.get('name', '').lower() for kw in erotic_keywords)]
         random.shuffle(filtered)
@@ -132,34 +131,28 @@ class ProductValidator:
     def validate(self, product: Dict, info: Dict, total_stock: int) -> Tuple[bool, str]:
         self.stats['total'] += 1
 
-        # EAN
         ean = str(product.get('ean13', '')).strip()
         if len(ean) != 13 or not ean.isdigit():
             self.stats['invalid_ean'] += 1
             return False, f"Invalid EAN: {ean}"
 
-        # Condition
         if product.get('condition', '').upper() != 'NEW':
             self.stats['not_new'] += 1
             return False, "Not NEW condition"
 
-        # Stock
         if total_stock <= 1:
             self.stats['no_stock'] += 1
             return False, "Insufficient stock"
 
-        # Info
         if not info or len(info.get('name', '').strip()) < 3:
             self.stats['no_info'] += 1
             return False, "Missing product info"
 
-        # Weight
         weight = float(product.get('weight', 0) or 0)
         if weight > self.config.max_weight_kg:
             self.stats['weight_high'] += 1
             return False, f"Weight too high: {weight}kg"
 
-        # Volume
         volume = (float(product.get('width', 0) or 0) *
                   float(product.get('height', 0) or 0) *
                   float(product.get('depth', 0) or 0))
@@ -167,7 +160,6 @@ class ProductValidator:
             self.stats['volume_high'] += 1
             return False, f"Volume too high: {volume}cm³"
 
-        # Price
         price = self._calculate_price(float(product.get('wholesalePrice', 0) or 0))
         max_price = self.config.max_price_eur * self.country.rate
         min_price = self.config.min_price_eur * self.country.rate
@@ -288,22 +280,21 @@ class ManoManoFeedGenerator:
         height = float(product.get('height', 0) or 0)
         volume = width * height * length
 
-        # ManoMano specifics / safe defaults
+        # ManoMano specifics per your request
         min_qty = 1
         increment = 1
         use_grid = 1
         carrier_grid_1 = "standard"
-        shipping_time = "5#7"  # 5–7 days
+        shipping_time = "3#8 "  # NOTE: trailing space kept intentionally
 
         imgs = (images + ["", "", "", "", ""])[:5]
-        brand = "Autres"
 
         return {
             'sku': str(product.get('sku', '')),
             'ean': str(product.get('ean13', '')),
             'sku_manufacturer': str(product.get('sku', '')),
-            'brand': brand,
-            'category': '20204',
+            'brand': "Autres",
+            'category': "20204",
             'title': (info.get('name', 'Product') or 'Product')[:150],
             'description': (info.get('description', '') or '')[:5000],
             'picture_1': imgs[0],
