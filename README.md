@@ -311,8 +311,8 @@ https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_pl.csv
 Czech Republic:
 https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_cz.csv
 
-Italy (default):
-https://poppulseemporium.github.io/kaufland-feed/kaufland_feed.csv
+Italy (ManoMano):
+https://poppulseemporium.github.io/kaufland-feed/manomano_feed_it.csv
 ```
 
 ### Update Schedule
