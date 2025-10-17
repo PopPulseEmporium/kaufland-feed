@@ -291,19 +291,19 @@ class ManoManoFeedGenerator:
         # ManoMano specifics / safe defaults
         min_qty = 1
         increment = 1
-        use_grid = 0
+        use_grid = 1
         carrier_grid_1 = "standard"
-        shipping_time = "3#8"  # 3–8 days
+        shipping_time = "5#7"  # 5–7 days
 
         imgs = (images + ["", "", "", "", ""])[:5]
-        brand = info.get('brand') or "Pop Pulse Emporium"
+        brand = "Autres"
 
         return {
             'sku': str(product.get('sku', '')),
             'ean': str(product.get('ean13', '')),
             'sku_manufacturer': str(product.get('sku', '')),
             'brand': brand,
-            'category': 'Gardening & DIY',
+            'category': '20204',
             'title': (info.get('name', 'Product') or 'Product')[:150],
             'description': (info.get('description', '') or '')[:5000],
             'picture_1': imgs[0],
