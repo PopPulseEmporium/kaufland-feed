@@ -1,4 +1,3 @@
-
 import requests
 import csv
 import json
@@ -9,6 +8,8 @@ from datetime import datetime
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
+
+# ------------------------- Configs -------------------------
 
 @dataclass
 class Config:
@@ -42,10 +43,12 @@ class CountryConfig:
             'IT': cls('it-IT', 'it', 'Italy', 'EUR', 1.0),
             'SK': cls('sk-SK', 'sk', 'Slovakia', 'EUR', 1.0),
             'PL': cls('pl-PL', 'pl', 'Poland', 'PLN', 4.5),
-            'CZ': cls('cs-CZ', 'cs', 'Czech Republic', 'CZK', 24.0)
+            'CZ': cls('cs-CZ', 'cs', 'Czech Republic', 'CZK', 24.0),
         }
         return configs.get(country_code.upper())
 
+
+# ------------------------- API -------------------------
 
 class BigBuyAPI:
     """Simplified BigBuy API client"""
@@ -62,9 +65,9 @@ class BigBuyAPI:
         separator = '&' if '?' in endpoint else '?'
         url = f"{self.base_url}{endpoint}{separator}t={int(time.time())}"
         try:
-            response = requests.get(url, headers=self.headers, timeout=30)
-            response.raise_for_status()
-            return response.json()
+            r = requests.get(url, headers=self.headers, timeout=30)
+            r.raise_for_status()
+            return r.json()
         except requests.exceptions.RequestException as e:
             print(f"❌ API Error ({endpoint}): {e}")
             return None
@@ -74,6 +77,7 @@ class BigBuyAPI:
         result = self._request("/rest/catalog/taxonomies.json?firstLevel")
         if not result:
             return []
+        # filter adult content
         erotic_keywords = ['erotic', 'erotico', 'adult', 'sex', 'sexy', 'intimate', 'lingerie']
         filtered = [t for t in result if not any(kw in t.get('name', '').lower() for kw in erotic_keywords)]
         random.shuffle(filtered)
@@ -90,6 +94,8 @@ class BigBuyAPI:
             'images': self._request(f"/rest/catalog/productsimages.json?parentTaxonomy={taxonomy_id}") or []
         }
 
+
+# ------------------------- Helpers -------------------------
 
 class StockCalculator:
     """Calculate safe stock quantities"""
@@ -112,7 +118,7 @@ class StockCalculator:
 
 
 class ProductValidator:
-    """Validate products"""
+    """Validate products against business rules"""
     def __init__(self, config: Config, country_config: CountryConfig):
         self.config = config
         self.country = country_config
@@ -126,28 +132,34 @@ class ProductValidator:
     def validate(self, product: Dict, info: Dict, total_stock: int) -> Tuple[bool, str]:
         self.stats['total'] += 1
 
+        # EAN
         ean = str(product.get('ean13', '')).strip()
         if len(ean) != 13 or not ean.isdigit():
             self.stats['invalid_ean'] += 1
             return False, f"Invalid EAN: {ean}"
 
+        # Condition
         if product.get('condition', '').upper() != 'NEW':
             self.stats['not_new'] += 1
             return False, "Not NEW condition"
 
+        # Stock
         if total_stock <= 1:
             self.stats['no_stock'] += 1
             return False, "Insufficient stock"
 
+        # Info
         if not info or len(info.get('name', '').strip()) < 3:
             self.stats['no_info'] += 1
             return False, "Missing product info"
 
+        # Weight
         weight = float(product.get('weight', 0) or 0)
         if weight > self.config.max_weight_kg:
             self.stats['weight_high'] += 1
             return False, f"Weight too high: {weight}kg"
 
+        # Volume
         volume = (float(product.get('width', 0) or 0) *
                   float(product.get('height', 0) or 0) *
                   float(product.get('depth', 0) or 0))
@@ -155,14 +167,13 @@ class ProductValidator:
             self.stats['volume_high'] += 1
             return False, f"Volume too high: {volume}cm³"
 
+        # Price
         price = self._calculate_price(float(product.get('wholesalePrice', 0) or 0))
         max_price = self.config.max_price_eur * self.country.rate
         min_price = self.config.min_price_eur * self.country.rate
-
         if price > max_price:
             self.stats['price_high'] += 1
             return False, f"Price too high: {price}"
-
         if price < min_price:
             self.stats['price_low'] += 1
             return False, f"Price too low: {price}"
@@ -238,9 +249,11 @@ class DataAggregator:
         return direct_stock + variation_stock
 
 
+# ------------------------- ManoMano generator -------------------------
+
 class ManoManoFeedGenerator:
     """
-    Generate CSV rows matching ManoMano 27-column format inferred from sample:
+    Generate rows matching ManoMano format:
     ['sku','ean','sku_manufacturer','brand','category','title','description',
      'picture_1','picture_2','picture_3','picture_4','picture_5',
      'product_price_vat_inc','min_quantity','increment','quantity',
@@ -248,6 +261,15 @@ class ManoManoFeedGenerator:
      'weight','length','width','height','DisplayWeight','volume',
      'parent_sku','parent_title']
     """
+    COLS = [
+        'sku','ean','sku_manufacturer','brand','category','title','description',
+        'picture_1','picture_2','picture_3','picture_4','picture_5',
+        'product_price_vat_inc','min_quantity','increment','quantity',
+        'use_grid','carrier_grid_1','shipping_time_carrier_grid_1',
+        'weight','length','width','height','DisplayWeight','volume',
+        'parent_sku','parent_title'
+    ]
+
     def __init__(self, config: Config, country_config: CountryConfig):
         self.config = config
         self.country = country_config
@@ -266,17 +288,14 @@ class ManoManoFeedGenerator:
         height = float(product.get('height', 0) or 0)
         volume = width * height * length
 
-        # ManoMano specifics (defaults chosen to be safe and consistent with your sample)
+        # ManoMano specifics / safe defaults
         min_qty = 1
         increment = 1
-        use_grid = 0  # 0=no grid; 1=use size/color grid (we keep 0 unless you want to group variations)
-        carrier_grid_1 = "standard"  # placeholder: can be mapped to your shipping matrix if you have one
-        shipping_time = f"3#8"  # maps from your delivery_time_min/max
+        use_grid = 0
+        carrier_grid_1 = "standard"
+        shipping_time = "3#8"  # 3–8 days
 
-        # Normalize images to five slots
-        img = (images + ["", "", "", "", ""])[:5]
-
-        # Brand: prefer info brand if available, else your store brand
+        imgs = (images + ["", "", "", "", ""])[:5]
         brand = info.get('brand') or "Pop Pulse Emporium"
 
         return {
@@ -287,11 +306,11 @@ class ManoManoFeedGenerator:
             'category': 'Gardening & DIY',
             'title': (info.get('name', 'Product') or 'Product')[:150],
             'description': (info.get('description', '') or '')[:5000],
-            'picture_1': img[0],
-            'picture_2': img[1],
-            'picture_3': img[2],
-            'picture_4': img[3],
-            'picture_5': img[4],
+            'picture_1': imgs[0],
+            'picture_2': imgs[1],
+            'picture_3': imgs[2],
+            'picture_4': imgs[3],
+            'picture_5': imgs[4],
             'product_price_vat_inc': round(price, 2),
             'min_quantity': min_qty,
             'increment': increment,
@@ -311,17 +330,11 @@ class ManoManoFeedGenerator:
 
     def save_csv(self, rows: List[Dict], filename: str) -> bool:
         try:
-            cols = ['sku','ean','sku_manufacturer','brand','category','title','description',
-                    'picture_1','picture_2','picture_3','picture_4','picture_5',
-                    'product_price_vat_inc','min_quantity','increment','quantity',
-                    'use_grid','carrier_grid_1','shipping_time_carrier_grid_1',
-                    'weight','length','width','height','DisplayWeight','volume',
-                    'parent_sku','parent_title']
             with open(filename, 'w', newline='', encoding='utf-8') as f:
-                writer = csv.DictWriter(f, fieldnames=cols)
-                writer.writeheader()
+                w = csv.DictWriter(f, fieldnames=self.COLS)
+                w.writeheader()
                 for r in rows:
-                    writer.writerow({k: r.get(k, "") for k in cols})
+                    w.writerow({k: r.get(k, "") for k in self.COLS})
             print(f"✅ Created {filename}")
             return True
         except Exception as e:
@@ -385,22 +398,10 @@ class ManoManoFeedGenerator:
  </div>
  <h2>🇪🇺 {self.country.name}</h2>
  <div class="stats">
-   <div class="stat-box">
-     <div class="stat-number">{len(data):,}</div>
-     <div class="stat-label">Valid Products</div>
-   </div>
-   <div class="stat-box">
-     <div class="stat-number">{self.config.margin*100:.0f}%</div>
-     <div class="stat-label">Margin</div>
-   </div>
-   <div class="stat-box">
-     <div class="stat-number">{self.country.currency}{min_price:.2f}</div>
-     <div class="stat-label">Min Price</div>
-   </div>
-   <div class="stat-box">
-     <div class="stat-number">{self.country.currency}{max_price:.2f}</div>
-     <div class="stat-label">Max Price</div>
-   </div>
+   <div class="stat-box"><div class="stat-number">{len(data):,}</div><div class="stat-label">Valid Products</div></div>
+   <div class="stat-box"><div class="stat-number">{self.config.margin*100:.0f}%</div><div class="stat-label">Margin</div></div>
+   <div class="stat-box"><div class="stat-number">{self.country.currency}{min_price:.2f}</div><div class="stat-label">Min Price</div></div>
+   <div class="stat-box"><div class="stat-number">{self.country.currency}{max_price:.2f}</div><div class="stat-label">Max Price</div></div>
  </div>
  <div class="feed-url">
    <h3>📡 Feed URL:</h3>
@@ -433,6 +434,8 @@ class ManoManoFeedGenerator:
             print(f"❌ HTML Error: {e}")
             return False
 
+
+# ------------------------- Main -------------------------
 
 def main():
     print("🚀 MANOMANO FEED GENERATOR (BigBuy)")
@@ -467,7 +470,6 @@ def main():
     if not categories:
         print("❌ No categories found")
         return
-
     print(f"📊 Processing {len(categories)} categories")
 
     all_products = []
@@ -500,12 +502,12 @@ def main():
     print(f"📊 Stock entries: {len(prod_stock)} products, {len(var_stock)} variations")
 
     print("\n🔍 Validating products...")
-    csv_rows = []
+    rows = []
     seen_eans = set()
     random.shuffle(all_products)
 
     for product in all_products:
-        if len(csv_rows) >= config.sample_size:
+        if len(rows) >= config.sample_size:
             break
 
         sku = product.get('sku')
@@ -513,8 +515,7 @@ def main():
             continue
 
         total_stock = aggregator.calculate_total_stock(product, variation_map, prod_stock, var_stock)
-
-        is_valid, msg = validator.validate(product, info_map[sku], total_stock)
+        is_valid, _ = validator.validate(product, info_map[sku], total_stock)
         if not is_valid:
             continue
 
@@ -528,9 +529,12 @@ def main():
             continue
 
         images = image_map.get(product.get('id'), [])
-        row = generator.create_row(product, info_map[sku], images, safe_qty,
-                                   parent_sku=product.get('id'), parent_title=info_map[sku].get('name'))
-        csv_rows.append(row)
+        row = generator.create_row(
+            product, info_map[sku], images, safe_qty,
+            parent_sku=product.get('id'),
+            parent_title=info_map[sku].get('name')
+        )
+        rows.append(row)
 
         if validator.stats['total'] % 1000 == 0:
             print(f"  Processed {validator.stats['total']:,}, found {validator.stats['valid']:,} valid")
@@ -540,28 +544,27 @@ def main():
         if value > 0:
             print(f"   {key}: {value:,}")
 
-    if not csv_rows:
+    if not rows:
         print("❌ No valid products found")
         return
 
-    print(f"\n✅ {len(csv_rows)} unique products ready")
+    print(f"\n✅ {len(rows)} unique products ready")
 
-    # Filenames (reuse your naming convention but with 'manomano')
-    # Filenames (use suffixes per country)
-    if country_code == 'IT':
-        csv_file  = 'manomano_feed_it.csv'
-        html_file = 'manomano_index_it.html'
-        json_file = 'manomano_info_it.json'
-    else:
-        csv_file  = f'manomano_feed_{country_code.lower()}.csv'
-        html_file = f'manomano_index_{country_code.lower()}.html'
-        json_file = f'manomano_info_{country_code.lower()}.json'
+    # Always use _cc suffix (matches your workflow checks)
+    cc = country_code.lower()
+    csv_file  = f'manomano_feed_{cc}.csv'
+    html_file = f'manomano_index_{cc}.html'
+    json_file = f'manomano_info_{cc}.json'
 
+    print("\n📁 Creating files...")
+    generator.save_csv(rows, csv_file)
+    generator.save_json(rows, validator.stats, json_file, csv_file)
+    generator.save_html(rows, validator.stats, html_file, csv_file)
 
     print("\n" + "=" * 70)
     print("🎉 FEED GENERATION COMPLETE")
     print("=" * 70)
-    print(f"📊 Products: {len(csv_rows)}")
+    print(f"📊 Products: {len(rows)}")
     print(f"🌐 Feed URL: https://poppulseemporium.github.io/kaufland-feed/{csv_file}")
     print(f"✅ All products have validated stock and complete data")
 
