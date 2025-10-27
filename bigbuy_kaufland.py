@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Tuple
 @dataclass
 class Config:
     """Configuration for feed generation"""
-    margin: float = 0.35
+    margin: float = 0.45
     vat: float = 0.22
     base_price: float = 0.25
     max_price_eur: float = 1000.0
