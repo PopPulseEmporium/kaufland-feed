@@ -1,0 +1,30 @@
+"Id Booking";Datum;Uhrzeit;Buchungstext;Bestellnummer;Betrag;Saldo;id_order_unit
+1236405651;2025-08-19;17:04:49;"Goods receipt order MHCSE6Q/314567986729703 Armoire Alexandra House Living 101 x 160 x 36 cm 4 étagères Industr...";MHCSE6Q;236,02;236,02;314567986729703
+1236405652;2025-08-19;17:04:49;"Net commission order MHCSE6Q/314567986729703 Armoire Alexandra House Living 101 x 160 x 36 cm 4 étagères Indust...";MHCSE6Q;-30,68;205,34;314567986729703
+1236475704;2025-08-19;20:34:03;"Cancel net commission order MHCSE6Q/314567986729703 Armoire Alexandra House Living 101 x 160 x 36 cm 4 étagères...";MHCSE6Q;30,68;236,02;314567986729703
+1236475705;2025-08-19;20:34:03;"Cancel goods receipt order MHCSE6Q/314567986729703 Armoire Alexandra House Living 101 x 160 x 36 cm 4 étagères ...";MHCSE6Q;-236,02;0,00;314567986729703
+1246391188;2025-09-12;10:38:43;"Goods receipt order MYHK3FQ/314567988105600 Royal canin chatons stérilisés croquettes pour chatons volaille, ri...";MYHK3FQ;65,85;65,85;314567988105600
+1246391189;2025-09-12;10:38:43;"Net commission order MYHK3FQ/314567988105600 Royal canin chatons stérilisés croquettes pour chatons volaille, r...";MYHK3FQ;-9,22;56,63;314567988105600
+1247346900;2025-09-15;08:09:37;"Cancel net commission order MYHK3FQ/314567988105600 Royal canin chatons stérilisés croquettes pour chatons vola...";MYHK3FQ;9,22;65,85;314567988105600
+1247346902;2025-09-15;08:09:37;"Cancel goods receipt order MYHK3FQ/314567988105600 Royal canin chatons stérilisés croquettes pour chatons volai...";MYHK3FQ;-65,85;0,00;314567988105600
+1253592846;2025-09-30;12:46:23;"Goods receipt order MW8DTLQ/314567989131619 Mattel Jurassic World : Indominus Rex, Multicolore (HNT63) MATTEL";MW8DTLQ;78,14;78,14;314567989131619
+1253592847;2025-09-30;12:46:23;"Net commission order MW8DTLQ/314567989131619 Mattel Jurassic World : Indominus Rex, Multicolore (HNT63) MATTEL";MW8DTLQ;-10,16;67,98;314567989131619
+1259668029;2025-10-14;21:37:28;"Goods receipt order M3Y1UGQ/314567989990568 Verre luminarc pure verre vert verre 750 ml (6 pièces)";M3Y1UGQ;38,87;106,85;314567989990568
+1259668030;2025-10-14;21:37:28;"Net commission order M3Y1UGQ/314567989990568 Verre luminarc pure verre vert verre 750 ml (6 pièces)";M3Y1UGQ;-5,44;101,41;314567989990568
+1259727155;2025-10-15;06:28:38;"Cancel net commission order M3Y1UGQ/314567989990568 Verre luminarc pure verre vert verre 750 ml (6 pièces)";M3Y1UGQ;5,44;106,85;314567989990568
+1259727156;2025-10-15;06:28:38;"Cancel goods receipt order M3Y1UGQ/314567989990568 Verre luminarc pure verre vert verre 750 ml (6 pièces)";M3Y1UGQ;-38,87;67,98;314567989990568
+1259974160;2025-10-15;15:08:52;"Goods receipt order MT9QEGQ/314567990027031 Tresse tubulaire pour emballage Fun&Go Universal-100 rouge 25 m";MT9QEGQ;25,82;93,80;314567990027031
+1259974161;2025-10-15;15:08:52;"Net commission order MT9QEGQ/314567990027031 Tresse tubulaire pour emballage Fun&Go Universal-100 rouge 25 m";MT9QEGQ;-3,61;90,19;314567990027031
+1261476015;2025-10-19;15:31:54;"Goods receipt order MTU1AGQ/314567990257915 Trixie Pièce détachée pour 13108";MTU1AGQ;38,56;128,75;314567990257915
+1261476016;2025-10-19;15:31:54;"Net commission order MTU1AGQ/314567990257915 Trixie Pièce détachée pour 13108";MTU1AGQ;-5,01;123,74;314567990257915
+1262253670;2025-10-21;09:21:58;"Goods receipt order MQ4WWGQ/314567990371035 Lifetime Ajustable 183x76x91 Cm Table de jardin pliante Blanc Blanc...";MQ4WWGQ;118,33;242,07;314567990371035
+1262253671;2025-10-21;09:21:59;"Net commission order MQ4WWGQ/314567990371035 Lifetime Ajustable 183x76x91 Cm Table de jardin pliante Blanc Blan...";MQ4WWGQ;-15,38;226,69;314567990371035
+1262437965;2025-10-21;14:54:28;"Release order MW8DTLQ/314567989131619 Mattel Jurassic World : Indominus Rex, Multicolore (HNT63) MATTEL";MW8DTLQ;-67,98;158,71;314567989131619
+1263417567;2025-10-23;16:32:59;"Goods receipt order MZWG1SQ/314567990517035 SCS Sentinel - PAF0003 - 2 -ENCERTIF DE AUDIO DE LIGHTS for buildin...";MZWG1SQ;70,42;229,13;314567990517035
+1263417568;2025-10-23;16:32:59;"Net commission order MZWG1SQ/314567990517035 SCS Sentinel - PAF0003 - 2 -ENCERTIF DE AUDIO DE LIGHTS for buildi...";MZWG1SQ;-9,15;219,98;314567990517035
+1263734257;2025-10-24;12:43:44;"Goods receipt order MK5PDSQ/314567990561785 Tresse tubulaire pour emballage Fun&Go Universal-100 rouge 25 m";MK5PDSQ;24,60;244,58;314567990561785
+1263734258;2025-10-24;12:43:44;"Net commission order MK5PDSQ/314567990561785 Tresse tubulaire pour emballage Fun&Go Universal-100 rouge 25 m";MK5PDSQ;-3,44;241,14;314567990561785
+1263994576;2025-10-25;07:01:18;"Goods receipt order MFGE3SQ/314567990600202 Lunettes de soleil Carrera Victory C 02/S 35J/9K";MFGE3SQ;71,51;312,65;314567990600202
+1263994577;2025-10-25;07:01:18;"Net commission order MFGE3SQ/314567990600202 Lunettes de soleil Carrera Victory C 02/S 35J/9K";MFGE3SQ;-10,01;302,64;314567990600202
+1264430937;2025-10-26;12:06:16;"Goods receipt order MA91QSQ/314567990674235 Alcool 96o 1 L (6 pièces)";MA91QSQ;46,59;349,23;314567990674235
+1264430938;2025-10-26;12:06:16;"Net commission order MA91QSQ/314567990674235 Alcool 96o 1 L (6 pièces)";MA91QSQ;-6,06;343,17;314567990674235

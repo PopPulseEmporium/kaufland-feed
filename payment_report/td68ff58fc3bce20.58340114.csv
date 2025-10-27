@@ -1,0 +1,101 @@
+"Id. Ordine",Data,Nome,Cognome,"Riferimento interno","Modalità di pagamento",Totale,"Stato dell'ordine","Data di spedizione","Linee d'ordine","Base imponibile","Supplemento di equivalenza","Spese di spedizione",Tasse,"Costo metodo di pagamento","Azienda della spedizione",Indirizzo,Paese,Provincia,Città,"Codice Postale",Telefono,Corriere,Fattura,Dropshpping
+17692148,2025-09-16,Sylke,Haunold,,adyen,7.39,DELIVERED,2025-09-18,1,18.09,0,10.08,0,0.62,,"Leonore-Brecher-Weg 15/3",Austria,,Wien,1120," 3791585222",GLS,BB25/271336,1
+17692165,2025-09-16,Gerhard,Huber,,paypal,47.82,DELIVERED,2025-09-19,1,49.1,0,0,0,1.28,,"Hinterholz 20",Austria,,Mauthausen,4310," 3791585222","Standard Shipment",BB25/271364,1
+17692175,2025-09-16,Gerhard,Huber,,paypal,47.82,CANCELLED,2025-09-19,1,49.1,0,0,0,1.28,,"Hinterholz 20",Austria,,Mauthausen,4310," 3791585222","Standard Shipment",BB25/270181,1
+17692190,2025-09-16,Juraj,Galajda,,adyen,62.09,DELIVERED,2025-09-19,1,75.45,0,11.88,0,1.48,,"Palárikova 7",Slovakia,,Košice,"040 01"," 914195895",GLS,BB25/272210,1
+17692200,2025-09-16,Tatiana,Evstafeva,,adyen,12.48,DELIVERED,2025-09-18,1,19.72,0,6.6,0,0.64,,"Via Molino 20",Italia,,"Incisa Scapaccino",14045," 3208895989","Postal Service",BB25/272000,1
+17692228,2025-09-16,Valentina,Coppola,,adyen,23.51,DELIVERED,2025-09-19,1,30.919999999999998,0,6.6,0,0.81,,"Via gozzano 11 c prima traversa",Italy,,Lerici,19032," 3288951953","Postal Service",BB25/272726,1
+17693898,2025-09-17,Laura,Kozáková,,adyen,11.05,DELIVERED,2025-09-22,1,20.66,0,8.96,0,0.65,,"Krížová Ves 38",Slovakia,,"Krížová Ves","059 01"," 902109341",GLS,BB25/274088,1
+17693901,2025-09-17,"VS COSTRUZIO",SABATINO,,adyen,15.21,DELIVERED,2025-09-22,1,22.490000000000002,0,6.6,0,0.68,,"VIA TEORA VECCHIA SNC",Italy,,Teora,83056," 3477474346","Postal Service",BB25/272726,1
+17693914,2025-09-17,Justine,Esser,,adyen,20,DELIVERED,2025-09-22,1,27.650000000000002,0,6.89,0,0.76,,"Frankstraße 27a",Germany,,Nettetal,41334," 3791585222","Postal Service",BB25/272471,1
+17694212,2025-09-18,"Pop Pulse Emporium",,0,transferencia,2000,DELIVERED,,1,2000,0,0,0,0,"Pop Pulse Emporium","Viale Iolanda, 128",Italy,71047,Stornara,71047,3791428612,"Pack Servicios",,0
+17694247,2025-09-18,Agnieszka,Dudziak,,adyen,196.17,DELIVERED,2025-09-22,1,208.71999999999997,0,9.07,0,3.48,,"Oleszna Podgórska 23",Poland,,Lubomierz,59-623," 691128209",UPS,BB25/274644,1
+17694253,2025-09-18,Sonja,Kaidisch,,adyen,36.59,DELIVERED,2025-09-22,1,45.17000000000001,0,7.56,0,1.02,,"Bessarabierstraße 25/18",Austria,,Salzburg,5020," 3791585222","Postal Service",BB25/274750,1
+17695360,2025-09-18,Josef,Schattauer,,adyen,15.92,SHIPPED,2025-09-23,1,24.67,0,8.04,0,0.71,,"Uttendorf 6",Austria,,Helpfau-Uttendorf,5261," 3791585222","Postal Service",BB25/274750,1
+17695369,2025-09-18,Milena,Hegerová,,adyen,18.64,DELIVERED,2025-09-23,1,31.23,0,11.78,0,0.81,,"Nemilská 619/7","Czech Republic",,Zábřeh,"789 01"," 737123218",GLS,BB25/275171,1
+17695390,2025-09-18,Pavel,Novák,,adyen,7.11,DELIVERED,2025-09-23,1,13.520000000000001,0,5.86,0,0.55,,"K nemocnici 2814","Czech Republic",,Kladno,"272 01"," 602456545","Postal Service",BB25/274809,1
+17695397,2025-09-18,Viera,Špaňová,,adyen,14.62,DELIVERED,2025-09-22,1,24.29,0,8.96,0,0.71,,"Vetvová 6a",Slovakia,,BRATISLAVA,"811 02"," 948531161",GLS,BB25/273267,1
+17696745,2025-09-19,Karel,Pánek,,monedero,16.67,DELIVERED,2025-09-23,1,22.540000000000003,0,5.87,0,0,,"Vrčeň 128","Czech Republic",,Vrčeň,"335 41"," 725298364","Postal Service",BB25/275512,1
+17697963,2025-09-21,Anna,Bednarska,,monedero,16.67,DELIVERED,2025-09-23,1,25.630000000000003,0,8.96,0,0,,"Orzechowa 59/10",Poland,,Wrocław,50-540," 501193941",GLS,BB25/274534,1
+17697964,2025-09-21,Ragbet,Hamza,,monedero,14.81,DELIVERED,2025-09-22,1,21.380000000000003,0,6.57,0,0,,"Waldhof 1",Germany,,Perl,66706," 3791585222",UPS,BB25/273561,1
+17698420,2025-09-21,FILIPPO,IGUERA,,monedero,56.48,CANCELLED,2025-09-24,1,71.53,0,13.63,0,1.42,,"VIA SAN GIACOMO, 17",Italy,,"Incisa Scapaccino",14045," 3478415842",GLS,BB25/272827,1
+17698432,2025-09-21,Petra,Karabová,,monedero,18.6,DELIVERED,2025-09-24,1,27.560000000000002,0,8.96,0,0,,"Štefunkova 9",Slovakia,,"Bratislava - Ružinov","821 03"," 905985133",GLS,BB25/274834,1
+17698455,2025-09-21,FILIPPO,IGUERA,,monedero,56.48,DELIVERED,2025-09-24,1,70.11,0,13.63,0,0,,"VIA SAN GIACOMO, 17",Italy,,"Incisa Scapaccino",14045," 3478415842",GLS,BB25/274606,1
+17698469,2025-09-21,Johann,Knorr,,monedero,76.14,DELIVERED,2025-09-24,1,83.7,0,7.56,0,0,,"Am Steindl 44",Austria,,"Krems an der Donau",3500," 3791585222","Postal Service",BB25/274880,1
+17698912,2025-09-21,Serif,Kurjakovic,,monedero,6.4,DELIVERED,2025-09-24,1,17.46,0,11.06,0,0,,"Rotkreuzstrasse 61a",Austria,,Lustenau,6890," 3791585222",SEUR,BB25/274880,1
+17698922,2025-09-21,Guntram,Brugger,,monedero,44.67,DELIVERED,2025-09-24,1,64.7,0,20.03,0,0,,"Unterfeld 15b",Austria,,Nüziders,6714," 3791585222",TNT,BB25/275140,1
+17699366,2025-09-22,"Pop Pulse Emporium",,Serv_cart_19195957,paypal,89,DELIVERED,,1,89,0,0,0,0,"Pop Pulse Emporium","Viale Iolanda, 128",Italy,71047,Stornara,71047,3791428612,"Pack Servicios",SRVBB/25/011115,0
+17699434,2025-09-22,Stefan,Misik,,monedero,6.79,DELIVERED,2025-09-25,1,18.57,0,11.78,0,0,,"Topolova 1980/7",Slovakia,,Nemsova,"914 41"," 951006270",GLS,BB25/275986,1
+17701118,2025-09-22,Antonino,Gulotta,,monedero,56.48,DELIVERED,2025-09-25,1,70.11,0,13.63,0,0,,"Via Friuli 26",Italy,,Lainate,20045," 3298733153",GLS,BB25/275242,1
+17702876,2025-09-23,Dorota,Pyrzowska,,monedero,27.37,DELIVERED,2025-09-26,1,39.15,0,11.78,0,0,,"Sympatyczna 6/u2",Poland,,Gdańsk,80-176," 501494562",GLS,BB25/276749,1
+17705018,2025-09-25,Jana,Šefčíková,,monedero,22.92,DELIVERED,2025-09-29,1,34.800000000000004,0,11.88,0,0,,"U třetí baterie 1408/35","Czech Republic",,"Praha 6","162 00"," 28737278",GLS,BB25/281318,1
+17705037,2025-09-25,Lubomír,Skolout,,monedero,27.69,DELIVERED,2025-09-29,1,33.6,0,5.91,0,0,,"Slunečná 363","Czech Republic",,Davle,"252 06"," 603266662","Postal Service",BB25/281919,1
+17705089,2025-09-25,Petra,Smržová,,monedero,8.06,DELIVERED,2025-09-29,1,19.84,0,11.78,0,0,,"Micmanice 330","Czech Republic",,Strachotice,"671 29"," 734595262",GLS,BB25/281919,1
+17705097,2025-09-25,elena,Yankovska,,monedero,21.83,DELIVERED,2025-09-29,1,28.43,0,6.6,0,0,," via aulo flacco persio 19",Italy,," La Spezia",19121," 3921781564","Postal Service",BB25/281218,1
+17705100,2025-09-25,MASSIMO,PALAMARA,,monedero,18.13,DELIVERED,2025-09-29,1,29.35,0,11.22,0,0,,"VIA FONDO VENA 33",Italy,,"Bova Marina",89035," 3478853830",SEUR,BB25/281218,1
+17705273,2025-09-25,"Leidy Yohana",Castano,,monedero,52.63,DELIVERED,2025-09-26,1,52.63,0,0,0,0,,"Michael Pacher Straße 25",Austria,,Salzburg,5029," 3791585222","Standard Shipment",BB25/281293,1
+17706444,2025-09-25,Pavel,Veverka,,monedero,22.09,DELIVERED,2025-09-30,1,33.87,0,11.78,0,0,,"Ústecká 230","Czech Republic",,"Dlouhá Třebová","561 17"," 736744985",GLS,BB25/281919,1
+17706499,2025-09-25,samsel,jackson,,monedero,25.94,DELIVERED,2025-09-30,1,36.160000000000004,0,10.22,0,0,,"Zmienna15a 54",Poland,,Łódź,91-719," 605386653",SEUR,BB25/282486,1
+17706507,2025-09-25,Silvester,Smolnický,,monedero,54.06,DELIVERED,2025-09-30,1,65.84,0,11.78,0,0,,"Župčany 329",Slovakia,,Župčany,"080 01"," 944660560",GLS,BB25/281996,1
+17708050,2025-09-26,Joanna,Nowak,,monedero,25.85,DELIVERED,2025-09-30,1,36.07,0,10.22,0,0,,"Ul. Floksowa 26",Poland,,Poznań,60-175," 697964427",SEUR,BB25/282486,1
+17708072,2025-09-26,Lucia,Singhoferová,,monedero,29.88,DELIVERED,2025-09-30,1,38.84,0,8.96,0,0,,"Zelený Rad 439",Slovakia,,"Orechová Potôň","930 02"," 948120179",GLS,BB25/281115,1
+17708075,2025-09-26,Ján,Pecník,,monedero,30.41,DELIVERED,2025-09-30,1,42.19,0,11.78,0,0,,"8maja 894 894",Slovakia,,"Kráľová pri Senci","900 50"," 918872434",GLS,BB25/281996,1
+17708084,2025-09-26,Samuel,Dimino,,monedero,18.29,DELIVERED,2025-09-30,1,24.89,0,6.6,0,0,,"Via Giuseppe Licata 269",Italy,,Sciacca,92019," 3478267192","Postal Service",BB25/281864,1
+17709335,2025-09-28,ilaria,zegarelli,,monedero,42.73,DELIVERED,2025-09-30,1,54.51,0,11.78,0,0,,"Piazza Erculea 11",Italy,,Milano,20122," 3209198670",GLS,BB25/282547,1
+17709336,2025-09-28,"Anne-Alice ","Pinson Ferraris",,monedero,9.97,DELIVERED,2025-09-30,1,16.57,0,6.6,0,0,,"Via Vincenzo Gioberti 8",Italy,,Milano,20123," 3791585222","Postal Service",BB25/281864,1
+17710835,2025-09-29,Karina,Jeromin,,monedero,23.89,DELIVERED,2025-10-03,1,34.49,0,10.6,0,0,,"Kepiny 5",Poland,,Jedlinsk,26-660," 530189109",SEUR,BB25/285858,1
+17710848,2025-09-29,Christoph,Eder,,paypal,67.07,SHIPPED,2025-09-30,1,73.27,0,4.44,0,1.76,,"Carl-Spaeter Siedlung 9/5",Austria,," St.Barbara im Mürztal",8663," 3791585222","Standard Shipment",BB25/281297,1
+17710856,2025-09-29,"José María ","Fernández Rodríguez",,monedero,14.28,DELIVERED,2025-10-01,1,22.32,0,8.04,0,0,,"Kleine Neugasse 14/12",Austria,,Wien,1040," 3791585222","Postal Service",BB25/283001,1
+17713807,2025-09-30,Anne-Sophie,Rébillard,,monedero,37.92,DELIVERED,2025-10-03,1,46.11,0,8.19,0,0,,"le Haut Montaudin 16",France,,Princé,35210," 3791585222",UPS,BB25/284721,1
+17715246,2025-10-01,Anna,Soukupová,,monedero,11.05,DELIVERED,2025-10-06,1,16.92,0,5.87,0,0,,"Kreuzmannova 1017/18","Czech Republic",,"PLZEŇ 3","318 00"," 739681404","Postal Service",BB25/284832,1
+17718506,2025-10-02,"Anna ","Di Paola",,monedero,23.32,DELIVERED,2025-10-07,1,34.54,0,11.22,0,0,,"Via Capone, 71",Italy,,"Altavilla Irpina",83011," 329326659",SEUR,BB25/287406,1
+17720297,2025-10-03,Gerhard,Huber,,monedero,48.49,DELIVERED,2025-10-07,1,48.49,0,0,0,0,04548060716,"Hinterholz 20",Austria,,Mauthausen,4310," 3791428612","Standard Shipment",BB25/285472,1
+17722122,2025-10-05,"Natan "," Zaton",,monedero,35.69,DELIVERED,2025-10-07,1,44.76,0,9.07,0,0,,"1 Maja 5",Poland,,Cybinka,69-108," 795385196",UPS,BB25/287940,1
+17722946,2025-10-05,Jan,Rafalski,,monedero,60.78,DELIVERED,2025-10-08,1,73.33,0,12.55,0,0,,"Sobieskiego 51",Poland,," Ilawa",14-200," 601651461",GLS,BB25/287272,1
+17725512,2025-10-06,Šárka,Svobodová,,monedero,14.83,DELIVERED,2025-10-08,1,23.79,0,8.96,0,0,,"Vaňurova 817/12D","Czech Republic",,Liberec,"460 07"," 724072236",GLS,BB25/287175,1
+17725518,2025-10-06,Riccardo,Bianchi,,monedero,4.97,DELIVERED,2025-10-10,1,11.57,0,6.6,0,0,,"Via Ragazzi Del '99, 14",Italy,,Firenze,50141," 3791585222","Postal Service",BB25/287828,1
+17728255,2025-10-08,Jiří," Viktora",,monedero,44.89,DELIVERED,2025-10-14,1,58.15,0,13.26,0,0,,"Papírenská 586/14","Czech Republic",,"Praha 6 - Bubeneč","160 00"," 603216143",GLS,BB25/291708,1
+17730738,2025-10-09,"Martina ",Hurtová,,monedero,11.18,DELIVERED,2025-10-13,1,20.14,0,8.96,0,0,,"Šoltésovej 1694/213",Slovakia,,"Považská Bystrica","017 01"," 904150158",GLS,BB25/291264,1
+17732169,2025-10-10,"Anja ",Hirsch,,monedero,15.38,DELIVERED,2025-10-14,1,21.29,0,5.91,0,0,,"Richard-Wagner-Platz 3",Germany,,Freital,01705," 3791428612",UPS,BB25/291219,1
+17732171,2025-10-10,"Hosna ",Stanekzai,,monedero,12.52,DELIVERED,2025-10-14,1,18.43,0,5.91,0,0,,"Glonntalstraße 19",Germany,,"Pfaffenhofen an der Glonn",85235," 3791428612",UPS,BB25/292158,1
+17732173,2025-10-10,"Gerlinde ",Benz,,monedero,85.23,DELIVERED,2025-10-14,1,91.14,0,5.91,0,0,,"Körnle 2",Germany,,Winnenden,71364," 3791428612",UPS,BB25/291219,1
+17732423,2025-10-10,"Miroslava ",Vojíková,,monedero,39.17,DELIVERED,2025-10-14,1,51.050000000000004,0,11.88,0,0,,"Palackého 533","Czech Republic",,Protivín,"398 11"," 605789350",GLS,BB25/290736,1
+17732786,2025-10-10,"Jana ",Buhl,,monedero,15.38,DELIVERED,2025-10-14,1,21.29,0,5.91,0,0,,"Alte Bahnhofstr. 15",Germany,,Lohsa,02999," 3791428612",UPS,BB25/292158,1
+17733201,2025-10-10,Denise,Destremps,,monedero,15.38,DELIVERED,2025-10-14,1,21.29,0,5.91,0,0,,"Am Mühlküppel 16 16",Germany,,Hünfeld,36088," 3791428612",UPS,BB25/292158,1
+17733203,2025-10-10,Francesco,Ferrante,,monedero,88.73,DELIVERED,2025-10-14,1,103.47,0,14.74,0,0,04548060716,"Via Risorgimento 10",Italy,,"Granarolo dell'Emilia",40057," 3478955154",GLS,BB25/292270,1
+17733627,2025-10-11,Angelo,Carmassi,,paypal,40.79,DELIVERED,2025-10-13,1,54.76,0,12.58,0,1.39,,"Via per Camaiore M. San Quirico 440A",Italy,,Lucca,55100," 3483856413",GLS,BB25/290648,1
+17733712,2025-10-11,Hana,Svrchokrylová,,paypal,136.83,DELIVERED,2025-10-14,1,139.92000000000002,0,0,0,3.09,,"BOČNÍ 439","Czech Republic",,"Velký Týnec","783 72"," 777664384","Standard Shipment",BB25/289597,1
+17734736,2025-10-12,Jan,Żarsk,,monedero,7.62,DELIVERED,2025-10-14,1,14.5,0,6.88,0,0,,"Topolowa 12",Poland,,Orzechowo,62-322," 730371380","Postal Service",BB25/291348,1
+17736073,2025-10-12,gianluigi," guzzi",,monedero,55,DELIVERED,2025-10-15,1,69.74,0,14.74,0,0,,"Viale Monte Nero, 4",Italy,," Milano",20135," 3200160660",GLS,BB25/291838,1
+17736456,2025-10-12,Nadia,Gigliotti,,monedero,38.41,DELIVERED,2025-10-15,1,44.31999999999999,0,5.91,0,0,,"Edith Stein Strasse 7",Germany,,Waldshut-Tiengen,79761," 3791585222",UPS,BB25/291219,1
+17736481,2025-10-12,Markéta,Tichá,,monedero,16.76,DELIVERED,2025-10-15,1,22.62,0,5.86,0,0,,"Šeříková 215","Czech Republic",," Tišice Kozly","277 15"," 721835569","Postal Service",BB25/292322,1
+17736954,2025-10-13,Patrícia,Kvašňovská,,monedero,10.88,SHIPPED,2025-10-17,1,22.66,0,11.78,0,0,,"Oščadnica 1576",Slovakia,,Čadca,"023 01"," 915413449",GLS,BB25/294764,1
+17737020,2025-10-13,"Pop Pulse Emporium",,0,transferencia,2000,PROCESSED,,1,2000,0,0,0,0,"Pop Pulse Emporium","Viale Iolanda, 128",Italy,71047,Stornara,71047,3791428612,"Pack Servicios",,0
+17738580,2025-10-13,Kerstin," Eckert",,monedero,9.33,DELIVERED,2025-10-16,1,15.24,0,5.91,0,0,,"Schumannstrasse 6",Germany,,"Bad Rappenau",74906," 3791585222",UPS,BB25/292158,1
+17738590,2025-10-13,"Lorenzo ",Ye,,monedero,13.06,DELIVERED,2025-10-16,1,21.75,0,8.69,0,0,,"Buonaventura cavalieri 22",Italy,,"Sesto fiorentino",50019," 3791585222","Postal Service",BB25/293384,1
+17739144,2025-10-14,Paulina,Szymkowiak,,monedero,20.45,SHIPPED,2025-10-20,1,29.52,0,9.07,0,0,,"Piaskowa 51C/35",Poland,,Wągrowiec,62-100," 733410132",UPS,BB25/295343,1
+17742848,2025-10-16,Damien,Dubosc,,monedero,9.93,DELIVERED,2025-10-20,1,17.13,0,7.2,0,0,,"Route des Grads 605",France,,Rompon,07250," 3791585222","Postal Service",BB25/295095,1
+17744560,2025-10-17,"alena ",tlapakova,,monedero,38.41,SHIPPED,2025-10-21,1,44.279999999999994,0,5.87,0,0,,"Na Pláni 440","Czech Republic",,"Ústí nad Labem-město","403 40"," 731808020","Postal Service",BB25/296275,1
+17747395,2025-10-19,Michael,Schuster,,monedero,71.75,SHIPPED,2025-10-21,1,85.38,0,13.63,0,0,,"Schönbrunner Straße 211 2/7",Austria,," Wien",1120," 3791585222",GLS,BB25/296681,1
+17747397,2025-10-19,Halina,Arnaut,,monedero,12.53,SHIPPED,2025-10-21,1,18.439999999999998,0,5.91,0,0,,"Paul-Münch-Str 44",Germany,,Homburg,66424," 3791585222",UPS,BB25/298847,1
+17748109,2025-10-19,Viviana,Beltrambini,,monedero,30.34,SHIPPED,2025-10-22,1,63.400000000000006,0,33.06,0,0,,"Via Casadei 134",Italy,,"Santarcangelo di Romagna",47822," 3201890927",TNT,BB25/296957,1
+17748124,2025-10-19,"Sylvie ",Baptiste,,monedero,16.59,PROCESSING,2025-10-22,1,25.04,0,8.45,0,0,,"Des gerbiers 21",France,,Semussac,17120," 3791585222","Standard Shipment",,1
+17748417,2025-10-19,"Mustafa "," Yildiz",,monedero,32.2,DELIVERED,2025-10-22,1,39.09,0,6.89,0,0,,"Hirschpaß 51",Germany,,Lübeck,23564," 3791585222","Postal Service",BB25/296190,1
+17748940,2025-10-20,Elżbieta," Skrzypek",,monedero,13.8,SHIPPED,2025-10-24,1,22.87,0,9.07,0,0,,"Pocztowa 2h",Poland,,Pniewy,62-045," 666049298",UPS,BB25/297951,1
+17750497,2025-10-20,"patrizia ",nardini,,monedero,36.17,SHIPPED,2025-10-23,1,49.06,0,12.89,0,0,,"via celio nanino 129/10,",Italy,,"reana del rojale",33010," 3471421093",GLS,BB25/297468,1
+17751263,2025-10-21,Tania,Bray,,monedero,62.23,SHIPPED,2025-10-23,1,86.28999999999999,0,24.06,0,0,,"Rue er Braden 3",France,,Belz,56550," 3791585222",TNT,BB25/296938,1
+17752627,2025-10-22,"Pop Pulse Emporium",,Serv_cart_19547353,paypal,89,DELIVERED,,1,89,0,0,0,0,"Pop Pulse Emporium","Viale Iolanda, 128",Italy,71047,Stornara,71047,3791428612,"Pack Servicios",,0
+17752721,2025-10-22,"Aleksandra ",Bogacka,,monedero,38.41,SHIPPED,2025-10-24,1,47.37,0,8.96,0,0,,"Poczty Gdańskiej 2/6",Poland,,Gdańsk,80-321," 792503123",GLS,BB25/298781,1
+17753682,2025-10-22,Andrea,Bucháčková,,monedero,28.62,SHIPPED,2025-10-27,1,28.62,0,0,0,0,,"Mírová 1409 1409","Czech Republic",,Poděbrady,"290 01"," 603181353","Standard Shipment",BB25/298943,1
+17754063,2025-10-22,Mila,Burger,,monedero,37.55,SHIPPED,2025-10-24,1,46.33,0,8.78,0,0,,"Lindenweg 3",Germany,,"Au am Rhein",76774," 3791585222",GLS,BB25/298263,1
+17754077,2025-10-22,"Marek ",Šupák,,monedero,41.45,SHIPPED,2025-10-27,1,41.45,0,0,0,0,,"Nádražní 484 Vapas","Czech Republic",,"Hrušovany nad Jevišovkou","671 67"," 606040535","Standard Shipment",BB25/298402,1
+17755625,2025-10-23,ERIC,MOLINARI,,monedero,33.92,SHIPPED,2025-10-28,1,33.92,0,0,0,0,,"7 VICTOR BASCH STREET",France,,GOUSSAINVILLE,95190," 3791585222","Standard Shipment",BB25/298586,1
+17755629,2025-10-23,Antonella,Gentili,,monedero,16.02,PROCESSED,2025-10-28,1,26.9,0,10.88,0,0,,"Via Marconi 41",Italy,,Baschi,05023," 3472962817",SEUR,,1
+17757425,2025-10-25,Damien,Dubosc,,monedero,9.93,PROCESSED,2025-10-28,1,17.13,0,7.2,0,0,,"Route des Grads 605",France,,Rompon,07250," 3791585222","Postal Service",,1
+17757428,2025-10-25,christophe,calvani,,monedero,38.41,PROCESSED,2025-10-28,1,44.64,0,6.23,0,0,,"Hameau des amandiers GOLF DE FREGATE 8",France,,"ST CYR SUR MER",83270," 3791585222",UPS,,1
+17758698,2025-10-26,Marek,Hęsiak,,monedero,12.24,PROCESSED,2025-10-28,1,24.02,0,11.78,0,0,,"Jagiellońska 10",Poland,,Bydgoszcz,85-027," 601660416",GLS,,1
+17758701,2025-10-26,"Anja ",Rusch,,monedero,15.46,PROCESSED,2025-10-28,1,23.14,0,7.68,0,0,,"Siedlerstraße 17",Germany,,Halle,06132," 3791585222",UPS,,1
+17758716,2025-10-26,Emanuele,Magnani,,monedero,19.23,PROCESSED,2025-10-28,1,25.83,0,6.6,0,0,,"Via Piancastelli, 24",Italy,,Forlì,47121," 3475486089","Postal Service",,1
+17759031,2025-10-26," Christian",Urban,,monedero,38.41,PROCESSED,2025-10-28,1,45.97,0,7.56,0,0,,"Gymnasiumstraße 54/3",Austria,,Wien,1190," 3791585222","Postal Service",,1
+17759884,2025-10-26,Patrick,Giroudon,,monedero,23.28,PROCESSED,2025-10-29,1,29.51,0,6.23,0,0,,"avenue berthelot LYON LYON 95",France,,Lione,69007," 3791585222",UPS,,1
+17760237,2025-10-27,Stephan,Kirchner,,monedero,32.11,SCHEDULED_CONFIRMATION,2025-10-29,1,43.89,0,11.78,0,0,,"Martina Benku 751/7",Slovakia,,Kostoliste,"900 62"," 915370313",GLS,,1
