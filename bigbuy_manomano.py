@@ -284,8 +284,8 @@ class ManoManoFeedGenerator:
         min_qty = 1
         increment = 1
         use_grid = 1
-        carrier_grid_1 = "standard"
-        shipping_time = "3#8 "  # NOTE: trailing space kept intentionally
+        carrier_grid_1 = "Generale"
+        shipping_time = "5#7 "  # NOTE: trailing space kept intentionally
 
         imgs = (images + ["", "", "", "", ""])[:5]
 
