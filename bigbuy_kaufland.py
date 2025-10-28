@@ -77,7 +77,7 @@ class BigBuyAPI:
             return []
         
         # Filter adult content
-        erotic_keywords = ['erotic', 'erotico', 'adult', 'sex', 'sexy', 'intimate', 'lingerie']
+        erotic_keywords = ['erotic', 'erotico', 'adult', 'sex', 'sexy']
         filtered = [
             t for t in result 
             if not any(kw in t.get('name', '').lower() for kw in erotic_keywords)
