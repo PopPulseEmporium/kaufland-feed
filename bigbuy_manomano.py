@@ -77,7 +77,7 @@ class BigBuyAPI:
         result = self._request("/rest/catalog/taxonomies.json?firstLevel")
         if not result:
             return []
-        erotic_keywords = ['erotic', 'erotico', 'adult', 'sex', 'sexy', 'intimate', 'lingerie']
+        erotic_keywords = ['erotic', 'erotico', 'adult', 'sex', 'sexy']
         filtered = [t for t in result if not any(kw in t.get('name', '').lower() for kw in erotic_keywords)]
         random.shuffle(filtered)
         return filtered[:limit]
