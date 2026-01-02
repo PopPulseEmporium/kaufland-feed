@@ -154,6 +154,9 @@ jobs:
           cp -f ./artifacts/*.json ./ 2>/dev/null || true
           cp -f ./artifacts/*.html ./ 2>/dev/null || true
 
+          # Remove artifacts folder to keep repo clean
+          rm -rf ./artifacts
+
           echo "=== Feed files ready for deployment ==="
           ls -la *.csv 2>/dev/null || echo "No CSV files"
           ls -la *.html 2>/dev/null || echo "No HTML files"
@@ -250,6 +253,7 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+          git pull --rebase origin main
           git add -A
           git diff --quiet && git diff --staged --quiet || git commit -m "Update feeds - $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push
