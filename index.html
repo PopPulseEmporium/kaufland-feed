@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pop Pulse Emporium - Feed Hub</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; border-radius: 10px; margin-bottom: 30px; text-align: center; }
+        .section { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .section h2 { margin-top: 0; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .feed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .feed-card { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; transition: transform 0.2s; }
+        .feed-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .feed-card h3 { margin: 0 0 10px 0; font-size: 1.1em; }
+        .feed-card a { display: inline-block; margin: 5px; padding: 8px 15px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; font-size: 0.9em; }
+        .feed-card a:hover { background: #5a6fd6; }
+        .feed-card a.secondary { background: #6c757d; }
+        .timestamp { color: #666; font-size: 0.9em; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Pop Pulse Emporium</h1>
+        <p>Marketplace Feed Hub</p>
+    </div>
+
+    <div class="section">
+        <h2>Kaufland Feeds</h2>
+        <div class="feed-grid">
+            <div class="feed-card">
+                <h3>Italy</h3>
+                <a href="kaufland_feed_it.csv">CSV</a>
+                <a href="index_it.html" class="secondary">Dashboard</a>
+            </div>
+            <div class="feed-card">
+                <h3>Germany</h3>
+                <a href="kaufland_feed_de.csv">CSV</a>
+                <a href="index_de.html" class="secondary">Dashboard</a>
+            </div>
+            <div class="feed-card">
+                <h3>France</h3>
+                <a href="kaufland_feed_fr.csv">CSV</a>
+                <a href="index_fr.html" class="secondary">Dashboard</a>
+            </div>
+            <div class="feed-card">
+                <h3>Austria</h3>
+                <a href="kaufland_feed_at.csv">CSV</a>
+                <a href="index_at.html" class="secondary">Dashboard</a>
+            </div>
+            <div class="feed-card">
+                <h3>Slovakia</h3>
+                <a href="kaufland_feed_sk.csv">CSV</a>
+                <a href="index_sk.html" class="secondary">Dashboard</a>
+            </div>
+            <div class="feed-card">
+                <h3>Poland</h3>
+                <a href="kaufland_feed_pl.csv">CSV</a>
+                <a href="index_pl.html" class="secondary">Dashboard</a>
+            </div>
+            <div class="feed-card">
+                <h3>Czech Republic</h3>
+                <a href="kaufland_feed_cz.csv">CSV</a>
+                <a href="index_cz.html" class="secondary">Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>ManoMano Feeds</h2>
+        <div class="feed-grid">
+            <div class="feed-card">
+                <h3>Italy</h3>
+                <a href="manomano_feed_it.csv">CSV</a>
+                <a href="manomano_feed_it.xlsx">XLSX</a>
+                <a href="manomano_index_it.html" class="secondary">Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <p class="timestamp">Feeds are updated every 8 hours automatically (01:00, 09:00, 17:00 CET).</p>
+</body>
+</html>

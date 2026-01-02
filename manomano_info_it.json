@@ -1,0 +1,42 @@
+{
+  "last_updated": "2026-01-02T13:00:36.297917",
+  "product_count": 17862,
+  "validation_stats": {
+    "total": 91091,
+    "invalid_ean": 0,
+    "not_new": 108,
+    "no_stock": 0,
+    "no_info": 0,
+    "price_high": 252,
+    "price_low": 8521,
+    "weight_high": 1565,
+    "volume_high": 4156,
+    "valid": 76489,
+    "variants_processed": 0,
+    "parents_processed": 359
+  },
+  "stock_validation_enabled": true,
+  "max_handling_days": 2,
+  "stock_note": "Only showing stock with 0-2 day handling (immediate availability)",
+  "max_price_eur": 1500.0,
+  "min_price_eur": 10.0,
+  "max_volume": 250000,
+  "max_weight": 45.0,
+  "currency": "EUR",
+  "margin": "43%",
+  "country": "Italy",
+  "categories_processed": [
+    19651,
+    19656,
+    19657,
+    19661,
+    19658,
+    19652,
+    19664,
+    19653,
+    19756,
+    19654,
+    19666
+  ],
+  "feed_url": "https://poppulseemporium.github.io/kaufland-feed/manomano_feed_it.csv"
+}

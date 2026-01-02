@@ -1,0 +1,25 @@
+{
+  "last_updated": "2026-01-02T13:02:08.007685",
+  "product_count": 10000,
+  "validation_stats": {
+    "total": 35560,
+    "invalid_ean": 2087,
+    "not_new": 28,
+    "no_stock": 20683,
+    "no_info": 0,
+    "price_high": 236,
+    "price_low": 2244,
+    "weight_high": 65,
+    "volume_high": 183,
+    "valid": 10034
+  },
+  "stock_validation_enabled": true,
+  "max_price_eur": 1000.0,
+  "min_price_eur": 15.0,
+  "max_volume": 150000,
+  "max_weight": 28.0,
+  "currency": "CZK",
+  "margin": "43%",
+  "country": "Czech Republic",
+  "feed_url": "https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_cz.csv"
+}
