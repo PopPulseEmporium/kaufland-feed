@@ -1,0 +1,28 @@
+# Kaufland Slovakia Configuration
+# This file controls feed generation parameters for the Slovak marketplace
+
+# Pricing settings
+pricing:
+  margin: 0.43              # 43% markup on wholesale price
+  vat: 0.22                 # 22% VAT (Italian VAT applied at source)
+  base_price: 2.0           # Fixed amount added to each product price (EUR)
+  min_price_eur: 15.0       # Minimum selling price in EUR
+  max_price_eur: 1000.0     # Maximum selling price in EUR
+
+# Product filters
+filters:
+  max_weight_kg: 28.0       # Maximum product weight
+  max_volume_cm3: 150000    # Maximum product volume (width x height x depth)
+  max_handling_days: 2      # Only include stock with 0-2 day handling time
+  sample_size: 10000        # Max products per feed (Kaufland 10MB file limit)
+
+# Promotions
+promotions:
+  enable_black_friday: false
+  black_friday_prefix: "Black Friday OFFER - "
+
+# Shipping settings
+shipping:
+  handling_time: 2          # Days to prepare order
+  delivery_time_min: 3      # Minimum delivery days
+  delivery_time_max: 8      # Maximum delivery days

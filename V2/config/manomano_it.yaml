@@ -1,0 +1,41 @@
+# ManoMano Italy Configuration
+# This file controls feed generation parameters for the Italian ManoMano marketplace
+
+# Pricing settings
+pricing:
+  margin: 0.43              # 43% markup on wholesale price
+  vat: 0.22                 # 22% VAT
+  base_price: 0.25          # Fixed amount added to each product price (EUR)
+  min_price_eur: 10.0       # Minimum selling price in EUR
+  max_price_eur: 1500.0     # Maximum selling price in EUR
+
+# Product filters
+filters:
+  max_weight_kg: 45.0       # Maximum product weight (higher than Kaufland)
+  max_volume_cm3: 250000    # Maximum product volume (higher than Kaufland)
+  max_handling_days: 2      # Only include stock with 0-2 day handling time
+
+# Promotions
+promotions:
+  enable_black_friday: false
+  black_friday_prefix: "Black Friday OFFER - "
+
+# Shipping settings
+shipping:
+  carrier_grid: "Generale"
+  shipping_time: "5#7"      # Format: min#max days
+
+# ManoMano-specific category mapping (BigBuy ID -> ManoMano ID)
+# These are the BigBuy categories to include in the feed
+categories:
+  19651: "20763"   # DIY & Tools -> Construction materials
+  19656: "20204"   # Home & Kitchen -> Home furnishings
+  19657: "20446"   # Lighting -> Lighting
+  19661: "19596"   # Garden -> Garden and pools
+  19658: "20763"   # Industrial -> Construction materials
+  19652: "20763"   # Automotive -> Construction materials
+  19664: "20204"   # Office -> Home furnishings
+  19653: "21092"   # Electronics -> Electricity
+  19756: "19596"   # Sports & Outdoor -> Garden and pools
+  19654: "20204"   # Luggage -> Home furnishings
+  19666: "20946"   # Pet Products -> Animals

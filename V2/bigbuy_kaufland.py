@@ -9,9 +9,11 @@ import json
 import os
 import random
 import time
+import yaml
 from datetime import datetime
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
+from pathlib import Path
 
 
 # Kaufland Category Mapping (BigBuy → Kaufland categories)
@@ -78,6 +80,19 @@ KAUFLAND_CATEGORY_IDS = {
 }
 
 
+def load_config_from_yaml(country_code: str) -> dict:
+    """Load configuration from YAML file for the specified country"""
+    script_dir = Path(__file__).parent
+    config_path = script_dir / 'config' / f'kaufland_{country_code.lower()}.yaml'
+
+    if config_path.exists():
+        with open(config_path, 'r') as f:
+            return yaml.safe_load(f)
+    else:
+        print(f"Warning: Config file {config_path} not found, using defaults")
+        return {}
+
+
 @dataclass
 class Config:
     """Configuration for feed generation"""
@@ -95,6 +110,41 @@ class Config:
     # BLACK FRIDAY SETTINGS - Set to True to enable, False to disable
     enable_black_friday: bool = False
     black_friday_prefix: str = "Black Friday OFFER - "
+
+    # Shipping settings
+    handling_time: int = 2
+    delivery_time_min: int = 3
+    delivery_time_max: int = 8
+
+    @classmethod
+    def from_yaml(cls, country_code: str) -> 'Config':
+        """Create Config from YAML file"""
+        yaml_config = load_config_from_yaml(country_code)
+
+        if not yaml_config:
+            return cls()
+
+        pricing = yaml_config.get('pricing', {})
+        filters = yaml_config.get('filters', {})
+        promotions = yaml_config.get('promotions', {})
+        shipping = yaml_config.get('shipping', {})
+
+        return cls(
+            margin=pricing.get('margin', 0.43),
+            vat=pricing.get('vat', 0.22),
+            base_price=pricing.get('base_price', 2),
+            max_price_eur=pricing.get('max_price_eur', 1000.0),
+            min_price_eur=pricing.get('min_price_eur', 15.0),
+            max_volume_cm3=filters.get('max_volume_cm3', 150000),
+            max_weight_kg=filters.get('max_weight_kg', 28.0),
+            max_handling_days=filters.get('max_handling_days', 2),
+            sample_size=filters.get('sample_size', 10000),
+            enable_black_friday=promotions.get('enable_black_friday', False),
+            black_friday_prefix=promotions.get('black_friday_prefix', "Black Friday OFFER - "),
+            handling_time=shipping.get('handling_time', 2),
+            delivery_time_min=shipping.get('delivery_time_min', 3),
+            delivery_time_max=shipping.get('delivery_time_max', 8),
+        )
 
 
 @dataclass
@@ -384,9 +434,9 @@ class FeedGenerator:
                                    float(product.get('height', 0) or 0) * 
                                    float(product.get('depth', 0) or 0), 2),
             'currency': self.country.currency,
-            'handling_time': 2,
-            'delivery_time_max': 8,
-            'delivery_time_min': 3
+            'handling_time': self.config.handling_time,
+            'delivery_time_max': self.config.delivery_time_max,
+            'delivery_time_min': self.config.delivery_time_min
         }
 
     def _calculate_price(self, wholesale_eur: float) -> float:
@@ -547,9 +597,10 @@ def main():
     
     print(f"🌍 Country: {country_config.name}")
     print(f"💱 Currency: {country_config.currency}")
-    
-    # Initialize components
-    config = Config()
+
+    # Initialize components - load config from YAML
+    config = Config.from_yaml(country_code)
+    print(f"📋 Config loaded: margin={config.margin*100:.0f}%, min_price={config.min_price_eur}EUR, max_price={config.max_price_eur}EUR")
     api = BigBuyAPI(api_key)
     validator = ProductValidator(config, country_config)
     aggregator = DataAggregator()

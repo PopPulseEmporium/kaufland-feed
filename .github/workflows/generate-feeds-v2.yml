@@ -1,0 +1,249 @@
+name: Generate Kaufland & ManoMano Feeds (V2)
+
+on:
+  # Run every 8 hours
+  schedule:
+    - cron: '0 */8 * * *'
+
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      run_kaufland:
+        description: 'Generate Kaufland feeds'
+        required: true
+        default: true
+        type: boolean
+      run_manomano:
+        description: 'Generate ManoMano feeds'
+        required: true
+        default: true
+        type: boolean
+
+# Sets permissions for GitHub Pages deployment
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  generate-kaufland-feeds:
+    name: Generate Kaufland Feeds
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'schedule' || github.event.inputs.run_kaufland == 'true' }}
+
+    strategy:
+      matrix:
+        country: [IT, DE, FR, AT, SK, PL, CZ]
+      fail-fast: false  # Continue with other countries if one fails
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate Kaufland feed for ${{ matrix.country }}
+        env:
+          BIGBUY_API_KEY: ${{ secrets.BIGBUY_API_KEY }}
+          COUNTRY_CODE: ${{ matrix.country }}
+        run: |
+          cd V2
+          python bigbuy_kaufland.py
+          # Move output files to root for Pages deployment
+          mv kaufland_feed_*.csv ../ 2>/dev/null || true
+          mv feed_info_*.json ../ 2>/dev/null || true
+          mv index_*.html ../ 2>/dev/null || true
+
+      - name: Upload Kaufland artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaufland-${{ matrix.country }}
+          path: |
+            kaufland_feed_${{ matrix.country }}.csv
+            feed_info_${{ matrix.country }}.json
+            index_${{ matrix.country }}.html
+          if-no-files-found: warn
+          retention-days: 1
+
+  generate-manomano-feeds:
+    name: Generate ManoMano Feeds
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'schedule' || github.event.inputs.run_manomano == 'true' }}
+
+    strategy:
+      matrix:
+        country: [IT]  # Add more countries here when needed
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate ManoMano feed for ${{ matrix.country }}
+        env:
+          BIGBUY_API_KEY: ${{ secrets.BIGBUY_API_KEY }}
+          COUNTRY_CODE: ${{ matrix.country }}
+        run: |
+          cd V2
+          python manomano_feed_generator.py
+          # Move output files to root for Pages deployment
+          mv manomano_feed_*.csv ../ 2>/dev/null || true
+          mv manomano_feed_*.xlsx ../ 2>/dev/null || true
+          mv manomano_info_*.json ../ 2>/dev/null || true
+          mv manomano_index_*.html ../ 2>/dev/null || true
+
+      - name: Upload ManoMano artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: manomano-${{ matrix.country }}
+          path: |
+            manomano_feed_${{ matrix.country }}.*
+            manomano_info_${{ matrix.country }}.json
+            manomano_index_${{ matrix.country }}.html
+          if-no-files-found: warn
+          retention-days: 1
+
+  deploy-to-pages:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: [generate-kaufland-feeds, generate-manomano-feeds]
+    if: always() && (needs.generate-kaufland-feeds.result == 'success' || needs.generate-manomano-feeds.result == 'success')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all Kaufland artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: kaufland-*
+          path: ./artifacts
+          merge-multiple: true
+
+      - name: Download all ManoMano artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: manomano-*
+          path: ./artifacts
+          merge-multiple: true
+
+      - name: Prepare files for deployment
+        run: |
+          # Move all artifact files to root (will overwrite old files)
+          cp -f ./artifacts/* ./ 2>/dev/null || true
+
+          # Create a summary index page
+          echo "Feed files ready for deployment:"
+          ls -la *.csv *.json *.html 2>/dev/null || echo "No files found"
+
+      - name: Create index.html dashboard
+        run: |
+          cat > index.html << 'HTMLEOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Pop Pulse Emporium - Feed Hub</title>
+              <style>
+                  body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+                  .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; border-radius: 10px; margin-bottom: 30px; text-align: center; }
+                  .section { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                  .section h2 { margin-top: 0; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+                  .feed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+                  .feed-card { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; transition: transform 0.2s; }
+                  .feed-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+                  .feed-card h3 { margin: 0 0 10px 0; font-size: 1.1em; }
+                  .feed-card a { display: inline-block; margin: 5px; padding: 8px 15px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; font-size: 0.9em; }
+                  .feed-card a:hover { background: #5a6fd6; }
+                  .feed-card a.secondary { background: #6c757d; }
+                  .timestamp { color: #666; font-size: 0.9em; margin-top: 20px; }
+              </style>
+          </head>
+          <body>
+              <div class="header">
+                  <h1>Pop Pulse Emporium</h1>
+                  <p>Marketplace Feed Hub</p>
+              </div>
+
+              <div class="section">
+                  <h2>Kaufland Feeds</h2>
+                  <div class="feed-grid">
+                      <div class="feed-card">
+                          <h3>Italy</h3>
+                          <a href="kaufland_feed_it.csv">CSV</a>
+                          <a href="index_it.html" class="secondary">Dashboard</a>
+                      </div>
+                      <div class="feed-card">
+                          <h3>Germany</h3>
+                          <a href="kaufland_feed_de.csv">CSV</a>
+                          <a href="index_de.html" class="secondary">Dashboard</a>
+                      </div>
+                      <div class="feed-card">
+                          <h3>France</h3>
+                          <a href="kaufland_feed_fr.csv">CSV</a>
+                          <a href="index_fr.html" class="secondary">Dashboard</a>
+                      </div>
+                      <div class="feed-card">
+                          <h3>Austria</h3>
+                          <a href="kaufland_feed_at.csv">CSV</a>
+                          <a href="index_at.html" class="secondary">Dashboard</a>
+                      </div>
+                      <div class="feed-card">
+                          <h3>Slovakia</h3>
+                          <a href="kaufland_feed_sk.csv">CSV</a>
+                          <a href="index_sk.html" class="secondary">Dashboard</a>
+                      </div>
+                      <div class="feed-card">
+                          <h3>Poland</h3>
+                          <a href="kaufland_feed_pl.csv">CSV</a>
+                          <a href="index_pl.html" class="secondary">Dashboard</a>
+                      </div>
+                      <div class="feed-card">
+                          <h3>Czech Republic</h3>
+                          <a href="kaufland_feed_cz.csv">CSV</a>
+                          <a href="index_cz.html" class="secondary">Dashboard</a>
+                      </div>
+                  </div>
+              </div>
+
+              <div class="section">
+                  <h2>ManoMano Feeds</h2>
+                  <div class="feed-grid">
+                      <div class="feed-card">
+                          <h3>Italy</h3>
+                          <a href="manomano_feed_it.csv">CSV</a>
+                          <a href="manomano_feed_it.xlsx">XLSX</a>
+                          <a href="manomano_index_it.html" class="secondary">Dashboard</a>
+                      </div>
+                  </div>
+              </div>
+
+              <p class="timestamp">Feeds are updated every 8 hours automatically.</p>
+          </body>
+          </html>
+          HTMLEOF
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add -A
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update feeds - $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push

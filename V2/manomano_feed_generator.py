@@ -8,9 +8,11 @@ import json
 import os
 import random
 import time
+import yaml
 from datetime import datetime
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
+from pathlib import Path
 
 try:
     from openpyxl import Workbook
@@ -23,10 +25,10 @@ except ImportError:
 
 # ------------------------- Configs -------------------------
 
-# BigBuy to ManoMano Category Mapping
+# Default BigBuy to ManoMano Category Mapping (can be overridden in YAML)
 # Maps BigBuy category IDs to ManoMano category IDs
 # IMPORTANT: Use Level 1 categories (top-level) to avoid CATEGORY_MISSING errors
-CATEGORY_MAPPING = {
+DEFAULT_CATEGORY_MAPPING = {
     19651: "20763",  # Bricolaje y herramientas (DIY & Tools) => Edilizia, materiali da costruzione (Construction materials) [Level 1]
     19656: "20204",  # Hogar y cocina (Home & Kitchen) => Arredo casa (Home furnishings) [Level 1]
     19657: "20446",  # Iluminación (Lighting) => Illuminazione (Lighting) [Level 1]
@@ -39,6 +41,19 @@ CATEGORY_MAPPING = {
     19654: "20204",  # Equipaje (Luggage) => Arredo casa (Home furnishings - storage) [Level 1]
     19666: "20946",  # Productos para mascotas (Pet Products) => Animali (Animals/Pets)
 }
+
+
+def load_manomano_config(country_code: str) -> dict:
+    """Load ManoMano configuration from YAML file"""
+    script_dir = Path(__file__).parent
+    config_path = script_dir / 'config' / f'manomano_{country_code.lower()}.yaml'
+
+    if config_path.exists():
+        with open(config_path, 'r') as f:
+            return yaml.safe_load(f)
+    else:
+        print(f"Warning: Config file {config_path} not found, using defaults")
+        return {}
 
 @dataclass
 class Config:
@@ -69,6 +84,46 @@ class Config:
     # BLACK FRIDAY SETTINGS - Set to True to enable, False to disable
     enable_black_friday: bool = False
     black_friday_prefix: str = "Black Friday OFFER - "
+
+    # Shipping settings
+    carrier_grid: str = "Generale"
+    shipping_time: str = "5#7"
+
+    # Category mapping (BigBuy ID -> ManoMano ID)
+    category_mapping: Dict[int, str] = field(default_factory=lambda: DEFAULT_CATEGORY_MAPPING.copy())
+
+    @classmethod
+    def from_yaml(cls, country_code: str) -> 'Config':
+        """Create Config from YAML file"""
+        yaml_config = load_manomano_config(country_code)
+
+        if not yaml_config:
+            return cls()
+
+        pricing = yaml_config.get('pricing', {})
+        filters = yaml_config.get('filters', {})
+        promotions = yaml_config.get('promotions', {})
+        shipping = yaml_config.get('shipping', {})
+        categories_raw = yaml_config.get('categories', {})
+
+        # Convert category keys to int (YAML may load them as strings)
+        category_mapping = {int(k): str(v) for k, v in categories_raw.items()} if categories_raw else DEFAULT_CATEGORY_MAPPING.copy()
+
+        return cls(
+            margin=pricing.get('margin', 0.43),
+            vat=pricing.get('vat', 0.22),
+            base_price=pricing.get('base_price', 0.25),
+            max_price_eur=pricing.get('max_price_eur', 1500.0),
+            min_price_eur=pricing.get('min_price_eur', 10.0),
+            max_volume_cm3=filters.get('max_volume_cm3', 250000),
+            max_weight_kg=filters.get('max_weight_kg', 45.0),
+            max_handling_days=filters.get('max_handling_days', 2),
+            enable_black_friday=promotions.get('enable_black_friday', False),
+            black_friday_prefix=promotions.get('black_friday_prefix', "Black Friday OFFER - "),
+            carrier_grid=shipping.get('carrier_grid', "Generale"),
+            shipping_time=shipping.get('shipping_time', "5#7"),
+            category_mapping=category_mapping,
+        )
 
 
 @dataclass
@@ -372,8 +427,8 @@ class ManoManoFeedGenerator:
             'increment': 1,
             'quantity': quantity,
             'use_grid': 1,
-            'carrier_grid_1': "Generale",
-            'shipping_time_carrier_grid_1': "5#7",
+            'carrier_grid_1': self.config.carrier_grid,
+            'shipping_time_carrier_grid_1': self.config.shipping_time,
             'width': round(width, 2),
             'width_unit': 'cm',
             'height': round(height, 2),
@@ -445,8 +500,8 @@ class ManoManoFeedGenerator:
             'increment': 1,
             'quantity': quantity,
             'use_grid': 1,
-            'carrier_grid_1': "Generale",
-            'shipping_time_carrier_grid_1': "5#7",
+            'carrier_grid_1': self.config.carrier_grid,
+            'shipping_time_carrier_grid_1': self.config.shipping_time,
             'width': round(width, 2),
             'width_unit': 'cm',
             'height': round(height, 2),
@@ -655,7 +710,10 @@ def main():
     print(f"🌍 Country: {country_config.name}")
     print(f"💱 Currency: {country_config.currency}")
 
-    config = Config()
+    # Load config from YAML
+    config = Config.from_yaml(country_code)
+    print(f"📋 Config loaded: margin={config.margin*100:.0f}%, min_price={config.min_price_eur}EUR, max_price={config.max_price_eur}EUR")
+
     api = BigBuyAPI(api_key)
     validator = ProductValidator(config, country_config)
     aggregator = DataAggregator()
@@ -725,7 +783,7 @@ def main():
 
         # Get BigBuy category and map to ManoMano category
         bigbuy_cat_id = product_to_category.get(product_id)
-        manomano_cat_id = CATEGORY_MAPPING.get(bigbuy_cat_id, "20204")  # Default to 20204
+        manomano_cat_id = config.category_mapping.get(bigbuy_cat_id, "20204")  # Default to 20204
 
         # Get parent stock (direct stock, not including variants)
         parent_stock = prod_stock.get(sku, 0)
