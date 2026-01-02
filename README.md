@@ -1,325 +1,192 @@
-# Multi-Language Kaufland Feed - Complete Setup Guide
+# Pop Pulse Emporium - Marketplace Feed Generator
 
-## 🎯 The Perfect Solution
+Automated feed generation for Kaufland (7 countries) and ManoMano (Italy) marketplaces using BigBuy API.
 
-You now have the **optimal setup** for selling across multiple Kaufland countries:
+## Feed URLs
 
-### 📦 ONE Product Feed (All Languages)
-- **File:** `kaufland_products_all.csv`
-- **Contains:** Same products with translations in DE, AT, SK, PL, CZ
-- **Format:** Multiple rows per EAN (one row per locale)
-- **Upload:** Manual, rare (when products change)
+### Kaufland Feeds
+| Country | CSV Feed | Dashboard |
+|---------|----------|-----------|
+| Italy | [kaufland_feed_it.csv](https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_it.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/index_it.html) |
+| Germany | [kaufland_feed_de.csv](https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_de.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/index_de.html) |
+| France | [kaufland_feed_fr.csv](https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_fr.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/index_fr.html) |
+| Austria | [kaufland_feed_at.csv](https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_at.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/index_at.html) |
+| Slovakia | [kaufland_feed_sk.csv](https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_sk.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/index_sk.html) |
+| Poland | [kaufland_feed_pl.csv](https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_pl.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/index_pl.html) |
+| Czech Republic | [kaufland_feed_cz.csv](https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_cz.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/index_cz.html) |
 
-### 💰 FIVE Offer Feeds (Per Country)
-- **Files:** `kaufland_offers_de.csv`, `kaufland_offers_at.csv`, etc.
-- **Contains:** EAN, SKU, price (with FX), quantity, condition
-- **NO translation needed** - just numbers!
-- **Upload:** Automatic 3x daily
-
----
-
-## 📁 Generated Files
-
-```
-kaufland_products_all.csv      ← ONE product feed (all languages)
-kaufland_offers_de.csv         ← Germany offers (EUR)
-kaufland_offers_at.csv         ← Austria offers (EUR)
-kaufland_offers_sk.csv         ← Slovakia offers (EUR)
-kaufland_offers_pl.csv         ← Poland offers (PLN)
-kaufland_offers_cz.csv         ← Czech Republic offers (CZK)
-feed_info.json                 ← Metadata
-```
+### ManoMano Feeds
+| Country | CSV Feed | XLSX Feed | Dashboard |
+|---------|----------|-----------|-----------|
+| Italy | [manomano_feed_it.csv](https://poppulseemporium.github.io/kaufland-feed/manomano_feed_it.csv) | [manomano_feed_it.xlsx](https://poppulseemporium.github.io/kaufland-feed/manomano_feed_it.xlsx) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/manomano_index_it.html) |
 
 ---
 
-## 🔄 How Multi-Language Product Feed Works
+## Update Schedule
 
-### Example: Product with EAN 4019111448324
-
-The product feed contains **multiple rows for the same EAN**:
-
-```csv
-ean;locale;title;description;picture;...
-4019111448324;de-DE;Gartenbank Kadina;Deutsche Beschreibung...;http://...;...
-4019111448324;de-AT;Gartenbank Kadina;Deutsche Beschreibung...;http://...;...
-4019111448324;sk-SK;Záhradná lavica Kadina;Slovenský popis...;http://...;...
-4019111448324;pl-PL;Ławka ogrodowa Kadina;Polski opis...;http://...;...
-4019111448324;cs-CZ;Zahradní lavice Kadina;Český popis...;http://...;...
-```
-
-**Kaufland automatically:**
-1. Recognizes the EAN
-2. Uses the correct locale for each country
-3. Creates/updates product with proper translation
+Feeds are automatically updated every 8 hours:
+- **01:00 CET** (00:00 UTC)
+- **09:00 CET** (08:00 UTC)
+- **17:00 CET** (16:00 UTC)
 
 ---
 
-## 💰 How Offer Feeds Work Per Country
+## Configuration
 
-Each country gets its own offer feed with correct currency:
+Each marketplace/country has its own YAML config file in `V2/config/`:
 
-### Germany (`kaufland_offers_de.csv`)
-```csv
-ean;id_offer;condition;price;currency;quantity;...
-4019111448324;SKU123;100;49.99;EUR;5;...
+### Kaufland Configs
+- `V2/config/kaufland_it.yaml`
+- `V2/config/kaufland_de.yaml`
+- `V2/config/kaufland_fr.yaml`
+- `V2/config/kaufland_at.yaml`
+- `V2/config/kaufland_sk.yaml`
+- `V2/config/kaufland_pl.yaml`
+- `V2/config/kaufland_cz.yaml`
+
+### ManoMano Configs
+- `V2/config/manomano_it.yaml`
+
+### Config Parameters
+
+```yaml
+# Pricing settings
+pricing:
+  margin: 0.43              # 43% markup
+  vat: 0.22                 # 22% VAT
+  base_price: 2.0           # Fixed fee added to price
+  min_price_eur: 15.0       # Minimum selling price
+  max_price_eur: 1000.0     # Maximum selling price
+
+# Product filters
+filters:
+  max_weight_kg: 28.0       # Max product weight
+  max_volume_cm3: 150000    # Max product volume
+  max_handling_days: 2      # Only include immediate stock
+  sample_size: 10000        # Max products per feed
+
+# Promotions
+promotions:
+  enable_black_friday: false
+  black_friday_prefix: "Black Friday OFFER - "
+
+# Shipping settings
+shipping:
+  handling_time: 2
+  delivery_time_min: 3
+  delivery_time_max: 8
 ```
-
-### Poland (`kaufland_offers_pl.csv`)
-```csv
-ean;id_offer;condition;price;currency;quantity;...
-4019111448324;SKU123;100;224.96;PLN;5;...
-```
-*Same product, different currency (49.99 EUR × 4.5 = 224.96 PLN)*
 
 ---
 
-## 🚀 GitHub Action Workflow
+## Directory Structure
 
-### Runs Every 8 Hours
 ```
-00:00 UTC → 01:00/02:00 Italy
-08:00 UTC → 09:00/10:00 Italy
-16:00 UTC → 17:00/18:00 Italy
+├── V2/                         # Current version (active)
+│   ├── bigbuy_kaufland.py      # Kaufland feed generator
+│   ├── manomano_feed_generator.py  # ManoMano feed generator
+│   ├── generate_all_kaufland_feeds.py  # Multi-country orchestrator
+│   └── config/                 # YAML configuration files
+│       ├── kaufland_*.yaml     # Per-country Kaufland configs
+│       └── manomano_*.yaml     # Per-country ManoMano configs
+│
+├── V1-deprecated/              # Old version (archived)
+│   ├── bigbuy_kaufland.py
+│   ├── bigbuy_manomano.py
+│   └── ...
+│
+├── .github/workflows/
+│   └── generate-feeds-v2.yml   # Automated workflow
+│
+└── [Generated Files]           # Output CSVs, HTMLs, JSONs
 ```
-
-### What It Does
-1. ✅ Fetches products from BigBuy API
-2. ✅ Collects descriptions in ALL languages (de, sk, pl, cs)
-3. ✅ Validates products (stock, EAN, price, weight, volume)
-4. ✅ Generates ONE product feed with all translations
-5. ✅ Generates FIVE offer feeds (one per country with FX)
-6. ✅ Commits to GitHub
-7. ✅ Publishes to GitHub Pages
 
 ---
 
-## ⚙️ Kaufland Configuration (Per Country)
+## Countries & Currencies
 
-### For EACH Country (DE, AT, SK, PL, CZ):
-
-#### Step 1: Upload Product Feed (One-Time)
-1. Go to Kaufland Seller Portal for that country
-2. Go to: **Product Data** → **Import Product Data**
-3. **Manual Upload** → Choose `kaufland_products_all.csv`
-4. Click Upload
-
-**This creates the product catalog with translations for ALL countries!**
-
-#### Step 2: Configure Automatic Offer Upload
-1. Go to: **Offer Data** → **Automatic Offer Upload**
-2. Enter URL: 
-   - DE: `https://poppulseemporium.github.io/kaufland-feed/kaufland_offers_de.csv`
-   - AT: `https://poppulseemporium.github.io/kaufland-feed/kaufland_offers_at.csv`
-   - SK: `https://poppulseemporium.github.io/kaufland-feed/kaufland_offers_sk.csv`
-   - PL: `https://poppulseemporium.github.io/kaufland-feed/kaufland_offers_pl.csv`
-   - CZ: `https://poppulseemporium.github.io/kaufland-feed/kaufland_offers_cz.csv`
-3. Days: **Daily** (all 7 days)
-4. Times: **2:00-3:00, 10:00-11:00, 18:00-19:00** (local time)
-5. Save
+| Country | Code | Currency | FX Rate |
+|---------|------|----------|---------|
+| Italy | IT | EUR | 1.0 |
+| Germany | DE | EUR | 1.0 |
+| France | FR | EUR | 1.0 |
+| Austria | AT | EUR | 1.0 |
+| Slovakia | SK | EUR | 1.0 |
+| Poland | PL | PLN | 4.5 |
+| Czech Republic | CZ | CZK | 24.0 |
 
 ---
 
-## 📊 Feed Format Details
+## Validation Rules
 
-### Product Feed Structure
-```csv
-ean;locale;title;description;short_description;category;manufacturer;picture;picture_2;picture_3;picture_4;condition;weight;length;width;height
-```
-
-**Separator:** Semicolon (`;`)
-**Encoding:** UTF-8
-**Multiple locales:** YES - same EAN with different locale values
-
-### Offer Feed Structure
-```csv
-ean;id_offer;condition;price;currency;quantity;handling_time;delivery_time_min;delivery_time_max
-```
-
-**Separator:** Semicolon (`;`)
-**Encoding:** UTF-8
-**Condition:** `100` = new (Kaufland code)
-
----
-
-## 🌍 Countries & Currencies
-
-| Country | Code | Locale | Language | Currency | FX Rate |
-|---------|------|--------|----------|----------|---------|
-| Germany | DE | de-DE | German | EUR | 1.0 |
-| Austria | AT | de-AT | German | EUR | 1.0 |
-| Slovakia | SK | sk-SK | Slovak | EUR | 1.0 |
-| Poland | PL | pl-PL | Polish | PLN | 4.5 |
-| Czech Rep | CZ | cs-CZ | Czech | CZK | 24.0 |
-
----
-
-## ✅ Quality & Safety Features
+Products are validated against these criteria:
+- Valid EAN13 (13 digits)
+- NEW condition only
+- Weight ≤ 28kg
+- Volume ≤ 150,000 cm³
+- Price: €15-€1000 (before currency conversion)
+- Stock ≥ 2 units with ≤2 day handling time
 
 ### Stock Safety Margins
-```
-BigBuy Stock → Your Listing
-1-2 units    → Rejected (not listed)
-3-5 units    → List 2
-6-10 units   → List 5
-11-20 units  → List 10
-21-50 units  → List 25
-50+ units    → List 50 max
-```
 
-### Validation Rules
-- ✅ Valid EAN13 (13 digits)
-- ✅ NEW condition only
-- ✅ Weight ≤ 35kg
-- ✅ Volume ≤ 180,000 cm³
-- ✅ Price: €15-€400 (in EUR, before FX)
-- ✅ Stock ≥ 3 units in BigBuy
-
-### Price Calculation
 ```
-Base Formula:
-Wholesale Price (EUR)
-× 1.22 (VAT)
-× 1.35 (Margin)
-+ €0.25 (Base fee)
-= Price in EUR
-
-Then for non-EUR countries:
-EUR Price × FX Rate = Local Price
+BigBuy Stock → Listed Quantity
+1-2 units    → 1
+3-5 units    → 2
+6-10 units   → 5
+11-20 units  → 10
+21-50 units  → 25
+50+ units    → 50 max (90% of stock)
 ```
 
 ---
 
-## 🔧 Troubleshooting
+## Running Locally
 
-### "Products not showing in all countries?"
-**Solution:** Make sure you uploaded `kaufland_products_all.csv` to EACH country's Kaufland portal. The file is the same, but each country needs it uploaded.
+```bash
+# Set API key
+export BIGBUY_API_KEY="your_api_key"
 
-### "Prices wrong in Poland/Czech?"
-**Check:** 
-- PLN should be ~4.5× EUR price
-- CZK should be ~24× EUR price
-If not, verify the FX rates in the script.
+# Generate single country feed
+export COUNTRY_CODE="IT"
+python V2/bigbuy_kaufland.py
 
-### "Stock still running out?"
-**Check:**
-1. Are offer feeds auto-importing 3x daily?
-2. Look at Kaufland import logs
-3. Verify times are correct for your timezone
+# Generate all Kaufland countries
+python V2/generate_all_kaufland_feeds.py
 
-### "Some products missing translations?"
-**Cause:** BigBuy might not have descriptions in all languages.
-**Solution:** Script will use available languages. Products without translations in a language won't have rows for that locale.
-
----
-
-## 📋 Daily Operations Checklist
-
-### Automated (No Action Needed)
-- ✅ GitHub Action runs every 8 hours
-- ✅ Generates fresh product feed (all languages)
-- ✅ Generates fresh offer feeds (all countries)
-- ✅ Publishes to GitHub Pages
-- ✅ Kaufland imports offers 3x daily automatically
-
-### Manual (Only When Needed)
-- 📦 **Re-upload product feed** when:
-  - Adding new product categories
-  - BigBuy updates descriptions
-  - You want to refresh translations
-  - Frequency: Weekly or monthly
-
----
-
-## 🎯 Why This Setup Solves Your Problems
-
-### Problem 1: Stock Issues ✅ SOLVED
-**Before:** Updated once daily, stale product catalog
-**Now:** Offers update 3x daily, fresh product data, min 2 units listed
-
-### Problem 2: Translation Complexity ✅ SOLVED
-**Before:** Needed separate product feeds per country
-**Now:** ONE product feed with all languages, auto-matched by Kaufland
-
-### Problem 3: Currency Handling ✅ SOLVED
-**Before:** Manual price conversions
-**Now:** Automatic FX calculation per country in offer feeds
-
-### Problem 4: Manual Work ✅ SOLVED
-**Before:** Manual uploads for everything
-**Now:** Only product feed manual (rare), offers auto-update
-
----
-
-## 🚀 Getting Started (First Time)
-
-### Step 1: Deploy Script & Workflow
-1. Save `bigbuy_kaufland.py` (the new multi-language version)
-2. Save `.github/workflows/update-all-feeds.yml`
-3. Commit and push to GitHub
-4. Verify GitHub Action runs successfully
-
-### Step 2: Download Generated Files
-After first run, download:
-- `kaufland_products_all.csv`
-- `kaufland_offers_de.csv`, `kaufland_offers_at.csv`, etc.
-
-### Step 3: Upload to Kaufland (Per Country)
-For **each country** (DE, AT, SK, PL, CZ):
-
-1. **Upload product feed** (manual, one-time):
-   - Login to that country's Kaufland Seller Portal
-   - Upload `kaufland_products_all.csv`
-   - This creates products with translations
-
-2. **Configure offer auto-upload**:
-   - Set URL for that country's offer feed
-   - Set times: 02:00, 10:00, 18:00
-   - Enable daily upload
-
-### Step 4: Monitor & Verify
-- Wait 24 hours
-- Check Kaufland dashboards for each country
-- Verify products appear with correct translations
-- Verify offers update with correct prices/stock
-- Check import logs for any errors
-
-### Step 5: You're Done! 🎉
-Everything now runs automatically. Only re-upload product feed when products significantly change.
-
----
-
-## 📞 Quick Reference
-
-### Feed URLs
-```
-Product (all languages):
-https://poppulseemporium.github.io/kaufland-feed/kaufland_products_all.csv
-
-Offers per country:
-Germany:
-https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_de.csv
-
-Austria:
-https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_at.csv
-
-Slovakia:
-https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_sk.csv
-
-Poland:
-https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_pl.csv
-
-Czech Republic:
-https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_cz.csv
-
-Italy (ManoMano):
-https://poppulseemporium.github.io/kaufland-feed/manomano_feed_it.csv
+# Generate ManoMano Italy
+export COUNTRY_CODE="IT"
+python V2/manomano_feed_generator.py
 ```
 
-### Update Schedule
-- **GitHub Action:** Every 8 hours (01:00, 09:00, 17:00 Italy time)
-- **Kaufland Import:** 3x daily (02:00, 10:00, 18:00 local time per country)
+---
 
-### Key Files
-- `bigbuy_kaufland.py` - Multi-language feed generator
-- `.github/workflows/update-all-feeds.yml` - GitHub Action
-- `feed_info.json` - Metadata and stats
+## GitHub Actions
+
+The workflow `.github/workflows/generate-feeds-v2.yml`:
+1. Runs every 8 hours automatically
+2. Generates feeds for all 7 Kaufland countries in parallel
+3. Generates ManoMano Italy feed
+4. Deploys all files to GitHub Pages
+
+### Manual Trigger
+Go to Actions → "Generate Kaufland & ManoMano Feeds (V2)" → Run workflow
+
+---
+
+## Requirements
+
+```
+requests==2.31.0
+pandas==1.5.3
+numpy==1.24.3
+PyYAML==6.0.1
+openpyxl==3.1.2
+```
+
+---
+
+## Secrets Required
+
+In GitHub repository settings → Secrets → Actions:
+- `BIGBUY_API_KEY` - Your BigBuy API key

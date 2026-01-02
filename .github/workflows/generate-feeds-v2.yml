@@ -33,7 +33,7 @@ jobs:
 
     strategy:
       matrix:
-        country: [IT, DE, FR, AT, SK, PL, CZ]
+        country: [it, de, fr, at, sk, pl, cz]
       fail-fast: false  # Continue with other countries if one fails
 
     steps:
@@ -56,19 +56,18 @@ jobs:
         run: |
           cd V2
           python bigbuy_kaufland.py
-          # Move output files to root for Pages deployment
-          mv kaufland_feed_*.csv ../ 2>/dev/null || true
-          mv feed_info_*.json ../ 2>/dev/null || true
-          mv index_*.html ../ 2>/dev/null || true
+          # List generated files for debugging
+          echo "Files in V2 directory:"
+          ls -la *.csv *.json *.html 2>/dev/null || echo "No output files found in V2"
 
       - name: Upload Kaufland artifacts
         uses: actions/upload-artifact@v4
         with:
           name: kaufland-${{ matrix.country }}
           path: |
-            kaufland_feed_${{ matrix.country }}.csv
-            feed_info_${{ matrix.country }}.json
-            index_${{ matrix.country }}.html
+            V2/kaufland_feed_${{ matrix.country }}.csv
+            V2/feed_info_${{ matrix.country }}.json
+            V2/index_${{ matrix.country }}.html
           if-no-files-found: warn
           retention-days: 1
 
@@ -79,7 +78,7 @@ jobs:
 
     strategy:
       matrix:
-        country: [IT]  # Add more countries here when needed
+        country: [it]  # Add more countries here when needed
       fail-fast: false
 
     steps:
@@ -102,20 +101,19 @@ jobs:
         run: |
           cd V2
           python manomano_feed_generator.py
-          # Move output files to root for Pages deployment
-          mv manomano_feed_*.csv ../ 2>/dev/null || true
-          mv manomano_feed_*.xlsx ../ 2>/dev/null || true
-          mv manomano_info_*.json ../ 2>/dev/null || true
-          mv manomano_index_*.html ../ 2>/dev/null || true
+          # List generated files for debugging
+          echo "Files in V2 directory:"
+          ls -la *.csv *.xlsx *.json *.html 2>/dev/null || echo "No output files found in V2"
 
       - name: Upload ManoMano artifacts
         uses: actions/upload-artifact@v4
         with:
           name: manomano-${{ matrix.country }}
           path: |
-            manomano_feed_${{ matrix.country }}.*
-            manomano_info_${{ matrix.country }}.json
-            manomano_index_${{ matrix.country }}.html
+            V2/manomano_feed_${{ matrix.country }}.csv
+            V2/manomano_feed_${{ matrix.country }}.xlsx
+            V2/manomano_info_${{ matrix.country }}.json
+            V2/manomano_index_${{ matrix.country }}.html
           if-no-files-found: warn
           retention-days: 1
 
@@ -135,6 +133,7 @@ jobs:
           pattern: kaufland-*
           path: ./artifacts
           merge-multiple: true
+        continue-on-error: true
 
       - name: Download all ManoMano artifacts
         uses: actions/download-artifact@v4
@@ -142,15 +141,22 @@ jobs:
           pattern: manomano-*
           path: ./artifacts
           merge-multiple: true
+        continue-on-error: true
 
       - name: Prepare files for deployment
         run: |
-          # Move all artifact files to root (will overwrite old files)
-          cp -f ./artifacts/* ./ 2>/dev/null || true
+          echo "=== Artifacts downloaded ==="
+          ls -la ./artifacts/ 2>/dev/null || echo "No artifacts directory"
 
-          # Create a summary index page
-          echo "Feed files ready for deployment:"
-          ls -la *.csv *.json *.html 2>/dev/null || echo "No files found"
+          # Move all artifact files to root (will overwrite old files)
+          cp -f ./artifacts/*.csv ./ 2>/dev/null || true
+          cp -f ./artifacts/*.xlsx ./ 2>/dev/null || true
+          cp -f ./artifacts/*.json ./ 2>/dev/null || true
+          cp -f ./artifacts/*.html ./ 2>/dev/null || true
+
+          echo "=== Feed files ready for deployment ==="
+          ls -la *.csv 2>/dev/null || echo "No CSV files"
+          ls -la *.html 2>/dev/null || echo "No HTML files"
 
       - name: Create index.html dashboard
         run: |
@@ -235,7 +241,7 @@ jobs:
                   </div>
               </div>
 
-              <p class="timestamp">Feeds are updated every 8 hours automatically.</p>
+              <p class="timestamp">Feeds are updated every 8 hours automatically (01:00, 09:00, 17:00 CET).</p>
           </body>
           </html>
           HTMLEOF
