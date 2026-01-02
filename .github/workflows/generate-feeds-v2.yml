@@ -148,22 +148,27 @@ jobs:
           echo "=== Artifacts downloaded ==="
           ls -la ./artifacts/ 2>/dev/null || echo "No artifacts directory"
 
-          # Move all artifact files to root (will overwrite old files)
-          cp -f ./artifacts/*.csv ./ 2>/dev/null || true
-          cp -f ./artifacts/*.xlsx ./ 2>/dev/null || true
-          cp -f ./artifacts/*.json ./ 2>/dev/null || true
-          cp -f ./artifacts/*.html ./ 2>/dev/null || true
+          # Create feeds folder and move all files there
+          mkdir -p feeds
 
-          # Remove artifacts folder to keep repo clean
+          # Remove old feeds first
+          rm -f feeds/*.csv feeds/*.xlsx feeds/*.json feeds/*.html
+
+          # Copy all artifact files to feeds folder
+          cp -f ./artifacts/*.csv ./feeds/ 2>/dev/null || true
+          cp -f ./artifacts/*.xlsx ./feeds/ 2>/dev/null || true
+          cp -f ./artifacts/*.json ./feeds/ 2>/dev/null || true
+          cp -f ./artifacts/*.html ./feeds/ 2>/dev/null || true
+
+          # Remove artifacts folder
           rm -rf ./artifacts
 
-          echo "=== Feed files ready for deployment ==="
-          ls -la *.csv 2>/dev/null || echo "No CSV files"
-          ls -la *.html 2>/dev/null || echo "No HTML files"
+          echo "=== Feed files in feeds/ folder ==="
+          ls -la feeds/ 2>/dev/null || echo "No files in feeds/"
 
       - name: Create index.html dashboard
         run: |
-          cat > index.html << 'HTMLEOF'
+          cat > feeds/index.html << 'HTMLEOF'
           <!DOCTYPE html>
           <html lang="en">
           <head>

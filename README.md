@@ -4,21 +4,23 @@ Automated feed generation for Kaufland (7 countries) and ManoMano (Italy) market
 
 ## Feed URLs
 
+**Dashboard:** https://poppulseemporium.github.io/kaufland-feed/feeds/
+
 ### Kaufland Feeds
 | Country | CSV Feed | Dashboard |
 |---------|----------|-----------|
-| Italy | [kaufland_feed_it.csv](https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_it.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/index_it.html) |
-| Germany | [kaufland_feed_de.csv](https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_de.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/index_de.html) |
-| France | [kaufland_feed_fr.csv](https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_fr.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/index_fr.html) |
-| Austria | [kaufland_feed_at.csv](https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_at.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/index_at.html) |
-| Slovakia | [kaufland_feed_sk.csv](https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_sk.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/index_sk.html) |
-| Poland | [kaufland_feed_pl.csv](https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_pl.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/index_pl.html) |
-| Czech Republic | [kaufland_feed_cz.csv](https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_cz.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/index_cz.html) |
+| Italy | [kaufland_feed_it.csv](https://poppulseemporium.github.io/kaufland-feed/feeds/kaufland_feed_it.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/feeds/index_it.html) |
+| Germany | [kaufland_feed_de.csv](https://poppulseemporium.github.io/kaufland-feed/feeds/kaufland_feed_de.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/feeds/index_de.html) |
+| France | [kaufland_feed_fr.csv](https://poppulseemporium.github.io/kaufland-feed/feeds/kaufland_feed_fr.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/feeds/index_fr.html) |
+| Austria | [kaufland_feed_at.csv](https://poppulseemporium.github.io/kaufland-feed/feeds/kaufland_feed_at.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/feeds/index_at.html) |
+| Slovakia | [kaufland_feed_sk.csv](https://poppulseemporium.github.io/kaufland-feed/feeds/kaufland_feed_sk.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/feeds/index_sk.html) |
+| Poland | [kaufland_feed_pl.csv](https://poppulseemporium.github.io/kaufland-feed/feeds/kaufland_feed_pl.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/feeds/index_pl.html) |
+| Czech Republic | [kaufland_feed_cz.csv](https://poppulseemporium.github.io/kaufland-feed/feeds/kaufland_feed_cz.csv) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/feeds/index_cz.html) |
 
 ### ManoMano Feeds
 | Country | CSV Feed | XLSX Feed | Dashboard |
 |---------|----------|-----------|-----------|
-| Italy | [manomano_feed_it.csv](https://poppulseemporium.github.io/kaufland-feed/manomano_feed_it.csv) | [manomano_feed_it.xlsx](https://poppulseemporium.github.io/kaufland-feed/manomano_feed_it.xlsx) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/manomano_index_it.html) |
+| Italy | [manomano_feed_it.csv](https://poppulseemporium.github.io/kaufland-feed/feeds/manomano_feed_it.csv) | [manomano_feed_it.xlsx](https://poppulseemporium.github.io/kaufland-feed/feeds/manomano_feed_it.xlsx) | [Dashboard](https://poppulseemporium.github.io/kaufland-feed/feeds/manomano_index_it.html) |
 
 ---
 
@@ -90,15 +92,18 @@ shipping:
 │       ├── kaufland_*.yaml     # Per-country Kaufland configs
 │       └── manomano_*.yaml     # Per-country ManoMano configs
 │
+├── feeds/                      # Generated feed files (auto-updated)
+│   ├── kaufland_feed_*.csv     # Kaufland feeds per country
+│   ├── manomano_feed_*.csv     # ManoMano feeds
+│   ├── index_*.html            # Country dashboards
+│   └── index.html              # Main dashboard
+│
 ├── V1-deprecated/              # Old version (archived)
-│   ├── bigbuy_kaufland.py
-│   ├── bigbuy_manomano.py
-│   └── ...
 │
 ├── .github/workflows/
 │   └── generate-feeds-v2.yml   # Automated workflow
 │
-└── [Generated Files]           # Output CSVs, HTMLs, JSONs
+└── requirements.txt
 ```
 
 ---
