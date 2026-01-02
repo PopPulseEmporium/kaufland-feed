@@ -26,10 +26,10 @@ Automated feed generation for Kaufland (7 countries) and ManoMano (Italy) market
 
 ## Update Schedule
 
-Feeds are automatically updated every 8 hours:
-- **01:00 CET** (00:00 UTC)
-- **09:00 CET** (08:00 UTC)
-- **17:00 CET** (16:00 UTC)
+Feeds are automatically updated every 8 hours (Rome time):
+- **01:00**
+- **09:00**
+- **17:00**
 
 ---
 
