@@ -277,10 +277,13 @@ class ProductValidator:
         self.stats['valid'] += 1
         return True, "Valid"
 
-    def _calculate_price(self, wholesale_eur: float) -> float:
-        price_eur = (wholesale_eur * (1 + self.config.vat) *
-                     (1 + self.config.margin) + self.config.base_price)
-        return price_eur * self.country.rate
+    def calculate_price(wholesale_eur: float, config: Config, country_rate: float, delivery_cost: float = None) -> float:
+        """Calculate product price ensuring margin after VAT (delivery VAT absorbed)"""
+        if delivery_cost is None:
+            delivery_cost = 8.0  # or add to Config
+        target_revenue = wholesale_eur * (1 + config.margin) + config.base_price + (delivery_cost * config.vat)
+        price_eur = target_revenue / (1 - config.vat)
+        return price_eur * country_rate
 
 
 class DataAggregator:
@@ -951,4 +954,5 @@ if __name__ == "__main__":
 # $env:BIGBUY_API_KEY="YjEzYWU2YTRkNmQyZTY1MjU5M2IzYjlmN2Q2OTQyMTljMjIxZjE0MTdkZGE1NTRjY2YzMTg3OWExYjllNTUzZQ"
 # $env:COUNTRY_CODE="IT"
 # python manomano_feed_generator.py
+
 
