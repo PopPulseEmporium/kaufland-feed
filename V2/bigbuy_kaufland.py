@@ -438,10 +438,10 @@ class FeedGenerator:
             'delivery_time_min': self.config.delivery_time_min
         }
 
-    def _calculate_price(self, wholesale_eur: float) -> float:
-        """Calculate final price"""
-        price_eur = (wholesale_eur * (1 + self.config.vat) * 
-                    (1 + self.config.margin) + self.config.base_price)
+    def _calculate_price(self, wholesale_eur: float, delivery_cost:float = 8) -> float:
+        """Calculate product price ensuring margin after VAT (delivery VAT absorbed in base_price)"""
+        target_revenue = wholesale_eur * (1 + self.config.margin) + self.config.base_price + (delivery_cost * self.config.vat)
+        price_eur = target_revenue / (1 - self.config.vat)
         return price_eur * self.country.rate
 
     def save_csv(self, data: List[Dict], filename: str) -> bool:
