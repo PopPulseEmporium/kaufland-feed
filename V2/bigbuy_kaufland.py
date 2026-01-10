@@ -305,9 +305,10 @@ class ProductValidator:
         self.stats['valid'] += 1
         return True, "Valid"
 
-    def _calculate_price(self, wholesale_eur: float) -> float:
-        """Calculate final price in local currency ensuring margin after VAT and fees"""
-        price_eur = (wholesale_eur * (1 + self.config.margin) + self.config.base_price) / (1 - self.config.vat)
+    def _calculate_price(self, wholesale_eur: float, delivery_cost:float = 8) -> float:
+        """Calculate final price in local currency ensuring margin after VAT"""
+        target_revenue = wholesale_eur * (1 + self.config.margin) + self.config.base_price + delivery_cost
+        price_eur = target_revenue / (1 - self.config.vat)
         return price_eur * self.country.rate
 
 class DataAggregator:
