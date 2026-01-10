@@ -306,8 +306,8 @@ class ProductValidator:
         return True, "Valid"
 
     def _calculate_price(self, wholesale_eur: float, delivery_cost:float = 8) -> float:
-        """Calculate final price in local currency ensuring margin after VAT"""
-        target_revenue = wholesale_eur * (1 + self.config.margin) + self.config.base_price + delivery_cost
+        """Calculate product price ensuring margin after VAT (delivery VAT absorbed in base_price)"""
+        target_revenue = wholesale_eur * (1 + self.config.margin) + self.config.base_price + (delivery_cost * self.config.vat)
         price_eur = target_revenue / (1 - self.config.vat)
         return price_eur * self.country.rate
 
