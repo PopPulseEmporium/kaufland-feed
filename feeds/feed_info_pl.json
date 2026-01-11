@@ -1,25 +1,25 @@
 {
-  "last_updated": "2026-01-10T16:30:48.332126",
+  "last_updated": "2026-01-11T02:09:10.979339",
   "product_count": 10000,
   "validation_stats": {
-    "total": 36655,
-    "invalid_ean": 2890,
-    "not_new": 20,
-    "no_stock": 22040,
+    "total": 30233,
+    "invalid_ean": 530,
+    "not_new": 39,
+    "no_stock": 16719,
     "no_info": 0,
-    "price_high": 28,
-    "price_low": 1372,
-    "weight_high": 149,
-    "volume_high": 156,
-    "valid": 10000
+    "price_high": 231,
+    "price_low": 2540,
+    "weight_high": 14,
+    "volume_high": 159,
+    "valid": 10001
   },
   "stock_validation_enabled": true,
   "max_price_eur": 1000.0,
-  "min_price_eur": 15.0,
+  "min_price_eur": 25.0,
   "max_volume": 150000,
-  "max_weight": 28.0,
+  "max_weight": 45.0,
   "currency": "PLN",
-  "margin": "43%",
+  "margin": "41%",
   "country": "Poland",
   "feed_url": "https://poppulseemporium.github.io/kaufland-feed/kaufland_feed_pl.csv"
 }
