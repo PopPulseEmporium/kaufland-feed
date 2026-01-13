@@ -2,7 +2,7 @@
 # This file controls feed generation parameters for the German marketplace
 
 pricing:
-  margin: 0.41              # 43% markup on wholesale price
+  margin: 1.00              # 43% markup on wholesale price
   vat: 0.22                 # 22% VAT (Italian VAT applied at source)
   base_price: 3.0           # Fixed amount added to each product price (EUR)
   min_price_eur: 25.0       # Minimum selling price in EUR
