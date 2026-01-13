@@ -277,10 +277,8 @@ class ProductValidator:
         self.stats['valid'] += 1
         return True, "Valid"
 
-    def _calculate_price(self, wholesale_eur: float, delivery_cost: float = 8.0) -> float:
-        target_revenue = wholesale_eur * (1 + self.config.margin) + self.config.base_price + (delivery_cost * self.config.vat)
-        price_eur = target_revenue / (1 - self.config.vat)
-        return price_eur * self.country.rate
+    def _calculate_price(self, wholesale_eur: float) -> float:
+        return wholesale_eur * (1 + self.config.margin)
 
 
 class DataAggregator:
@@ -951,6 +949,7 @@ if __name__ == "__main__":
 # $env:BIGBUY_API_KEY="YjEzYWU2YTRkNmQyZTY1MjU5M2IzYjlmN2Q2OTQyMTljMjIxZjE0MTdkZGE1NTRjY2YzMTg3OWExYjllNTUzZQ"
 # $env:COUNTRY_CODE="IT"
 # python manomano_feed_generator.py
+
 
 
 
