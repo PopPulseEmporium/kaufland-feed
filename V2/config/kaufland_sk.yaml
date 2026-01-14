@@ -4,8 +4,8 @@
 # Pricing settings
 pricing:
   margin: 1.00              # 43% markup on wholesale price
-  vat: 0.22                 # 22% VAT (Italian VAT applied at source)
-  base_price: 3.0           # Fixed amount added to each product price (EUR)
+  vat: 0.00                 # 22% VAT (Italian VAT applied at source)
+  base_price: 0.0           # Fixed amount added to each product price (EUR)
   min_price_eur: 25.0       # Minimum selling price in EUR
   max_price_eur: 1000.0     # Maximum selling price in EUR
 
