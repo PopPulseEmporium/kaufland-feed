@@ -1,17 +1,17 @@
 {
-  "last_updated": "2026-01-23T16:36:41.093755",
+  "last_updated": "2026-01-24T01:56:37.987937",
   "product_count": 10000,
   "validation_stats": {
-    "total": 25162,
-    "invalid_ean": 2049,
-    "not_new": 4,
-    "no_stock": 11439,
+    "total": 49531,
+    "invalid_ean": 3315,
+    "not_new": 36,
+    "no_stock": 29490,
     "no_info": 0,
-    "price_high": 66,
-    "price_low": 1529,
-    "weight_high": 10,
-    "volume_high": 65,
-    "valid": 10000
+    "price_high": 254,
+    "price_low": 6165,
+    "weight_high": 32,
+    "volume_high": 237,
+    "valid": 10002
   },
   "stock_validation_enabled": true,
   "max_price_eur": 1000.0,
