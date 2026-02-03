@@ -1,15 +1,15 @@
 {
-  "last_updated": "2026-02-02T16:47:06.743503",
+  "last_updated": "2026-02-03T02:30:19.079229",
   "product_count": 10000,
   "validation_stats": {
-    "total": 68243,
-    "invalid_ean": 4156,
-    "not_new": 87,
-    "no_stock": 48761,
+    "total": 89499,
+    "invalid_ean": 8712,
+    "not_new": 105,
+    "no_stock": 64145,
     "no_info": 0,
-    "price_high": 281,
-    "price_low": 4701,
-    "weight_high": 20,
+    "price_high": 67,
+    "price_low": 6218,
+    "weight_high": 15,
     "volume_high": 237,
     "valid": 10000
   },
