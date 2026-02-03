@@ -42,6 +42,16 @@ DEFAULT_CATEGORY_MAPPING = {
     19666: "20946",  # Productos para mascotas (Pet Products) => Animali (Animals/Pets)
 }
 
+# Reverse mapping: ManoMano category ID -> category name (for category_margins lookup)
+MANOMANO_CATEGORY_NAMES = {
+    "20763": "Edilizia e materiali da costruzione",
+    "20204": "Arredo casa",
+    "20446": "Illuminazione",
+    "19596": "Giardino e piscine",
+    "21092": "Elettricità",
+    "20946": "Animali",
+}
+
 
 def load_manomano_config(country_code: str) -> dict:
     """Load ManoMano configuration from YAML file"""
@@ -92,6 +102,19 @@ class Config:
     # Category mapping (BigBuy ID -> ManoMano ID)
     category_mapping: Dict[int, str] = field(default_factory=lambda: DEFAULT_CATEGORY_MAPPING.copy())
 
+    # Per-category margin overrides (manomano_category_name -> margin)
+    category_margins: Dict[str, float] = None
+
+    def __post_init__(self):
+        if self.category_margins is None:
+            self.category_margins = {}
+
+    def get_margin(self, category_name: str = None) -> float:
+        """Get margin for a category, falling back to default"""
+        if category_name and category_name in self.category_margins:
+            return self.category_margins[category_name]
+        return self.margin
+
     @classmethod
     def from_yaml(cls, country_code: str) -> 'Config':
         """Create Config from YAML file"""
@@ -123,6 +146,7 @@ class Config:
             carrier_grid=shipping.get('carrier_grid', "Generale"),
             shipping_time=shipping.get('shipping_time', "5#7"),
             category_mapping=category_mapping,
+            category_margins=pricing.get('category_margins', {}),
         )
 
 
@@ -220,11 +244,12 @@ class ProductValidator:
         }
 
     def validate(self, product: Dict, info: Dict, stock: int, wholesale_price: float = None, 
-                 is_parent_with_variants: bool = False) -> Tuple[bool, str]:
+                 is_parent_with_variants: bool = False, category_name: str = None) -> Tuple[bool, str]:
         """Validate product or variant
         
         Args:
             is_parent_with_variants: If True, skip EAN validation (parent is just a container)
+            category_name: Category name for margin lookup
         """
         self.stats['total'] += 1
 
@@ -264,7 +289,7 @@ class ProductValidator:
             self.stats['volume_high'] += 1
             return False, f"Volume too high: {volume}cm³"
 
-        price = self._calculate_price(price_to_check)
+        price = self._calculate_price(price_to_check, category_name=category_name)
         max_price = self.config.max_price_eur * self.country.rate
         min_price = self.config.min_price_eur * self.country.rate
         if price > max_price:
@@ -277,9 +302,10 @@ class ProductValidator:
         self.stats['valid'] += 1
         return True, "Valid"
 
-    def _calculate_price(self, wholesale_eur: float, delivery_cost:float = 8) -> float:
+    def _calculate_price(self, wholesale_eur: float, delivery_cost: float = 8, category_name: str = None) -> float:
         """Calculate product price ensuring margin after VAT (delivery VAT absorbed in base_price)"""
-        target_revenue = wholesale_eur * (1 + self.config.margin) + self.config.base_price + (delivery_cost * self.config.vat)
+        margin = self.config.get_margin(category_name)
+        target_revenue = wholesale_eur * (1 + margin) + self.config.base_price + (delivery_cost * self.config.vat)
         price_eur = target_revenue / (1 - self.config.vat)
         return price_eur * self.country.rate
 
@@ -302,7 +328,6 @@ class DataAggregator:
         for item in stock_data:
             sku = item.get('sku')
             if sku:
-                # Only count stock within acceptable handling days
                 total = sum(
                     s.get('quantity', 0)
                     for s in item.get('stocks', [])
@@ -313,7 +338,6 @@ class DataAggregator:
         for item in var_stock_data:
             sku = item.get('sku')
             if sku:
-                # Only count stock within acceptable handling days
                 total = sum(
                     s.get('quantity', 0)
                     for s in item.get('stocks', [])
@@ -364,8 +388,9 @@ class ManoManoFeedGenerator:
         self.config = config
         self.country = country_config
 
-    def _price_local(self, wholesale_eur: float, delivery_cost: float = 8.0) -> float:
-        target_revenue = wholesale_eur * (1 + self.config.margin) + self.config.base_price + (delivery_cost * self.config.vat)
+    def _price_local(self, wholesale_eur: float, delivery_cost: float = 8.0, category_name: str = None) -> float:
+        margin = self.config.get_margin(category_name)
+        target_revenue = wholesale_eur * (1 + margin) + self.config.base_price + (delivery_cost * self.config.vat)
         price_eur = target_revenue / (1 - self.config.vat)
         return price_eur * self.country.rate
 
@@ -380,14 +405,16 @@ class ManoManoFeedGenerator:
         return default
 
     def create_parent_row(self, product: Dict, info: Dict, images: List, quantity: int,
-                         fallback_ean: str = "", manomano_category: str = "20204") -> Dict:
+                         fallback_ean: str = "", manomano_category: str = "20204",
+                         category_name: str = None) -> Dict:
         """Create parent product row (always included, even with 0 quantity)
 
         Args:
             fallback_ean: Use this EAN if parent has none (e.g., from first variant)
             manomano_category: ManoMano category ID for this product
+            category_name: Category name for margin lookup
         """
-        price = self._price_local(float(product.get('wholesalePrice', 0) or 0))
+        price = self._price_local(float(product.get('wholesalePrice', 0) or 0), category_name=category_name)
         weight = float(product.get('weight', 0) or 0)
         length = float(product.get('depth', 0) or 0)
         width  = float(product.get('width', 0) or 0)
@@ -445,16 +472,18 @@ class ManoManoFeedGenerator:
         }
 
     def create_variant_row(self, variant: Dict, parent_product: Dict, parent_info: Dict,
-                          images: List, quantity: int, manomano_category: str = "20204") -> Dict:
+                          images: List, quantity: int, manomano_category: str = "20204",
+                          category_name: str = None) -> Dict:
         """Create variant row with fallback to parent data
 
         Args:
             manomano_category: ManoMano category ID for this product (inherited from parent)
+            category_name: Category name for margin lookup
         """
 
         # Price: variant wholesale or parent wholesale
         variant_price = self._get_with_fallback(variant, parent_product, 'wholesalePrice', 0)
-        price = self._price_local(float(variant_price))
+        price = self._price_local(float(variant_price), category_name=category_name)
 
         # Dimensions: variant or parent
         width = float(self._get_with_fallback(variant, parent_product, 'width', 0))
@@ -598,6 +627,7 @@ class ManoManoFeedGenerator:
                 "max_weight": self.config.max_weight_kg,
                 "currency": self.country.currency,
                 "margin": f"{self.config.margin*100:.0f}%",
+                "category_margins": {k: f"{v*100:.0f}%" for k, v in self.config.category_margins.items()} if self.config.category_margins else {},
                 "country": self.country.name,
                 "categories_processed": list(self.config.manomano_categories.keys()),
                 "feed_url": f"https://poppulseemporium.github.io/kaufland-feed/{csv_filename}"
@@ -652,7 +682,7 @@ class ManoManoFeedGenerator:
    <div class="stat-box"><div class="stat-number">{len(data):,}</div><div class="stat-label">Total Rows</div></div>
    <div class="stat-box"><div class="stat-number">{parents:,}</div><div class="stat-label">Parent Products</div></div>
    <div class="stat-box"><div class="stat-number">{variants:,}</div><div class="stat-label">Variants</div></div>
-   <div class="stat-box"><div class="stat-number">{self.config.margin*100:.0f}%</div><div class="stat-label">Margin</div></div>
+   <div class="stat-box"><div class="stat-number">{self.config.margin*100:.0f}%</div><div class="stat-label">Default Margin</div></div>
    <div class="stat-box"><div class="stat-number">{self.country.currency}{min_price:.2f}</div><div class="stat-label">Min Price</div></div>
    <div class="stat-box"><div class="stat-number">{self.country.currency}{max_price:.2f}</div><div class="stat-label">Max Price</div></div>
  </div>
@@ -714,6 +744,9 @@ def main():
     # Load config from YAML
     config = Config.from_yaml(country_code)
     print(f"📋 Config loaded: margin={config.margin*100:.0f}%, min_price={config.min_price_eur}EUR, max_price={config.max_price_eur}EUR")
+    if config.category_margins:
+        for cat, m in config.category_margins.items():
+            print(f"   📌 Category override: {cat} → {m*100:.0f}%")
 
     api = BigBuyAPI(api_key)
     validator = ProductValidator(config, country_config)
@@ -728,7 +761,7 @@ def main():
     all_products = []
     all_data = {'info': [], 'images': [], 'stock': [], 'var_stock': [], 'variations': []}
     # Map product ID to BigBuy category ID (for category mapping)
-    product_to_category = {}
+    product_to_bigbuy_cat = {}
 
     print("\n🔄 Collecting data from categories...")
     for i, (cat_id, cat_name) in enumerate(config.manomano_categories.items(), 1):
@@ -739,7 +772,7 @@ def main():
         for product in data['products']:
             product_id = product.get('id')
             if product_id:
-                product_to_category[product_id] = cat_id
+                product_to_bigbuy_cat[product_id] = cat_id
 
         all_products.extend(data['products'])
         all_data['info'].extend(data['info'])
@@ -783,8 +816,11 @@ def main():
             continue
 
         # Get BigBuy category and map to ManoMano category
-        bigbuy_cat_id = product_to_category.get(product_id)
+        bigbuy_cat_id = product_to_bigbuy_cat.get(product_id)
         manomano_cat_id = config.category_mapping.get(bigbuy_cat_id, "20204")  # Default to 20204
+
+        # Resolve category name for margin lookup
+        category_name = MANOMANO_CATEGORY_NAMES.get(manomano_cat_id)
 
         # Get parent stock (direct stock, not including variants)
         parent_stock = prod_stock.get(sku, 0)
@@ -806,7 +842,8 @@ def main():
             # Validate parent (ALLOW missing EAN for parents with variants)
             parent_price = float(product.get('wholesalePrice', 0) or 0)
             is_valid, _ = validator.validate(product, info, safe_parent_qty, parent_price, 
-                                            is_parent_with_variants=True)  # Skip EAN check
+                                            is_parent_with_variants=True,
+                                            category_name=category_name)
             
             if is_valid:
                 # Get first variant's EAN for parent fallback
@@ -824,10 +861,11 @@ def main():
                 if parent_ean_str and parent_ean_str not in seen_eans:
                     seen_eans.add(parent_ean_str)
 
-                    # Create parent row (use first variant's EAN if parent has none)
+                    # Create parent row
                     parent_row = generator.create_parent_row(
                         product, info, images, safe_parent_qty,
-                        fallback_ean=first_variant_ean, manomano_category=manomano_cat_id
+                        fallback_ean=first_variant_ean, manomano_category=manomano_cat_id,
+                        category_name=category_name
                     )
                     rows.append(parent_row)
                 
@@ -847,7 +885,8 @@ def main():
                     
                     # Validate variant (using variant's own price if available)
                     variant_price = variant.get('wholesalePrice') or parent_price
-                    is_var_valid, _ = validator.validate(variant, info, safe_var_qty, float(variant_price))
+                    is_var_valid, _ = validator.validate(variant, info, safe_var_qty, float(variant_price),
+                                                        category_name=category_name)
                     
                     if is_var_valid:
                         variant_ean = str(variant.get('ean13', ''))
@@ -859,7 +898,8 @@ def main():
                             # Create variant row
                             var_row = generator.create_variant_row(
                                 variant, product, info, images, safe_var_qty,
-                                manomano_category=manomano_cat_id
+                                manomano_category=manomano_cat_id,
+                                category_name=category_name
                             )
                             rows.append(var_row)
         else:
@@ -868,7 +908,8 @@ def main():
             
             # Standalone products MUST have valid EAN
             is_valid, _ = validator.validate(product, info, safe_parent_qty, 
-                                            is_parent_with_variants=False)  # Require EAN
+                                            is_parent_with_variants=False,
+                                            category_name=category_name)
             
             if is_valid and safe_parent_qty > 0:  # Standalone products need stock
                 parent_ean = str(product.get('ean13', ''))
@@ -878,7 +919,8 @@ def main():
                     # Create single row (parent points to itself)
                     row = generator.create_parent_row(
                         product, info, images, safe_parent_qty,
-                        manomano_category=manomano_cat_id
+                        manomano_category=manomano_cat_id,
+                        category_name=category_name
                     )
                     rows.append(row)
 
@@ -943,6 +985,7 @@ def main():
     print("  • Parent rows always included (even with 0 stock)")
     print("  • Category whitelist (11 ManoMano-relevant categories)")
     print("  • No product limit (all valid products included)")
+    print("  • Per-category margin overrides via YAML config")
 
 
 if __name__ == "__main__":
@@ -952,8 +995,3 @@ if __name__ == "__main__":
 # $env:BIGBUY_API_KEY="YjEzYWU2YTRkNmQyZTY1MjU5M2IzYjlmN2Q2OTQyMTljMjIxZjE0MTdkZGE1NTRjY2YzMTg3OWExYjllNTUzZQ"
 # $env:COUNTRY_CODE="IT"
 # python manomano_feed_generator.py
-
-
-
-
-
