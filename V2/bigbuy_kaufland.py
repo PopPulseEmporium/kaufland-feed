@@ -719,12 +719,27 @@ def main():
         # Create row
         images = image_map.get(product.get('id'), [])
         # Get category for this product
+        # Get category for this product (needed for validation and row creation)
         product_id = product.get('id')
         category_name = product_to_category.get(product_id, 'Giardinaggio e fai da te')
+        
         # Validate
         is_valid, msg = validator.validate(product, info_map[sku], total_stock, category_name=category_name)
         if not is_valid:
             continue
+        
+        # Check for duplicates
+        ean = str(product.get('ean13', ''))
+        if ean in seen_eans:
+            continue
+        seen_eans.add(ean)
+        
+        # Calculate safe quantity
+        safe_qty = stock_calc.calculate_safe_quantity(total_stock)
+        if safe_qty <= 0:
+            continue
+        
+        # Create row
         images = image_map.get(product.get('id'), [])
         row = generator.create_product_row(product, info_map[sku], images, safe_qty, category_name)
         csv_data.append(row)
