@@ -209,8 +209,6 @@ class BigBuyAPI:
 
     def get_categories(self) -> List[Dict]:
         """Get whitelisted Kaufland-relevant categories"""
-        # Return specific categories from KAUFLAND_CATEGORIES mapping
-        # User note: "in kaufland we can upload all the categories!"
         return [
             {'id': cat_id, 'name': KAUFLAND_CATEGORIES.get(cat_id, 'Unknown')}
             for cat_id in KAUFLAND_CATEGORIES.keys()
@@ -263,7 +261,7 @@ class ProductValidator:
             'valid': 0
         }
 
-    def validate(self, product: Dict, info: Dict, total_stock: int) -> Tuple[bool, str]:
+    def validate(self, product: Dict, info: Dict, total_stock: int, category_name: str = None) -> Tuple[bool, str]:
         """Validate product against all rules"""
         self.stats['total'] += 1
         
@@ -325,6 +323,7 @@ class ProductValidator:
         price_eur = target_revenue / (1 - self.config.vat)
         return price_eur * self.country.rate
 
+
 class DataAggregator:
     """Aggregate and organize API data"""
     
@@ -338,7 +337,6 @@ class DataAggregator:
         for item in stock_data:
             sku = item.get('sku')
             if sku:
-                # Filter by handling days - only include warehouses within acceptable time window
                 total = sum(
                     s.get('quantity', 0)
                     for s in item.get('stocks', [])
@@ -350,7 +348,6 @@ class DataAggregator:
         for item in var_stock_data:
             sku = item.get('sku')
             if sku:
-                # Filter by handling days - only include warehouses within acceptable time window
                 total = sum(
                     s.get('quantity', 0)
                     for s in item.get('stocks', [])
@@ -487,6 +484,7 @@ class FeedGenerator:
                 "max_weight": self.config.max_weight_kg,
                 "currency": self.country.currency,
                 "margin": f"{self.config.margin*100:.0f}%",
+                "category_margins": {k: f"{v*100:.0f}%" for k, v in self.config.category_margins.items()} if self.config.category_margins else {},
                 "country": self.country.name,
                 "feed_url": f"https://poppulseemporium.github.io/kaufland-feed/{csv_filename}"
             }
@@ -506,6 +504,12 @@ class FeedGenerator:
             prices = [row['price_cs'] for row in data]
             min_price = min(prices) if prices else 0
             max_price = max(prices) if prices else 0
+            
+            # Build margin display string
+            margin_info = f"{self.config.margin*100:.0f}%"
+            if self.config.category_margins:
+                overrides = ", ".join(f"{k}: {v*100:.0f}%" for k, v in self.config.category_margins.items())
+                margin_info += f" (overrides: {overrides})"
             
             html = f"""<!DOCTYPE html>
 <html lang="{self.country.language}">
@@ -543,7 +547,7 @@ class FeedGenerator:
         </div>
         <div class="stat-box">
             <div class="stat-number">{self.config.margin*100:.0f}%</div>
-            <div class="stat-label">Margin</div>
+            <div class="stat-label">Default Margin</div>
         </div>
         <div class="stat-box">
             <div class="stat-number">{self.country.currency}{min_price:.2f}</div>
@@ -699,26 +703,6 @@ def main():
             product, variation_map, prod_stock, var_stock
         )
         
-        # Validate
-        # Validate
-        is_valid, msg = validator.validate(product, info_map[sku], total_stock, category_name=category_name)
-        if not is_valid:
-            continue
-        
-        # Check for duplicates
-        ean = str(product.get('ean13', ''))
-        if ean in seen_eans:
-            continue
-        seen_eans.add(ean)
-        
-        # Calculate safe quantity
-        safe_qty = stock_calc.calculate_safe_quantity(total_stock)
-        if safe_qty <= 0:
-            continue
-        
-        # Create row
-        images = image_map.get(product.get('id'), [])
-        # Get category for this product
         # Get category for this product (needed for validation and row creation)
         product_id = product.get('id')
         category_name = product_to_category.get(product_id, 'Giardinaggio e fai da te')
