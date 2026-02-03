@@ -156,6 +156,7 @@ class Config:
             handling_time=shipping.get('handling_time', 2),
             delivery_time_min=shipping.get('delivery_time_min', 3),
             delivery_time_max=shipping.get('delivery_time_max', 8),
+            category_margins=pricing.get('category_margins', {}),
         )
 
 
@@ -302,7 +303,7 @@ class ProductValidator:
             return False, f"Volume too high: {volume}cm³"
         
         # Price check
-        price = self._calculate_price(float(product.get('wholesalePrice', 0) or 0))
+        price = self._calculate_price(float(product.get('wholesalePrice', 0) or 0), category_name=category_name)
         max_price = self.config.max_price_eur * self.country.rate
         min_price = self.config.min_price_eur * self.country.rate
         
@@ -317,9 +318,10 @@ class ProductValidator:
         self.stats['valid'] += 1
         return True, "Valid"
 
-    def _calculate_price(self, wholesale_eur: float, delivery_cost:float = 8) -> float:
+    def _calculate_price(self, wholesale_eur: float, delivery_cost: float = 8, category_name: str = None) -> float:
         """Calculate product price ensuring margin after VAT (delivery VAT absorbed in base_price)"""
-        target_revenue = wholesale_eur * (1 + self.config.margin) + self.config.base_price + (delivery_cost * self.config.vat)
+        margin = self.config.get_margin(category_name)
+        target_revenue = wholesale_eur * (1 + margin) + self.config.base_price + (delivery_cost * self.config.vat)
         price_eur = target_revenue / (1 - self.config.vat)
         return price_eur * self.country.rate
 
@@ -412,7 +414,7 @@ class FeedGenerator:
     def create_product_row(self, product: Dict, info: Dict, images: List,
                           quantity: int, category_name: str = 'Giardinaggio e fai da te') -> Dict:
         """Create CSV row for product"""
-        price = self._calculate_price(float(product.get('wholesalePrice', 0) or 0))
+        price = self._calculate_price(float(product.get('wholesalePrice', 0) or 0), category_name=category_name)
 
         # Apply Black Friday prefix if enabled
         base_title = (info.get('name', 'Product') or 'Product')
@@ -450,9 +452,10 @@ class FeedGenerator:
             'delivery_time_min': self.config.delivery_time_min
         }
 
-    def _calculate_price(self, wholesale_eur: float, delivery_cost:float = 8) -> float:
+    def _calculate_price(self, wholesale_eur: float, delivery_cost: float = 8, category_name: str = None) -> float:
         """Calculate product price ensuring margin after VAT (delivery VAT absorbed in base_price)"""
-        target_revenue = wholesale_eur * (1 + self.config.margin) + self.config.base_price + (delivery_cost * self.config.vat)
+        margin = self.config.get_margin(category_name)
+        target_revenue = wholesale_eur * (1 + margin) + self.config.base_price + (delivery_cost * self.config.vat)
         price_eur = target_revenue / (1 - self.config.vat)
         return price_eur * self.country.rate
 
@@ -612,6 +615,9 @@ def main():
     # Initialize components - load config from YAML
     config = Config.from_yaml(country_code)
     print(f"📋 Config loaded: margin={config.margin*100:.0f}%, min_price={config.min_price_eur}EUR, max_price={config.max_price_eur}EUR")
+    if config.category_margins:
+        for cat, m in config.category_margins.items():
+            print(f"   📌 Category override: {cat} → {m*100:.0f}%")
     api = BigBuyAPI(api_key)
     validator = ProductValidator(config, country_config)
     aggregator = DataAggregator()
@@ -694,7 +700,8 @@ def main():
         )
         
         # Validate
-        is_valid, msg = validator.validate(product, info_map[sku], total_stock)
+        # Validate
+        is_valid, msg = validator.validate(product, info_map[sku], total_stock, category_name=category_name)
         if not is_valid:
             continue
         
@@ -714,6 +721,11 @@ def main():
         # Get category for this product
         product_id = product.get('id')
         category_name = product_to_category.get(product_id, 'Giardinaggio e fai da te')
+        # Validate
+        is_valid, msg = validator.validate(product, info_map[sku], total_stock, category_name=category_name)
+        if not is_valid:
+            continue
+        images = image_map.get(product.get('id'), [])
         row = generator.create_product_row(product, info_map[sku], images, safe_qty, category_name)
         csv_data.append(row)
         
