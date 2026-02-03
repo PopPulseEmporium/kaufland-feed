@@ -103,11 +103,10 @@ class Config:
     min_price_eur: float = 15.0
     max_volume_cm3: int = 150000
     max_weight_kg: float = 28.0
-    max_handling_days: int = 2  # Stock filtering: only include warehouses with 0-2 day handling
-    sample_size: int = 10000  # Kaufland has 10MB file size limit (22MB/25k products ≈ 0.88KB/product → 11k products ≈ 9.7MB)
-    # Kaufland allows all categories - no limit on products per category
+    max_handling_days: int = 2
+    sample_size: int = 10000
 
-    # BLACK FRIDAY SETTINGS - Set to True to enable, False to disable
+    # BLACK FRIDAY SETTINGS
     enable_black_friday: bool = False
     black_friday_prefix: str = "Black Friday OFFER - "
 
@@ -115,6 +114,19 @@ class Config:
     handling_time: int = 2
     delivery_time_min: int = 3
     delivery_time_max: int = 8
+
+    # Per-category margin overrides (category_name -> margin)
+    category_margins: Dict[str, float] = None
+
+    def __post_init__(self):
+        if self.category_margins is None:
+            self.category_margins = {}
+
+    def get_margin(self, category_name: str = None) -> float:
+        """Get margin for a category, falling back to default"""
+        if category_name and category_name in self.category_margins:
+            return self.category_margins[category_name]
+        return self.margin
 
     @classmethod
     def from_yaml(cls, country_code: str) -> 'Config':
