@@ -1,25 +1,25 @@
 {
-  "last_updated": "2026-03-21T08:39:31.238578",
+  "last_updated": "2026-03-21T08:57:42.679986",
   "product_count": 10000,
   "validation_stats": {
-    "total": 40277,
-    "invalid_ean": 1729,
-    "not_new": 75,
-    "no_stock": 25030,
+    "total": 46986,
+    "invalid_ean": 2276,
+    "not_new": 76,
+    "no_stock": 31353,
     "no_info": 0,
-    "price_high": 56,
-    "price_low": 3106,
-    "weight_high": 110,
-    "volume_high": 169,
-    "valid": 10002
+    "price_high": 12,
+    "price_low": 1995,
+    "weight_high": 578,
+    "volume_high": 695,
+    "valid": 10001
   },
   "stock_validation_enabled": true,
   "max_price_eur": 1000.0,
   "min_price_eur": 25.0,
-  "max_volume": 150000,
-  "max_weight": 45.0,
+  "max_volume": 35000,
+  "max_weight": 10.0,
   "currency": "EUR",
-  "margin": "80%",
+  "margin": "74%",
   "category_margins": {
     "Cura del corpo e salute": "75%"
   },
