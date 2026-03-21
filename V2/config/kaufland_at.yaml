@@ -12,8 +12,8 @@ pricing:
     "Cura del corpo e salute": 0.75   # Beauty & Health — San Valentino promo
 # Product filters
 filters:
-  max_weight_kg: 45.0       # Maximum product weight
-  max_volume_cm3: 150000    # Maximum product volume (width x height x depth)
+  max_weight_kg: 10.0       # Maximum product weight
+  max_volume_cm3: 35000     # Maximum product volume (width x height x depth)
   max_handling_days: 2      # Only include stock with 0-2 day handling time
   sample_size: 10000        # Max products per feed (Kaufland 10MB file limit)
 
